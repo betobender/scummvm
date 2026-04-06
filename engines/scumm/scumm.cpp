@@ -80,6 +80,7 @@
 #include "scumm/scumm_v8.h"
 #include "scumm/sound.h"
 #include "scumm/string_v7.h"
+#include "audio/voiceplugin.h"
 #include "scumm/imuse/sysex.h"
 #include "scumm/he/localizer.h"
 #include "scumm/he/sprite_he.h"
@@ -479,7 +480,6 @@ ScummEngine::~ScummEngine() {
 	delete[] _languageBuffer;
 	delete[] _translatedLines;
 	delete[] _languageLineIndex;
-
 	if (_2byteFontPtr && !_useMultiFont)
 		delete[] _2byteFontPtr;
 	for (int i = 0; i < 20; i++)
@@ -1672,6 +1672,12 @@ void ScummEngine::setupScumm(const Common::Path &macResourceFile) {
 
 	// Load localization data, if present
 	loadLanguageBundle();
+
+	// Load translation overlay data (dialogue.json, voice directories) now that
+	// the game config domain is active. The plugin was activated in main.cpp;
+	// calling reloadConfig() here triggers the actual dialogue.json parsing and
+	// voice path setup so it happens at engine start, not at plugin construction.
+	TranslationMan.reloadConfig();
 
 	// Create the charset renderer
 	setupCharsetRenderer(macFontFile);

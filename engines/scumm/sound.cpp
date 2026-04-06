@@ -376,7 +376,14 @@ void Sound::processSfxQueues() {
 		bool finished;
 
 		if (_vm->_imuseDigital) {
-			finished = !isSoundRunning(kTalkSoundID);
+			// If a voice-replacement stream is playing on the talk channel (bypassing
+			// iMUSE), use the mixer handle as the authoritative "still playing" signal.
+			// Otherwise fall back to iMUSE's kTalkSoundID status as normal.
+			if (_mixer->isSoundHandleActive(*_talkChannelHandle)) {
+				finished = false;
+			} else {
+				finished = !isSoundRunning(kTalkSoundID);
+			}
 			if (_vm->_game.id == GID_CMI) { // No mutex lock here, COMI doesn't use the speech timer thread
 #if defined(ENABLE_SCUMM_7_8)
 				_curSoundPos = _vm->_imuseDigital->getSoundElapsedTimeInMs(kTalkSoundID) * 60 / 1000;

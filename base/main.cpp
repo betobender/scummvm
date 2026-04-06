@@ -59,6 +59,7 @@
 
 #include "audio/mididrv.h"
 #include "audio/musicplugin.h"  /* for music manager */
+#include "audio/voiceplugin.h"  /* for voice replacement manager */
 
 #include "graphics/cursorman.h"
 #include "graphics/fontman.h"
@@ -185,6 +186,14 @@ void saveLastLaunchedTarget(const Common::String &target) {
 // TODO: specify the possible return values here
 static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const DetectedGame &game, const void *meDescriptor) {
 	assert(enginePlugin);
+
+	// Activate the translation overlay plugin now that the game config domain
+	// is active and game-specific keys are visible.
+	{
+		const PluginList &vp = TranslationMan.getPlugins();
+		if (!vp.empty() && ConfMan.hasKey("translation_overlay_path"))
+			TranslationMan.setActivePlugin(0);
+	}
 
 	// Determine the game data path, for validation and error messages
 	Common::FSNode dir(ConfMan.getPath("path"));
@@ -346,6 +355,10 @@ static Common::Error runGame(const Plugin *enginePlugin, OSystem &system, const 
 		ttsMan->setLanguage(ConfMan.get("language"));
 	}
 #endif // USE_TRANSLATION
+
+	// Deactivate translation overlay plugin when the game exits so it doesn't
+	// bleed into the launcher or the next game loaded.
+	TranslationMan.setActivePlugin(-1);
 
 	// Return result (== 0 means no error)
 	return result;
@@ -609,6 +622,8 @@ extern "C" int scummvm_main(int argc, const char * const argv[]) {
 	// Do it here to prevent fragmentation later
 	system.getAudioCDManager();
 	MusicManager::instance();
+	VoiceReplacementManager::instance();
+	// Plugin activation happens in runGame() once the game domain is active.
 	Common::DebugManager::instance();
 
 	// Init the event manager. As the virtual keyboard is loaded here, it must
@@ -923,6 +938,7 @@ extern "C" int scummvm_main(int argc, const char * const argv[]) {
 	Common::MainTranslationManager::destroy();
 #endif
 	MusicManager::destroy();
+	VoiceReplacementManager::destroy();
 	Graphics::CursorManager::destroy();
 	Graphics::FontManager::destroy();
 #ifdef USE_FREETYPE2

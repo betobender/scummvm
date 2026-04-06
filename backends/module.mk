@@ -579,5 +579,8 @@ MODULE_OBJS += \
 endif
 endif
 
+MODULE_OBJS += \
+	translation_overlay/translation-overlay-plugin.o
+
 # Include common rules
 include $(srcdir)/rules.mk

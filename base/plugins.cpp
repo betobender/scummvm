@@ -42,6 +42,7 @@ const int pluginTypeVersions[PLUGIN_TYPE_MAX] = {
 	PLUGIN_TYPE_MUSIC_VERSION,
 	PLUGIN_TYPE_DETECTION_VERSION,
 	PLUGIN_TYPE_SCALER_VERSION,
+	PLUGIN_TYPE_VOICE_REPLACEMENT_VERSION,
 };
 
 
@@ -162,6 +163,9 @@ public:
 		#if defined(USE_TIMIDITY)
 		LINK_PLUGIN(TIMIDITY)
 		#endif
+
+		// Translation overlay plugin (handles text substitution + voice replacement)
+		LINK_PLUGIN(TRANSLATION_OVERLAY)
 
 		// Scaler plugins
 		LINK_PLUGIN(NORMAL)
@@ -1079,4 +1083,69 @@ void ScalerManager::updateOldSettings() {
 			}
 		}
 	}
+}
+
+// Translation overlay / voice replacement plugin manager
+
+#include "audio/voiceplugin.h"
+#include "audio/audiostream.h"
+
+namespace Common {
+DECLARE_SINGLETON(VoiceReplacementManager);
+}
+
+VoiceReplacementManager::VoiceReplacementManager() : _activePlugin(nullptr) {}
+
+const PluginList &VoiceReplacementManager::getPlugins() const {
+	return PluginManager::instance().getPlugins(PLUGIN_TYPE_VOICE_REPLACEMENT);
+}
+
+void VoiceReplacementManager::setActivePlugin(int index) {
+	if (index < 0) {
+		_activePlugin = nullptr;
+		return;
+	}
+	const PluginList &plugins = getPlugins();
+	if ((uint)index < plugins.size())
+		_activePlugin = plugins[index];
+}
+
+Audio::SeekableAudioStream *VoiceReplacementManager::createReplacementStream(int soundId) const {
+	if (!_activePlugin)
+		return nullptr;
+	const VoiceReplacementPluginObject &plugin = _activePlugin->get<VoiceReplacementPluginObject>();
+	if (!plugin.hasReplacement(soundId))
+		return nullptr;
+	return plugin.createReplacementStream(soundId);
+}
+
+bool VoiceReplacementManager::hasTagReplacement(const char *tag) const {
+	if (!_activePlugin || !tag || !tag[0])
+		return false;
+	return _activePlugin->get<VoiceReplacementPluginObject>().hasTagReplacement(tag);
+}
+
+Audio::SeekableAudioStream *VoiceReplacementManager::createTagReplacementStream(const char *tag) const {
+	if (!_activePlugin || !tag || !tag[0])
+		return nullptr;
+	return _activePlugin->get<VoiceReplacementPluginObject>().createTagReplacementStream(tag);
+}
+
+int VoiceReplacementManager::buildOutput(const byte *rawMsg, int actorId,
+                                          byte *dst, int dstSize) const {
+	if (!_activePlugin)
+		return -1;
+	return _activePlugin->get<VoiceReplacementPluginObject>().buildOutput(rawMsg, actorId, dst, dstSize);
+}
+
+Common::String VoiceReplacementManager::resolveV6Voice(const byte *rawMsg, int actorId) const {
+	if (!_activePlugin)
+		return Common::String();
+	return _activePlugin->get<VoiceReplacementPluginObject>().resolveV6Voice(rawMsg, actorId);
+}
+
+void VoiceReplacementManager::reloadConfig() {
+	if (!_activePlugin)
+		return;
+	_activePlugin->get<VoiceReplacementPluginObject>().loadConfig();
 }

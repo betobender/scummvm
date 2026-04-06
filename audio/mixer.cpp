@@ -28,6 +28,7 @@
 #include "audio/rate.h"
 #include "audio/audiostream.h"
 #include "audio/timestamp.h"
+#include "audio/voiceplugin.h"
 
 
 namespace Audio {
@@ -298,6 +299,17 @@ void MixerImpl::playStream(
 		return;
 	}
 
+	// If the translation overlay plugin is active and has a replacement for this
+	// sound ID, substitute the original stream with the AI-generated one.
+	if (type == kSpeechSoundType && id != -1 && TranslationMan.isActive()) {
+		Audio::SeekableAudioStream *replacement = TranslationMan.createReplacementStream(id);
+		if (replacement) {
+			if (autofreeStream == DisposeAfterUse::YES)
+				delete stream;
+			stream = replacement;
+			autofreeStream = DisposeAfterUse::YES;
+		}
+	}
 
 	assert(_mixerReady);
 
