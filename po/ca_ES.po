@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.6.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-03 16:26+0000\n"
-"PO-Revision-Date: 2026-03-27 15:22+0000\n"
+"POT-Creation-Date: 2026-04-12 17:14+0000\n"
+"PO-Revision-Date: 2026-04-11 00:22+0000\n"
 "Last-Translator: Xaviu <xaviu@xaviu.com>\n"
 "Language-Team: Catalan <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ca/>\n"
@@ -24,39 +24,46 @@ msgstr ""
 msgid "Apple Macintosh Audio"
 msgstr "Àudio d'Apple Macintosh"
 
+#. I18N: built with <compiler>
+#: gui/about.cpp:113
+#, fuzzy, c-format
+#| msgid "(built on %s with %s)"
+msgid "(built with %s)"
+msgstr "(compilat el %s amb %s)"
+
 #. I18N: built on <build date> with <compiler>
-#: gui/about.cpp:103
+#: gui/about.cpp:116
 #, c-format
 msgid "(built on %s with %s)"
 msgstr "(compilat el %s amb %s)"
 
-#: gui/about.cpp:110
+#: gui/about.cpp:124
 msgid "Features compiled in:"
 msgstr "Característiques compilades:"
 
-#: gui/about.cpp:118
+#: gui/about.cpp:132
 msgid "not supported"
 msgstr "no suportat"
 
-#: gui/about.cpp:118
+#: gui/about.cpp:132
 msgid "disabled"
 msgstr "inhabilitat"
 
-#: gui/about.cpp:118
+#: gui/about.cpp:132
 msgid "enabled"
 msgstr "habilitat"
 
 #. I18N: CPU extensions are sets of extra processor instructions used to speed up operations. See Intel AVX2, ARM NEON, etc.
-#: gui/about.cpp:142
+#: gui/about.cpp:156
 msgid "CPU extensions support:"
 msgstr "Suport d'extensions de CPU:"
 
-#: gui/about.cpp:155
+#: gui/about.cpp:169
 msgid "Available engines:"
 msgstr "Motors disponibles:"
 
 #. I18N: Close dialog button
-#: gui/about.cpp:527 gui/downloadpacksdialog.cpp:298
+#: gui/about.cpp:511 gui/about.cpp:640 gui/downloadpacksdialog.cpp:298
 #: gui/downloadpacksdialog.cpp:389 gui/integrity-dialog.cpp:354
 #: gui/gui-manager.cpp:168 gui/helpdialog.cpp:128 gui/imagealbum-dialog.cpp:133
 #: gui/textviewer.cpp:56 gui/unknown-game-dialog.cpp:53
@@ -118,8 +125,8 @@ msgstr "Amunt"
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
 #: gui/shaderbrowser-dialog.cpp:80 gui/themebrowser.cpp:54
 #: gui/unknown-game-dialog.cpp:53 base/main.cpp:604
-#: dists/android.strings.xml.cpp:46 engines/engine.cpp:808
-#: engines/engine.cpp:833 backends/dialogs/gtk/gtk-dialogs.cpp:65
+#: dists/android.strings.xml.cpp:46 engines/engine.cpp:800
+#: engines/engine.cpp:825 backends/dialogs/gtk/gtk-dialogs.cpp:65
 #: backends/events/default/default-events.cpp:193
 #: backends/events/default/default-events.cpp:217
 #: backends/platform/android/options.cpp:293
@@ -273,13 +280,8 @@ msgstr "Enganxa"
 msgid "Paste code from clipboard"
 msgstr "Enganxa el codi del porta-retalls"
 
-#: gui/cloudconnectionwizard.cpp:387 gui/launcher.cpp:324
-#: engines/dialogs.cpp:97 engines/engine.cpp:1019 engines/mm/xeen/saves.cpp:259
-#: engines/nancy/state/loadsave.cpp:108 engines/nancy/state/loadsave.cpp:153
-#: engines/parallaction/metaengine.cpp:151
-#: engines/parallaction/saveload.cpp:193 engines/pegasus/pegasus.cpp:388
-#: engines/tinsel/metaengine.cpp:329 engines/trecision/saveload.cpp:253
-#: engines/tsage/scenes.cpp:642 engines/wage/saveload.cpp:753
+#: gui/cloudconnectionwizard.cpp:387 engines/nancy/state/loadsave.cpp:108
+#: engines/parallaction/metaengine.cpp:151 engines/tinsel/metaengine.cpp:329
 msgid "Load"
 msgstr "Carrega"
 
@@ -330,7 +332,7 @@ msgstr "Un altre Emmagatzematge està actiu ara mateix. Voleu interrompre'l?"
 #: gui/cloudconnectionwizard.cpp:530 gui/downloaddialog.cpp:118
 #: gui/downloaddialog.cpp:152 gui/filebrowser-dialog.cpp:135
 #: gui/fluidsynth-dialog.cpp:210 gui/launcher.cpp:428 gui/launcher.cpp:457
-#: gui/launcher.cpp:534 gui/launcher.cpp:1926 gui/options.cpp:3485
+#: gui/launcher.cpp:534 gui/launcher.cpp:1938 gui/options.cpp:3485
 #: gui/options.cpp:3859 base/main.cpp:604
 #: backends/events/default/default-events.cpp:193 engines/buried/buried.cpp:598
 #: engines/chamber/metaengine.cpp:91 engines/director/events.cpp:122
@@ -342,14 +344,14 @@ msgstr "Un altre Emmagatzematge està actiu ara mateix. Voleu interrompre'l?"
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:638 engines/sherlock/metaengine.cpp:1244
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:321
+#: engines/zvision/zvision.cpp:326
 msgid "Yes"
 msgstr "Sí"
 
 #: gui/cloudconnectionwizard.cpp:530 gui/downloaddialog.cpp:118
 #: gui/downloaddialog.cpp:153 gui/filebrowser-dialog.cpp:135
 #: gui/fluidsynth-dialog.cpp:210 gui/launcher.cpp:428 gui/launcher.cpp:457
-#: gui/launcher.cpp:534 gui/launcher.cpp:1927 gui/options.cpp:3485
+#: gui/launcher.cpp:534 gui/launcher.cpp:1939 gui/options.cpp:3485
 #: gui/options.cpp:3859 engines/buried/buried.cpp:598
 #: engines/chamber/metaengine.cpp:97 engines/director/events.cpp:122
 #: engines/director/lingo/xlibs/j/jitdraw3.cpp:139
@@ -360,7 +362,7 @@ msgstr "Sí"
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:643 engines/sherlock/metaengine.cpp:1250
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:322
+#: engines/zvision/zvision.cpp:327
 msgid "No"
 msgstr "No"
 
@@ -805,7 +807,9 @@ msgstr ""
 #: backends/platform/ios7/ios7_options.mm:132
 #: backends/platform/ios7/ios7_options.mm:133
 #: backends/platform/ios7/ios7_options.mm:158 engines/ags/dialogs.cpp:65
-#: engines/sword1/metaengine.cpp:98
+#: engines/glk/dialogs.cpp:233 engines/glk/dialogs.cpp:239
+#: engines/glk/dialogs.cpp:251 engines/glk/dialogs.cpp:257
+#: engines/glk/dialogs.cpp:266 engines/sword1/metaengine.cpp:98
 msgid "<default>"
 msgstr "<per defecte>"
 
@@ -1090,12 +1094,12 @@ msgstr "Avall"
 #: gui/gui-manager.cpp:186 engines/metaengine.cpp:149
 #: engines/awe/metaengine.cpp:59 engines/bagel/metaengine.cpp:68
 #: engines/crab/input/input.cpp:107 engines/crab/input/input.cpp:157
-#: engines/dragons/metaengine.cpp:170 engines/got/metaengine.cpp:72
-#: engines/griffon/metaengine.cpp:133 engines/grim/grim.cpp:491
-#: engines/grim/grim.cpp:573 engines/icb/icb.cpp:78 engines/icb/icb.cpp:162
-#: engines/scumm/metaengine.cpp:1020 engines/twine/metaengine.cpp:452
-#: engines/twine/metaengine.cpp:520 engines/twp/metaengine.cpp:152
-#: engines/ultima/ultima4/metaengine.cpp:46
+#: engines/dragons/metaengine.cpp:170 engines/glk/dialogs.cpp:371
+#: engines/got/metaengine.cpp:72 engines/griffon/metaengine.cpp:133
+#: engines/grim/grim.cpp:491 engines/grim/grim.cpp:573 engines/icb/icb.cpp:78
+#: engines/icb/icb.cpp:162 engines/scumm/metaengine.cpp:1020
+#: engines/twine/metaengine.cpp:452 engines/twine/metaengine.cpp:520
+#: engines/twp/metaengine.cpp:152 engines/ultima/ultima4/metaengine.cpp:46
 #: engines/ultima/ultima4/metaengine.cpp:141
 #: engines/ultima/ultima4/metaengine.cpp:151
 #: engines/wintermute/keymapper_tables.h:320
@@ -1110,12 +1114,12 @@ msgstr "Esquerra"
 #: gui/gui-manager.cpp:192 engines/metaengine.cpp:155
 #: engines/awe/metaengine.cpp:60 engines/bagel/metaengine.cpp:69
 #: engines/crab/input/input.cpp:113 engines/crab/input/input.cpp:163
-#: engines/dragons/metaengine.cpp:176 engines/got/metaengine.cpp:73
-#: engines/griffon/metaengine.cpp:139 engines/grim/grim.cpp:496
-#: engines/grim/grim.cpp:578 engines/icb/icb.cpp:83 engines/icb/icb.cpp:167
-#: engines/scumm/metaengine.cpp:1027 engines/twine/metaengine.cpp:444
-#: engines/twine/metaengine.cpp:513 engines/twp/metaengine.cpp:153
-#: engines/ultima/ultima4/metaengine.cpp:47
+#: engines/dragons/metaengine.cpp:176 engines/glk/dialogs.cpp:373
+#: engines/got/metaengine.cpp:73 engines/griffon/metaengine.cpp:139
+#: engines/grim/grim.cpp:496 engines/grim/grim.cpp:578 engines/icb/icb.cpp:83
+#: engines/icb/icb.cpp:167 engines/scumm/metaengine.cpp:1027
+#: engines/twine/metaengine.cpp:444 engines/twine/metaengine.cpp:513
+#: engines/twp/metaengine.cpp:153 engines/ultima/ultima4/metaengine.cpp:47
 #: engines/ultima/ultima4/metaengine.cpp:142
 #: engines/ultima/ultima4/metaengine.cpp:152
 #: engines/wintermute/keymapper_tables.h:326
@@ -1475,13 +1479,6 @@ msgstr "Cerca a la llista de jocs"
 msgid "Search:"
 msgstr "Cerca:"
 
-#: gui/launcher.cpp:324 engines/dialogs.cpp:97 engines/engine.cpp:1019
-#: engines/mm/xeen/saves.cpp:259 engines/nancy/state/loadsave.cpp:153
-#: engines/pegasus/pegasus.cpp:388 engines/trecision/saveload.cpp:253
-#: engines/tsage/scenes.cpp:642 engines/wage/saveload.cpp:753
-msgid "Load game:"
-msgstr "Carrega partida:"
-
 #: gui/launcher.cpp:416
 msgid "This directory cannot be used yet, it is being downloaded into!"
 msgstr ""
@@ -1525,7 +1522,7 @@ msgid "ScummVM could not find any game in the specified directory!"
 msgstr "ScummVM no ha pogut trobar cap joc al directori especificat!"
 
 #. I18N: Unknown game variant
-#: gui/launcher.cpp:742 engines/engine.cpp:1235
+#: gui/launcher.cpp:742 engines/engine.cpp:1227
 msgid "Unknown variant"
 msgstr "Variant desconeguda"
 
@@ -1537,85 +1534,85 @@ msgstr "Vista de llistat"
 msgid "Grid view"
 msgstr "Vista de quadrícula"
 
-#: gui/launcher.cpp:1143
+#: gui/launcher.cpp:1145
 msgid "~S~tart"
 msgstr "~I~nicia"
 
-#: gui/launcher.cpp:1143
+#: gui/launcher.cpp:1145
 msgid "Start selected game"
 msgstr "Iniciant el joc seleccionat"
 
-#: gui/launcher.cpp:1146
+#: gui/launcher.cpp:1148
 msgid "~L~oad..."
 msgstr "~C~arrega..."
 
-#: gui/launcher.cpp:1146
+#: gui/launcher.cpp:1148
 msgid "Load saved game for selected game"
 msgstr "Carrega una partida pel joc seleccionat"
 
-#: gui/launcher.cpp:1148
+#: gui/launcher.cpp:1150
 msgid "Record..."
 msgstr "Enregistra..."
 
-#: gui/launcher.cpp:1154
+#: gui/launcher.cpp:1156
 msgid "~G~ame Options..."
 msgstr "~O~pcions del jocs..."
 
-#: gui/launcher.cpp:1154
+#: gui/launcher.cpp:1156
 msgid "Change game options"
 msgstr "Canvia les opcions del joc"
 
-#: gui/launcher.cpp:1154
+#: gui/launcher.cpp:1156
 msgctxt "lowres"
 msgid "~G~ame Opts..."
 msgstr "Opcs. del ~j~oc..."
 
-#: gui/launcher.cpp:1240
+#: gui/launcher.cpp:1242
 msgid "Add-on"
 msgstr "Complement"
 
 #. I18N: List grouping when no engine is specified
-#: gui/launcher.cpp:1297 gui/launcher.cpp:1542
+#: gui/launcher.cpp:1309 gui/launcher.cpp:1554
 msgid "Unknown Engine"
 msgstr "Motor desconegut"
 
 #. I18N: List grouping when no publisher is specified
 #. I18N: List group when no publisher is specified
-#: gui/launcher.cpp:1314 gui/launcher.cpp:1559
+#: gui/launcher.cpp:1326 gui/launcher.cpp:1571
 msgid "Unknown Publisher"
 msgstr "Distribuïdora desconeguda"
 
 #. I18N: List group when no game series is specified
 #. I18N: List grouping when no game series is specified
-#: gui/launcher.cpp:1331 gui/launcher.cpp:1576
+#: gui/launcher.cpp:1343 gui/launcher.cpp:1588
 msgid "No Series"
 msgstr "Sense sèrie"
 
 #. I18N: List group when no language is specified
-#: gui/launcher.cpp:1345 gui/launcher.cpp:1590
+#: gui/launcher.cpp:1357 gui/launcher.cpp:1602
 msgid "Language not detected"
 msgstr "No s'ha detectat l'idioma"
 
 #. I18N: List group when no platform is specified
-#: gui/launcher.cpp:1359 gui/launcher.cpp:1604
+#: gui/launcher.cpp:1371 gui/launcher.cpp:1616
 msgid "Platform not detected"
 msgstr "No s'ha detectat la plataforma"
 
 #. I18N: List group when no year is specified
-#: gui/launcher.cpp:1376 gui/launcher.cpp:1621
+#: gui/launcher.cpp:1388 gui/launcher.cpp:1633
 msgid "Unknown Year"
 msgstr "Any desconegut"
 
 #. I18N: Group for All items
-#: gui/launcher.cpp:1628 gui/widgets/groupedlist.cpp:81
+#: gui/launcher.cpp:1640 gui/widgets/groupedlist.cpp:81
 msgid "All"
 msgstr "Tots"
 
-#: gui/launcher.cpp:1800
+#: gui/launcher.cpp:1812
 msgid "Icons per row:"
 msgstr "Icones per línia:"
 
-#: gui/launcher.cpp:1857
+#: gui/launcher.cpp:1869
 #, c-format
 msgid ""
 "Do you really want to remove the following %d game configurations?\n"
@@ -1884,7 +1881,7 @@ msgstr "Renderitzador 3D del joc:"
 msgid "3D Anti-aliasing:"
 msgstr "Antialiàsing 3D:"
 
-#: gui/options.cpp:1731 engines/mohawk/dialogs.cpp:364
+#: gui/options.cpp:1731
 msgid "Disabled"
 msgstr "Inhabilitat"
 
@@ -2343,7 +2340,7 @@ msgid "Debug level:"
 msgstr "Nivell de depuració:"
 
 #. I18N: Debug level -1, no messages
-#: gui/options.cpp:2749 gui/options.cpp:2886
+#: gui/options.cpp:2749 gui/options.cpp:2886 audio/fmopl.cpp:83
 msgid "None"
 msgstr "Cap"
 
@@ -2604,7 +2601,7 @@ msgstr ""
 "\n"
 "I més..."
 
-#: gui/options.cpp:2966 engines/engine.cpp:655
+#: gui/options.cpp:2966 engines/engine.cpp:647
 #: engines/access/metaengine.cpp:281 engines/drascula/metaengine.cpp:255
 #: engines/queen/metaengine.cpp:269 engines/sherlock/metaengine.cpp:410
 #: engines/ultima/nuvie/metaengine.cpp:71
@@ -2735,7 +2732,7 @@ msgstr "*  Abc"
 
 #: gui/printing-dialog.cpp:54
 msgid "Print"
-msgstr ""
+msgstr "Imprimeix"
 
 #: gui/printing-dialog.cpp:56
 msgid "Save as image"
@@ -2747,7 +2744,7 @@ msgstr "Ajusta a la pàgina"
 
 #: gui/printing-dialog.cpp:60 backends/graphics/opengl/opengl-graphics.cpp:315
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:127
-#: engines/twine/metaengine.cpp:312
+#: engines/glk/dialogs.cpp:372 engines/twine/metaengine.cpp:312
 msgid "Center"
 msgstr "Centra"
 
@@ -2765,7 +2762,7 @@ msgstr "Enregistrar o reproduïr vídeos de partida"
 
 #: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
-#: dists/android.strings.xml.cpp:47 engines/engine.cpp:649
+#: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "Suprimeix"
 
@@ -2802,6 +2799,26 @@ msgstr "Autor desconegut"
 #: gui/remotebrowser.cpp:128
 msgid "ScummVM could not access the directory!"
 msgstr "ScummVM no ha pogut accedir al directori especificat!"
+
+#: gui/saveload.cpp:36
+msgid "Save game:"
+msgstr "Desa la partida:"
+
+#: gui/saveload.cpp:36
+msgid "Restore game:"
+msgstr "Recupera la partida:"
+
+#: gui/saveload.cpp:37 engines/groovie/script.cpp:853
+#: engines/lab/savegame.cpp:237 engines/nancy/state/loadsave.cpp:108
+#: engines/parallaction/metaengine.cpp:157 engines/saga/metaengine.cpp:469
+#: engines/tinsel/metaengine.cpp:323 engines/zvision/metaengine.cpp:282
+msgid "Save"
+msgstr "Desa"
+
+#: gui/saveload.cpp:37 engines/groovie/script.cpp:853
+#: engines/lab/savegame.cpp:237 engines/zvision/metaengine.cpp:287
+msgid "Restore"
+msgstr "Restaura"
 
 #: gui/saveload-dialog.cpp:56
 msgid "Downloading saves..."
@@ -3507,53 +3524,6 @@ msgctxt "lowres"
 msgid "~R~eturn to Launcher"
 msgstr "~R~etorna al Llançador"
 
-#: engines/dialogs.cpp:98 engines/engine.cpp:1048 engines/agi/saveload.cpp:766
-#: engines/avalanche/parser.cpp:1918 engines/cine/various.cpp:349
-#: engines/dm/loadsave.cpp:199 engines/drascula/saveload.cpp:390
-#: engines/dreamweb/saveload.cpp:261 engines/glk/streams.cpp:1432
-#: engines/gnap/menu.cpp:465 engines/groovie/script.cpp:858
-#: engines/groovie/script.cpp:2256 engines/groovie/script.cpp:2283
-#: engines/groovie/script.cpp:2324 engines/hugo/file.cpp:297
-#: engines/illusions/menusystem.cpp:702 engines/kingdom/kingdom.cpp:731
-#: engines/lab/savegame.cpp:242 engines/mads/nebular/dialogs_nebular.cpp:358
-#: engines/mads/phantom/dialogs_phantom.cpp:354 engines/mm/xeen/saves.cpp:280
-#: engines/mtropolis/saveload.cpp:76 engines/nancy/state/loadsave.cpp:136
-#: engines/neverhood/menumodule.cpp:925 engines/pegasus/pegasus.cpp:407
-#: engines/prince/saveload.cpp:54 engines/sci/engine/guest_additions.cpp:746
-#: engines/sci/engine/kfile.cpp:1104 engines/sherlock/scalpel/scalpel.cpp:1250
-#: engines/sherlock/tattoo/widget_files.cpp:81 engines/startrek/saveload.cpp:42
-#: engines/toltecs/menu.cpp:308 engines/toon/toon.cpp:3820
-#: engines/trecision/saveload.cpp:67 engines/tsage/scenes.cpp:640
-#: engines/wage/saveload.cpp:763 engines/zvision/file/save_manager.cpp:47
-msgid "Save game:"
-msgstr "Desa la partida:"
-
-#: engines/dialogs.cpp:98 engines/engine.cpp:1048 engines/agi/saveload.cpp:766
-#: engines/avalanche/parser.cpp:1918 engines/cine/various.cpp:349
-#: engines/dm/loadsave.cpp:199 engines/drascula/saveload.cpp:390
-#: engines/dreamweb/saveload.cpp:261 engines/glk/streams.cpp:1432
-#: engines/gnap/menu.cpp:465 engines/groovie/script.cpp:853
-#: engines/groovie/script.cpp:858 engines/groovie/script.cpp:2256
-#: engines/groovie/script.cpp:2283 engines/groovie/script.cpp:2324
-#: engines/hugo/file.cpp:297 engines/illusions/menusystem.cpp:702
-#: engines/kingdom/kingdom.cpp:731 engines/lab/savegame.cpp:237
-#: engines/lab/savegame.cpp:242 engines/mads/nebular/dialogs_nebular.cpp:358
-#: engines/mads/phantom/dialogs_phantom.cpp:354 engines/mm/xeen/saves.cpp:280
-#: engines/mtropolis/saveload.cpp:76 engines/nancy/state/loadsave.cpp:108
-#: engines/nancy/state/loadsave.cpp:136 engines/neverhood/menumodule.cpp:925
-#: engines/parallaction/metaengine.cpp:157
-#: engines/parallaction/saveload.cpp:208 engines/pegasus/pegasus.cpp:407
-#: engines/prince/saveload.cpp:54 engines/saga/metaengine.cpp:469
-#: engines/sci/engine/guest_additions.cpp:747 engines/sci/engine/kfile.cpp:1104
-#: engines/sherlock/scalpel/scalpel.cpp:1250
-#: engines/sherlock/tattoo/widget_files.cpp:81 engines/startrek/saveload.cpp:42
-#: engines/tinsel/metaengine.cpp:323 engines/toltecs/menu.cpp:308
-#: engines/toon/toon.cpp:3820 engines/trecision/saveload.cpp:67
-#: engines/tsage/scenes.cpp:640 engines/wage/saveload.cpp:763
-#: engines/zvision/file/save_manager.cpp:47 engines/zvision/metaengine.cpp:282
-msgid "Save"
-msgstr "Desa"
-
 #: engines/dialogs.cpp:128
 msgid ""
 "Sorry, this engine does not currently provide in-game help. Please consult "
@@ -3607,41 +3577,41 @@ msgstr "~C~ancel·la"
 msgid "Could not switch to resolution '%dx%d'."
 msgstr "No s'ha pogut canviar al mode de vídeo: '%dx%d'."
 
-#: engines/engine.cpp:381
+#: engines/engine.cpp:380
 msgid "Could not initialize color format."
 msgstr "No s'ha pogut iniciar el format de color."
 
-#: engines/engine.cpp:390
+#: engines/engine.cpp:388
 #, c-format
 msgid "Could not switch to video mode '%s'."
 msgstr "No s'ha pogut canviar al mode de vídeo: '%s'."
 
-#: engines/engine.cpp:398
+#: engines/engine.cpp:396
 #, c-format
 msgid "Could not switch to stretch mode '%s'."
 msgstr "No s'ha pogut canviar al mode de vídeo: '%s'."
 
-#: engines/engine.cpp:405
+#: engines/engine.cpp:403
 msgid "Could not apply aspect ratio setting."
 msgstr "No s'ha pogut aplicar la configuració de la relació d'aspecte."
 
-#: engines/engine.cpp:410
+#: engines/engine.cpp:408
 msgid "Could not apply fullscreen setting."
 msgstr "No s'ha pogut aplicar l'ajust de pantalla completa."
 
-#: engines/engine.cpp:415
+#: engines/engine.cpp:413
 msgid "Could not apply filtering setting."
 msgstr "No s'ha pogut aplicar la configuració de filtratge."
 
-#: engines/engine.cpp:420
+#: engines/engine.cpp:418
 msgid "Could not apply shader setting."
 msgstr "No s'ha pogut aplicar la configuració del «shader»."
 
-#: engines/engine.cpp:536
+#: engines/engine.cpp:528
 msgid "Error"
 msgstr "Error"
 
-#: engines/engine.cpp:599
+#: engines/engine.cpp:591
 msgid ""
 "You appear to be playing this game directly\n"
 "from the CD. This is known to cause problems,\n"
@@ -3655,7 +3625,7 @@ msgstr ""
 "els fitxers de dades al vostre disc dur.\n"
 "Consulteu la documentació (àudio CD) per a més detalls."
 
-#: engines/engine.cpp:622
+#: engines/engine.cpp:614
 msgid ""
 "This game has audio tracks on its CD. These\n"
 "tracks need to be ripped from the CD using\n"
@@ -3669,41 +3639,41 @@ msgstr ""
 "poder escoltar la música del joc.\n"
 "Consulteu la documentació (àudio CD) per a més detalls."
 
-#: engines/engine.cpp:650
+#: engines/engine.cpp:642
 msgid "Skip autosave"
 msgstr "Omet el desament automàtic"
 
-#: engines/engine.cpp:652
+#: engines/engine.cpp:644
 #, c-format
 msgid ""
-"WARNING: The autosave slot contains a saved game named %S, and an autosave "
+"WARNING: The autosave slot contains a saved game named %s, and an autosave "
 "is pending.\n"
 "Please move this saved game to a new slot, or delete it if it's no longer "
 "needed.\n"
 "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
 msgstr ""
-"ADVERTÈNCIA: La ranura de desament automàtic té una partida anomenada %S., i "
+"ADVERTÈNCIA: La ranura de desament automàtic té una partida anomenada %s, i "
 "hi ha un desament automàtic pendent.\n"
 "Moveu aquesta partida desada a una ranura nova, o suprimiu-la si ja no és "
 "necessària.\n"
 "Alternativament, podeu ometre el desament automàtic (es tornarà a preguntar "
 "en 5 minuts)."
 
-#: engines/engine.cpp:662
+#: engines/engine.cpp:654
 msgid "ERROR: Could not copy the savegame to a new slot"
 msgstr "ERROR: No s'ha pogut copiar la partida desada a una ranura nova"
 
-#: engines/engine.cpp:689 engines/savestate.cpp:98
+#: engines/engine.cpp:681 engines/savestate.cpp:103
 #: backends/platform/ios7/ios7_osys_main.cpp:266 engines/mm/xeen/saves.cpp:293
 #: engines/sky/metaengine.cpp:218
 msgid "Autosave"
 msgstr "Desament automàtic"
 
-#: engines/engine.cpp:697
+#: engines/engine.cpp:689
 msgid "Error occurred making autosave"
 msgstr "S'ha produït un error en desar automàticament"
 
-#: engines/engine.cpp:780
+#: engines/engine.cpp:772
 #, c-format
 msgid ""
 "Failed to load saved game (%s)! Please consult the README for basic "
@@ -3713,15 +3683,15 @@ msgstr ""
 "per a la informació bàsica i les instruccions sobre com obtenir més "
 "assistència."
 
-#: engines/engine.cpp:804
+#: engines/engine.cpp:796
 msgid "WARNING: "
 msgstr "ADVERTÈNCIA: "
 
-#: engines/engine.cpp:804
+#: engines/engine.cpp:796
 msgid " Shall we still run the game?"
 msgstr " Encara s'ha d'executar el joc?"
 
-#: engines/engine.cpp:805
+#: engines/engine.cpp:797
 msgid ""
 "WARNING: The game you are about to start is not yet fully supported by "
 "ScummVM. As such, it is likely to be unstable, and any saved game you make "
@@ -3731,12 +3701,12 @@ msgstr ""
 "pel ScummVM. Com a tal, probablement serà inestable, i pot ser que les "
 "partides que deseu no funcionin en versions futures de ScummVM."
 
-#: engines/engine.cpp:808 engines/engine.cpp:833
+#: engines/engine.cpp:800 engines/engine.cpp:825
 #: engines/wintermute/wintermute.cpp:174
 msgid "Start anyway"
 msgstr "Inicia de totes maneres"
 
-#: engines/engine.cpp:827
+#: engines/engine.cpp:819
 #, c-format
 msgid ""
 "WARNING: the game you are about to start contains the add-on \"%s\" which is "
@@ -3748,7 +3718,7 @@ msgstr ""
 "inestable, i pot ser que les partides que deseu no funcionin en versions "
 "futures de ScummVM."
 
-#: engines/engine.cpp:852
+#: engines/engine.cpp:844
 #, c-format
 msgid ""
 "The game \"%s\" you are trying to add is an add-on for \"%s\" that cannot be "
@@ -3759,11 +3729,11 @@ msgstr ""
 "executar independentment. Si us plau, copieu el contingut del complement en "
 "un subdirectori del joc base i inicieu el joc base."
 
-#: engines/engine.cpp:869
+#: engines/engine.cpp:861
 msgid "This game is not supported."
 msgstr "Aquest joc no és compatible."
 
-#: engines/engine.cpp:869
+#: engines/engine.cpp:861
 msgid ""
 "This game is not supported for the following reason:\n"
 "\n"
@@ -3771,15 +3741,15 @@ msgstr ""
 "Aquest joc no és compatible per la següent raó:\n"
 "\n"
 
-#: engines/engine.cpp:1015
+#: engines/engine.cpp:1007
 msgid "Loading game is currently unavailable"
 msgstr "Actualment no es pot carregar la partida"
 
-#: engines/engine.cpp:1044
+#: engines/engine.cpp:1036
 msgid "Saving game is currently unavailable"
 msgstr "Actualment no es pot desar la partida"
 
-#: engines/engine.cpp:1213
+#: engines/engine.cpp:1205
 #, c-format
 msgid ""
 "The directory '%s' looks like an add-on for the game '%s', but ScummVM could "
@@ -3788,7 +3758,7 @@ msgstr ""
 "El directori '%s' sembla un complement per al joc '%s', però ScummVM no ha "
 "pogut trobar cap complement que coincideixi."
 
-#: engines/engine.cpp:1241
+#: engines/engine.cpp:1233
 #, c-format
 msgid "Directory '%s' matches several add-ons, please pick one."
 msgstr ""
@@ -3828,16 +3798,17 @@ msgstr "Assignació de tecles per defecte del joc"
 #: engines/draci/metaengine.cpp:200 engines/groovie/metaengine.cpp:205
 #: engines/hdb/metaengine.cpp:207 engines/hopkins/metaengine.cpp:211
 #: engines/hugo/metaengine.cpp:134 engines/illusions/metaengine.cpp:94
-#: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:502
+#: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:505
 #: engines/lure/metaengine.cpp:177 engines/made/metaengine.cpp:137
-#: engines/mads/metaengine.cpp:280 engines/mtropolis/metaengine.cpp:161
-#: engines/nancy/input.cpp:181 engines/parallaction/metaengine.cpp:138
-#: engines/saga/metaengine.cpp:278 engines/sludge/keymapper_tables.h:561
-#: engines/sludge/keymapper_tables.h:580 engines/stark/metaengine.cpp:189
-#: engines/sword1/metaengine.cpp:271 engines/tinsel/metaengine.cpp:246
-#: engines/toon/metaengine.cpp:86 engines/touche/metaengine.cpp:122
-#: engines/trecision/metaengine.cpp:125 engines/tsage/metaengine.cpp:178
-#: engines/tucker/metaengine.cpp:172 engines/ultima/ultima0/metaengine.cpp:180
+#: engines/mads/metaengine.cpp:280 engines/mm/metaengine.cpp:186
+#: engines/mtropolis/metaengine.cpp:161 engines/nancy/input.cpp:181
+#: engines/parallaction/metaengine.cpp:138 engines/saga/metaengine.cpp:278
+#: engines/sludge/keymapper_tables.h:561 engines/sludge/keymapper_tables.h:580
+#: engines/stark/metaengine.cpp:189 engines/sword1/metaengine.cpp:271
+#: engines/tinsel/metaengine.cpp:246 engines/toon/metaengine.cpp:86
+#: engines/touche/metaengine.cpp:122 engines/trecision/metaengine.cpp:125
+#: engines/tsage/metaengine.cpp:178 engines/tucker/metaengine.cpp:172
+#: engines/ultima/ultima0/metaengine.cpp:180
 #: engines/ultima/ultima4/metaengine.cpp:227
 #: engines/ultima/nuvie/metaengine.cpp:238
 #: engines/ultima/ultima8/metaengine.cpp:138 engines/vcruise/metaengine.cpp:158
@@ -3861,16 +3832,16 @@ msgstr "Clic central"
 #: engines/draci/metaengine.cpp:206 engines/groovie/metaengine.cpp:211
 #: engines/hopkins/metaengine.cpp:217 engines/hugo/metaengine.cpp:141
 #: engines/illusions/metaengine.cpp:101 engines/kyra/engine/eobcommon.cpp:370
-#: engines/kyra/engine/lol.cpp:503 engines/lure/metaengine.cpp:183
+#: engines/kyra/engine/lol.cpp:506 engines/lure/metaengine.cpp:183
 #: engines/made/metaengine.cpp:144 engines/mads/metaengine.cpp:286
-#: engines/mtropolis/metaengine.cpp:167 engines/nancy/input.cpp:188
-#: engines/parallaction/metaengine.cpp:144 engines/saga/metaengine.cpp:289
-#: engines/sludge/keymapper_tables.h:567 engines/sludge/keymapper_tables.h:586
-#: engines/stark/metaengine.cpp:195 engines/sword1/metaengine.cpp:277
-#: engines/tinsel/metaengine.cpp:252 engines/toon/metaengine.cpp:92
-#: engines/touche/metaengine.cpp:128 engines/trecision/metaengine.cpp:131
-#: engines/tsage/metaengine.cpp:184 engines/tucker/metaengine.cpp:178
-#: engines/ultima/ultima0/metaengine.cpp:186
+#: engines/mm/metaengine.cpp:192 engines/mtropolis/metaengine.cpp:167
+#: engines/nancy/input.cpp:188 engines/parallaction/metaengine.cpp:144
+#: engines/saga/metaengine.cpp:289 engines/sludge/keymapper_tables.h:567
+#: engines/sludge/keymapper_tables.h:586 engines/stark/metaengine.cpp:195
+#: engines/sword1/metaengine.cpp:277 engines/tinsel/metaengine.cpp:252
+#: engines/toon/metaengine.cpp:92 engines/touche/metaengine.cpp:128
+#: engines/trecision/metaengine.cpp:131 engines/tsage/metaengine.cpp:184
+#: engines/tucker/metaengine.cpp:178 engines/ultima/ultima0/metaengine.cpp:186
 #: engines/ultima/ultima4/metaengine.cpp:233
 #: engines/ultima/nuvie/metaengine.cpp:244
 #: engines/ultima/ultima8/metaengine.cpp:144
@@ -3963,31 +3934,31 @@ msgstr "OpenGL amb shaders"
 msgid "AdLib emulator"
 msgstr "Emulador AdLib"
 
-#: audio/fmopl.cpp:82
+#: audio/fmopl.cpp:84
 msgid "MAME OPL emulator"
 msgstr "Emulador OPL de MAME"
 
-#: audio/fmopl.cpp:84
+#: audio/fmopl.cpp:86
 msgid "DOSBox OPL emulator"
 msgstr "Emulador OPL de DOSBox"
 
-#: audio/fmopl.cpp:87
+#: audio/fmopl.cpp:89
 msgid "Nuked OPL emulator"
 msgstr "Emulador OPL de Nuked"
 
-#: audio/fmopl.cpp:90
+#: audio/fmopl.cpp:92
 msgid "ALSA Direct FM"
 msgstr "ALSA Direct FM"
 
-#: audio/fmopl.cpp:93
+#: audio/fmopl.cpp:95
 msgid "OPL2LPT"
 msgstr "OPL2LPT"
 
-#: audio/fmopl.cpp:94
+#: audio/fmopl.cpp:96
 msgid "OPL3LPT"
 msgstr "OPL3LPT"
 
-#: audio/fmopl.cpp:97
+#: audio/fmopl.cpp:99
 msgid "RetroWave OPL3"
 msgstr "RetroWave OPL3"
 
@@ -4032,7 +4003,7 @@ msgstr ""
 "No es pot utilitzar el dispositiu d'àudio preferit '%s'. Vegeu el fitxer de "
 "registre per a més informació."
 
-#: audio/mididrv.cpp:469
+#: audio/mididrv.cpp:474
 msgid "Starting MIDI dump"
 msgstr "S'està iniciant el bolcat MIDI"
 
@@ -4234,38 +4205,38 @@ msgstr "Amplia a la finestra"
 msgid "Fit to window (4:3)"
 msgstr "Ajusta a la finestra (4:3)"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:966
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:975
 #, c-format
 msgid "Resolution: %dx%d"
 msgstr "Resolució: %dx%d"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1010
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2882
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1019
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2869
 msgid "Active graphics filter:"
 msgstr "Filtre de gràfics actiu:"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1031
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2916
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1040
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2903
 msgid "Enabled aspect ratio correction"
 msgstr "S'ha activat la correcció de la relació d'aspecte"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1033
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2922
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1042
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2909
 msgid "Disabled aspect ratio correction"
 msgstr "S'ha desactivat la correcció de la relació d'aspecte"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1046
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2938
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1055
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2925
 msgid "Filtering enabled"
 msgstr "Filtratge activat"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1048
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2940
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1057
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2927
 msgid "Filtering disabled"
 msgstr "Filtratge desactivat"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1074
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2967
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1083
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2954
 msgid "Stretch mode"
 msgstr "Mode d'ajustament"
 
@@ -4782,7 +4753,7 @@ msgstr "Y"
 #: backends/platform/sdl/ps3/ps3.cpp:49 backends/platform/sdl/psp2/psp2.cpp:51
 #: engines/bagel/metaengine.cpp:64 engines/efh/metaengine.cpp:397
 #: engines/got/metaengine.cpp:76 engines/hypno/metaengine.cpp:363
-#: engines/mm/mm1/metaengine.cpp:49 engines/mm/mm1/metaengine.cpp:92
+#: engines/mm/mm1/metaengine.cpp:50 engines/mm/mm1/metaengine.cpp:93
 #: engines/sherlock/metaengine.cpp:660 engines/sherlock/metaengine.cpp:672
 #: engines/sherlock/metaengine.cpp:1014 engines/supernova/metaengine.cpp:303
 #: engines/titanic/metaengine.cpp:233 engines/ultima/ultima0/metaengine.cpp:47
@@ -4914,12 +4885,12 @@ msgstr ""
 msgid "Magnify Mode Off"
 msgstr "Mode d'ampliació desactivat"
 
-#: backends/platform/android/android.cpp:1076
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/android/android.cpp:930
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr "Obtenció d'ajuda"
 
-#: backends/platform/android/android.cpp:1079
+#: backends/platform/android/android.cpp:933
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -4941,13 +4912,13 @@ msgid ""
 "checking out a game walkthrough. Good luck!\n"
 msgstr ""
 
-#: backends/platform/android/android.cpp:1088
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/android/android.cpp:942
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 msgid "Touch Controls"
 msgstr "Controls tàctils"
 
-#: backends/platform/android/android.cpp:1091
+#: backends/platform/android/android.cpp:945
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5016,13 +4987,13 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/android/android.cpp:1147
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/android/android.cpp:1001
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 msgid "Adding Games"
 msgstr "Afegir jocs"
 
-#: backends/platform/android/android.cpp:1150
+#: backends/platform/android/android.cpp:1004
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5256,7 +5227,7 @@ msgstr "Usa una disposició mínima del teclat"
 msgid "Show keyboard function bar"
 msgstr "Mostra la barra de funcions del teclat"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5277,7 +5248,7 @@ msgid ""
 "checking out a game walkthrough. Good luck!\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5351,11 +5322,11 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 msgid "External keyboard"
 msgstr "Teclat extern"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5380,7 +5351,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5401,7 +5372,7 @@ msgid ""
 "other_platforms/ios.html) for more information.\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5423,7 +5394,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -6022,7 +5993,7 @@ msgstr "Obté"
 #: engines/access/metaengine.cpp:291 engines/access/metaengine.cpp:312
 #: engines/bbvs/metaengine.cpp:136 engines/cine/metaengine.cpp:342
 #: engines/efh/metaengine.cpp:462 engines/hdb/metaengine.cpp:237
-#: engines/lab/metaengine.cpp:323 engines/mm/mm1/metaengine.cpp:81
+#: engines/lab/metaengine.cpp:323 engines/mm/mm1/metaengine.cpp:82
 #: engines/petka/metaengine.cpp:151 engines/queen/metaengine.cpp:294
 #: engines/saga/metaengine.cpp:379 engines/scumm/help.cpp:129
 #: engines/scumm/help.cpp:153 engines/scumm/help.cpp:171
@@ -6174,7 +6145,7 @@ msgstr "Usa el cursor quadrat dels models posteriors d'Apple II"
 #: engines/adl/metaengine.cpp:117 engines/agi/metaengine.cpp:220
 #: engines/cge/metaengine.cpp:56 engines/cine/metaengine.cpp:69
 #: engines/cruise/metaengine.cpp:45 engines/drascula/metaengine.cpp:55
-#: engines/efh/metaengine.cpp:44 engines/glk/metaengine.cpp:193
+#: engines/efh/metaengine.cpp:44 engines/glk/metaengine.cpp:205
 #: engines/gob/metaengine.cpp:57 engines/got/metaengine.cpp:48
 #: engines/griffon/metaengine.cpp:40 engines/hugo/metaengine.cpp:56
 #: engines/made/metaengine.cpp:51 engines/mm/metaengine.cpp:91
@@ -6358,48 +6329,6 @@ msgstr "Aquest joc no permet carregar"
 msgid "This game does not support saving"
 msgstr "Aquesta partida no permet desar"
 
-#: engines/agi/saveload.cpp:779 engines/avalanche/parser.cpp:1906
-#: engines/cine/various.cpp:360 engines/dm/dm.cpp:271
-#: engines/dm/loadsave.cpp:187 engines/drascula/saveload.cpp:403
-#: engines/dreamweb/saveload.cpp:169 engines/glk/streams.cpp:1441
-#: engines/gnap/menu.cpp:474 engines/groovie/script.cpp:835
-#: engines/groovie/script.cpp:870 engines/groovie/script.cpp:2243
-#: engines/groovie/script.cpp:2270 engines/groovie/script.cpp:2340
-#: engines/hugo/file.cpp:399 engines/illusions/menusystem.cpp:679
-#: engines/kingdom/kingdom.cpp:741 engines/lab/savegame.cpp:257
-#: engines/mads/nebular/dialogs_nebular.cpp:385
-#: engines/mads/phantom/dialogs_phantom.cpp:381
-#: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:938
-#: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:749
-#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1263
-#: engines/sherlock/tattoo/widget_files.cpp:100
-#: engines/startrek/saveload.cpp:67 engines/toltecs/menu.cpp:278
-#: engines/toon/toon.cpp:3914 engines/zvision/file/save_manager.cpp:60
-msgid "Restore game:"
-msgstr "Recupera la partida:"
-
-#: engines/agi/saveload.cpp:779 engines/avalanche/parser.cpp:1906
-#: engines/cine/various.cpp:360 engines/dm/dm.cpp:271
-#: engines/dm/loadsave.cpp:187 engines/drascula/saveload.cpp:403
-#: engines/dreamweb/saveload.cpp:169 engines/glk/streams.cpp:1441
-#: engines/gnap/menu.cpp:474 engines/groovie/script.cpp:835
-#: engines/groovie/script.cpp:853 engines/groovie/script.cpp:870
-#: engines/groovie/script.cpp:2243 engines/groovie/script.cpp:2270
-#: engines/groovie/script.cpp:2340 engines/hugo/file.cpp:399
-#: engines/illusions/menusystem.cpp:679 engines/kingdom/kingdom.cpp:741
-#: engines/lab/savegame.cpp:237 engines/lab/savegame.cpp:257
-#: engines/mads/nebular/dialogs_nebular.cpp:385
-#: engines/mads/phantom/dialogs_phantom.cpp:381
-#: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:938
-#: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:750
-#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1263
-#: engines/sherlock/tattoo/widget_files.cpp:100
-#: engines/startrek/saveload.cpp:67 engines/toltecs/menu.cpp:278
-#: engines/toon/toon.cpp:3914 engines/zvision/file/save_manager.cpp:60
-#: engines/zvision/metaengine.cpp:287
-msgid "Restore"
-msgstr "Restaura"
-
 #: engines/agos/animation.cpp:576
 #, c-format
 msgid "Cutscene file '%s' not found!"
@@ -6455,7 +6384,7 @@ msgstr "Utilitza el cursor original del sistema Acorn"
 
 #: engines/agos/dialogs.cpp:94
 msgid "Toggle between the system cursor and the default cursor."
-msgstr ""
+msgstr "Commuta entre el cursor del sistema i el cursor predeterminat."
 
 #: engines/agos/dialogs.cpp:107 engines/sci/detection_options.h:263
 msgid "MIDI mode:"
@@ -6553,8 +6482,8 @@ msgid "Turn backward"
 msgstr "Gira cap enrere"
 
 #: engines/agos/metaengine.cpp:228 engines/dm/metaengine.cpp:186
-#: engines/kyra/engine/eobcommon.cpp:375 engines/kyra/engine/lol.cpp:514
-#: engines/lab/metaengine.cpp:257 engines/mm/mm1/metaengine.cpp:97
+#: engines/kyra/engine/eobcommon.cpp:375 engines/kyra/engine/lol.cpp:517
+#: engines/lab/metaengine.cpp:257 engines/mm/mm1/metaengine.cpp:98
 #: engines/mohawk/riven.cpp:901 engines/pegasus/pegasus.cpp:2740
 #: engines/twine/metaengine.cpp:353 engines/ultima/ultima0/metaengine.cpp:80
 #: engines/ultima/ultima8/metaengine.cpp:48
@@ -6567,8 +6496,8 @@ msgid "Turn left"
 msgstr "Gira a l'esquerra"
 
 #: engines/agos/metaengine.cpp:234 engines/dm/metaengine.cpp:206
-#: engines/kyra/engine/eobcommon.cpp:376 engines/kyra/engine/lol.cpp:515
-#: engines/lab/metaengine.cpp:271 engines/mm/mm1/metaengine.cpp:98
+#: engines/kyra/engine/eobcommon.cpp:376 engines/kyra/engine/lol.cpp:518
+#: engines/lab/metaengine.cpp:271 engines/mm/mm1/metaengine.cpp:99
 #: engines/mohawk/riven.cpp:907 engines/pegasus/pegasus.cpp:2747
 #: engines/twine/metaengine.cpp:346 engines/ultima/ultima0/metaengine.cpp:81
 #: engines/ultima/ultima8/metaengine.cpp:49
@@ -6842,7 +6771,7 @@ msgstr "Filtra les textures"
 
 #: engines/alcachofa/metaengine.cpp:63
 msgid "Whether textures should be linearly filtered"
-msgstr ""
+msgstr "Indica si les textures s'han de filtrar linealment"
 
 #: engines/alcachofa/metaengine.cpp:98 engines/cine/metaengine.cpp:347
 #: engines/freescape/games/castle/castle.cpp:520
@@ -7001,8 +6930,8 @@ msgstr "Truc de l'ull del soldat 714"
 #: engines/bbvs/metaengine.cpp:111 engines/cruise/metaengine.cpp:223
 #: engines/freescape/movement.cpp:107 engines/got/metaengine.cpp:78
 #: engines/hugo/metaengine.cpp:197 engines/lure/metaengine.cpp:209
-#: engines/mads/metaengine.cpp:292 engines/mm/mm1/metaengine.cpp:41
-#: engines/mm/mm1/metaengine.cpp:47 engines/saga/metaengine.cpp:328
+#: engines/mads/metaengine.cpp:292 engines/mm/mm1/metaengine.cpp:42
+#: engines/mm/mm1/metaengine.cpp:48 engines/saga/metaengine.cpp:328
 #: engines/tinsel/metaengine.cpp:258 engines/tsage/metaengine.cpp:190
 #: engines/tucker/metaengine.cpp:221 engines/twine/metaengine.cpp:388
 #: engines/ultima/ultima0/metaengine.cpp:40 engines/vcruise/metaengine.cpp:164
@@ -7303,7 +7232,7 @@ msgstr "Activa / desactiva la privadesa de la pista"
 #: engines/freescape/games/castle/castle.cpp:465
 #: engines/freescape/games/dark/dark.cpp:226
 #: engines/freescape/games/driller/driller.cpp:125
-#: engines/freescape/games/eclipse/eclipse.cpp:301
+#: engines/freescape/games/eclipse/eclipse.cpp:351
 #: engines/hopkins/metaengine.cpp:236 engines/hugo/metaengine.cpp:165
 #: engines/lure/metaengine.cpp:191 engines/made/metaengine.cpp:192
 #: engines/mads/metaengine.cpp:305 engines/mohawk/myst.cpp:583
@@ -7331,7 +7260,7 @@ msgstr "Desa la partida"
 #: engines/freescape/games/castle/castle.cpp:470
 #: engines/freescape/games/dark/dark.cpp:231
 #: engines/freescape/games/driller/driller.cpp:130
-#: engines/freescape/games/eclipse/eclipse.cpp:306
+#: engines/freescape/games/eclipse/eclipse.cpp:356
 #: engines/hopkins/metaengine.cpp:242 engines/made/metaengine.cpp:198
 #: engines/mohawk/myst_stacks/menu.cpp:283
 #: engines/mohawk/riven_stacks/aspit.cpp:349 engines/pegasus/pegasus.cpp:2831
@@ -7381,7 +7310,7 @@ msgstr "Base de dades de pistes"
 #: engines/freescape/games/castle/castle.cpp:478
 #: engines/freescape/games/dark/dark.cpp:236
 #: engines/freescape/games/driller/driller.cpp:135
-#: engines/freescape/games/eclipse/eclipse.cpp:311
+#: engines/freescape/games/eclipse/eclipse.cpp:361
 #: engines/mads/metaengine.cpp:361 engines/phoenixvr/metaengine.cpp:80
 #: engines/saga/metaengine.cpp:437 engines/sherlock/metaengine.cpp:359
 #: engines/sherlock/metaengine.cpp:618 engines/sherlock/metaengine.cpp:852
@@ -7390,6 +7319,18 @@ msgstr "Base de dades de pistes"
 #: engines/vcruise/metaengine.cpp:190
 msgid "Quit game"
 msgstr "Surt del joc"
+
+#: engines/bolt/metaengine.cpp:34
+msgid "Extended game resolution"
+msgstr "Resolució del joc ampliada"
+
+#: engines/bolt/metaengine.cpp:35
+msgid ""
+"This option allows the game to play at a slightly extended resolution. This "
+"is what the Mac and CDi versions are supposed to play like."
+msgstr ""
+"Aquesta opció permet que el joc es jugui amb una resolució lleugerament "
+"estesa. Això és el que se suposa que han de reproduir les versions Mac i CDi."
 
 #: engines/buried/buried.cpp:598
 msgid "Are you sure you want to quit?"
@@ -7459,7 +7400,7 @@ msgstr "Mira a la dreta"
 
 #: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
-#: engines/kyra/engine/lol.cpp:510 engines/mohawk/riven.cpp:881
+#: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
 #: engines/twine/metaengine.cpp:332 engines/ultima/ultima0/metaengine.cpp:78
 #: engines/ultima/ultima8/metaengine.cpp:50
@@ -7778,6 +7719,8 @@ msgstr "Mod de pantalla panoràmica"
 #: engines/colony/metaengine.cpp:47 engines/myst3/metaengine.cpp:41
 msgid "Enable widescreen rendering in fullscreen mode."
 msgstr ""
+"Habilita la renderització de pantalla panoràmica en mode de pantalla "
+"completa."
 
 #: engines/colony/metaengine.cpp:107
 msgid "Move backward"
@@ -7785,13 +7728,13 @@ msgstr "Mou cap enrere"
 
 #: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
-#: engines/mm/mm1/metaengine.cpp:99
+#: engines/mm/mm1/metaengine.cpp:100
 msgid "Strafe left"
 msgstr "Desplaça't a l'esquerra"
 
 #: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
-#: engines/mm/mm1/metaengine.cpp:100
+#: engines/mm/mm1/metaengine.cpp:101
 msgid "Strafe right"
 msgstr "Desplaça't a la dreta"
 
@@ -7799,7 +7742,7 @@ msgstr "Desplaça't a la dreta"
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
-#: engines/freescape/games/eclipse/eclipse.cpp:324
+#: engines/freescape/games/eclipse/eclipse.cpp:374
 msgid "Rotate left"
 msgstr "Gira cap a l'esquerra"
 
@@ -7807,33 +7750,25 @@ msgstr "Gira cap a l'esquerra"
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
-#: engines/freescape/games/eclipse/eclipse.cpp:329
+#: engines/freescape/games/eclipse/eclipse.cpp:379
 msgid "Rotate right"
 msgstr "Gira cap a la dreta"
 
 #: engines/colony/metaengine.cpp:148
-#, fuzzy
-#| msgid "Look down"
 msgid "Look behind"
-msgstr "Mira avall"
+msgstr "Mira enrere"
 
 #: engines/colony/metaengine.cpp:153
-#, fuzzy
-#| msgid "Toggle mute"
 msgid "Toggle mouselook"
-msgstr "Commuta el silenci"
+msgstr "Commuta la vista amb el ratolí"
 
 #: engines/colony/metaengine.cpp:159
-#, fuzzy
-#| msgid "Toggle sound"
 msgid "Toggle dashboard"
-msgstr "Commuta el so"
+msgstr "Commuta el tauler de control"
 
 #: engines/colony/metaengine.cpp:164
-#, fuzzy
-#| msgid "Toggle frame by frame"
 msgid "Toggle wireframe"
-msgstr "Commuta el fotograma a fotograma"
+msgstr "Commuta la malla"
 
 #: engines/colony/metaengine.cpp:174 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
@@ -7848,11 +7783,12 @@ msgstr "Dispara l'arma"
 
 #: engines/colony/savegame.cpp:290
 msgid "Saving is only available in first-person view."
-msgstr ""
+msgstr "Desar la partida només està disponible a la vista en primera persona."
 
 #: engines/colony/savegame.cpp:299
 msgid "Loading is only available in first-person view."
 msgstr ""
+"Carregar la partida només està disponible a la vista en primera persona."
 
 #: engines/crab/input/input.cpp:119
 msgid "Talk / Interact"
@@ -7861,7 +7797,7 @@ msgstr "Parla / Interactua"
 #. I18N: Combat command in Might & Magic 1
 #: engines/crab/input/input.cpp:125 engines/efh/metaengine.cpp:487
 #: engines/efh/metaengine.cpp:512 engines/griffon/metaengine.cpp:145
-#: engines/mm/mm1/metaengine.cpp:65 engines/scumm/metaengine.cpp:1053
+#: engines/mm/mm1/metaengine.cpp:66 engines/scumm/metaengine.cpp:1053
 #: engines/ultima/ultima0/metaengine.cpp:82
 #: engines/ultima/ultima4/metaengine.cpp:48
 #: engines/ultima/nuvie/metaengine.cpp:74
@@ -7869,7 +7805,7 @@ msgid "Attack"
 msgstr "Atac"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/crab/input/input.cpp:130 engines/mm/mm1/metaengine.cpp:67
+#: engines/crab/input/input.cpp:130 engines/mm/mm1/metaengine.cpp:68
 msgid "Block"
 msgstr "Bloqueja"
 
@@ -8078,14 +8014,16 @@ msgid "Brighten the graphics to simulate a Macintosh monitor"
 msgstr "Aclareix els gràfics per simular un monitor Macintosh"
 
 #: engines/director/metaengine.cpp:81
-msgid "Force true color"
-msgstr "Força el color real"
+msgid "Force true color (32bpp) mode"
+msgstr "Força el mode de color real (32bpp)"
 
 #: engines/director/metaengine.cpp:82
-msgid "Use true color graphics mode, even if the game is not designed for it"
+msgid ""
+"Use true color graphics mode (32 bits per pixel), even if the game is not "
+"designed for it"
 msgstr ""
-"Usa el mode de gràfics de color veritable, fins i tot si el joc no està "
-"dissenyat per a aquest mode"
+"Usa el mode de gràfics de color veritable (32 bits per píxel), encara que el "
+"joc no estigui dissenyat per aquest mode"
 
 #: engines/dm/metaengine.cpp:125
 msgid "Dialog choice selection keymappings"
@@ -8123,7 +8061,7 @@ msgid "Toggle champion 4 inventory"
 msgstr "Commuta l'inventari del campió 4"
 
 #: engines/dm/metaengine.cpp:226 engines/kyra/engine/eobcommon.cpp:372
-#: engines/kyra/engine/lol.cpp:511 engines/mohawk/riven.cpp:895
+#: engines/kyra/engine/lol.cpp:514 engines/mohawk/riven.cpp:895
 #: engines/titanic/metaengine.cpp:343 engines/titanic/metaengine.cpp:384
 #: engines/twine/metaengine.cpp:339 engines/wintermute/keymapper_tables.h:155
 #: engines/wintermute/keymapper_tables.h:736
@@ -8648,29 +8586,31 @@ msgstr "Controls tecles WASD"
 
 #: engines/freescape/metaengine.cpp:154
 msgid "Use WASD keys for movement and Shift to run"
-msgstr ""
+msgstr "Usa les tecles W, A, S i D per al moviment i Majúscules per a córrer"
 
 #. I18N: Enable background music using AdLib/OPL2 FM synthesis
 #: engines/freescape/metaengine.cpp:165
 msgid "Backported music from C64 releases (AdLib)"
-msgstr ""
+msgstr "Música recuperada de les versions de C64 (AdLib)"
 
 #: engines/freescape/metaengine.cpp:166
 msgid ""
 "Enable background music ported from the C64 version using AdLib FM synthesis"
 msgstr ""
+"Habilita la música de fons recuperada de la versió C64 utilitzant la síntesi "
+"FM d'AdLib"
 
 #. I18N: Enable background music using AY chip emulation
 #: engines/freescape/metaengine.cpp:177
 msgid "Backported music from C64 releases"
-msgstr ""
+msgstr "Música recuperada de les versions de C64"
 
 #: engines/freescape/metaengine.cpp:178
 msgid "Enable background music ported from the C64 version"
-msgstr ""
+msgstr "Habilita la música de fons recuperada de la versió C64"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/freescape/movement.cpp:69 engines/mm/mm1/metaengine.cpp:79
+#: engines/freescape/movement.cpp:69 engines/mm/mm1/metaengine.cpp:80
 msgid "Shoot"
 msgstr "Dispara"
 
@@ -8706,7 +8646,7 @@ msgstr "Selecciona la princesa"
 #: engines/freescape/games/castle/castle.cpp:483
 #: engines/freescape/games/dark/dark.cpp:246
 #: engines/freescape/games/driller/driller.cpp:143
-#: engines/freescape/games/eclipse/eclipse.cpp:319
+#: engines/freescape/games/eclipse/eclipse.cpp:369
 #: engines/hugo/metaengine.cpp:154
 msgid "Toggle sound"
 msgstr "Commuta el so"
@@ -8716,13 +8656,13 @@ msgid "Crawl"
 msgstr "Arrossegar-se"
 
 #: engines/freescape/games/castle/castle.cpp:515
-#: engines/freescape/games/eclipse/eclipse.cpp:367
+#: engines/freescape/games/eclipse/eclipse.cpp:417
 msgid "Face forward"
 msgstr "Mira endavant"
 
 #: engines/freescape/games/castle/castle.cpp:526
 msgid "Run (hold)"
-msgstr ""
+msgstr "Córrer (manté)"
 
 #: engines/freescape/games/dark/dark.cpp:262
 #: engines/freescape/games/driller/driller.cpp:188
@@ -8784,32 +8724,32 @@ msgid "Collect drilling rig"
 msgstr "Recull l'equip de perforació"
 
 #. I18N: Illustrates the angle at which you turn left or right.
-#: engines/freescape/games/eclipse/eclipse.cpp:335
+#: engines/freescape/games/eclipse/eclipse.cpp:385
 msgid "Change angle"
 msgstr "Canvia l'angle"
 
 #. I18N: STEP SIZE: Measures the size of one movement in the direction you are facing (1-250 standard distance units (SDUs))
-#: engines/freescape/games/eclipse/eclipse.cpp:341
+#: engines/freescape/games/eclipse/eclipse.cpp:391
 msgid "Change step size"
 msgstr "Canvia la mida dels passos"
 
-#: engines/freescape/games/eclipse/eclipse.cpp:347
+#: engines/freescape/games/eclipse/eclipse.cpp:397
 msgid "Sprint (hold)"
-msgstr ""
+msgstr "Esprinta (manté)"
 
-#: engines/freescape/games/eclipse/eclipse.cpp:355
+#: engines/freescape/games/eclipse/eclipse.cpp:405
 msgid "Toggle height"
 msgstr "Commuta l'alçada"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/freescape/games/eclipse/eclipse.cpp:361
-#: engines/kyra/engine/lol.cpp:516 engines/mm/mm1/metaengine.cpp:109
+#: engines/freescape/games/eclipse/eclipse.cpp:411
+#: engines/kyra/engine/lol.cpp:519 engines/mm/mm1/metaengine.cpp:110
 #: engines/ultima/nuvie/metaengine.cpp:195
 #: engines/ultima/nuvie/metaengine.cpp:200
 msgid "Rest"
 msgstr "Descansa"
 
-#: engines/freescape/games/eclipse/eclipse.cpp:372
+#: engines/freescape/games/eclipse/eclipse.cpp:422
 msgid "Toggle flashlight"
 msgstr "Commuta la llanterna"
 
@@ -8821,15 +8761,15 @@ msgstr "[ premeu qualsevol tecla per sortir ]"
 msgid "Untitled Savegame"
 msgstr "Partida sense nom"
 
-#: engines/glk/metaengine.cpp:194
+#: engines/glk/metaengine.cpp:206
 msgid "Use TTS to read the text"
 msgstr "Utilitzeu un servei de conversió de text a veu per llegir el text"
 
-#: engines/glk/metaengine.cpp:201
+#: engines/glk/metaengine.cpp:213
 msgid "Also read input text"
 msgstr "Llegeix també el text d'entrada"
 
-#: engines/glk/metaengine.cpp:202
+#: engines/glk/metaengine.cpp:214
 msgid "Use TTS to read the input text"
 msgstr ""
 "Utilitzeu un servei de conversió de text a veu per llegir el text d'entrada"
@@ -8879,6 +8819,446 @@ msgstr "Desa la partida"
 msgid "Picture window toggled\n"
 msgstr "Finestra d'imatge commutada\n"
 
+#: engines/glk/dialogs.cpp:141
+msgid "white"
+msgstr "blanc"
+
+#: engines/glk/dialogs.cpp:142
+msgid "green"
+msgstr "verd"
+
+#: engines/glk/dialogs.cpp:143
+msgid "red"
+msgstr "vermell"
+
+#: engines/glk/dialogs.cpp:144
+msgid "blue"
+msgstr "blau"
+
+#: engines/glk/dialogs.cpp:145
+msgid "black"
+msgstr "negre"
+
+#: engines/glk/dialogs.cpp:146
+msgid "grey"
+msgstr "gris"
+
+#: engines/glk/dialogs.cpp:195
+msgid "Monospace Regular"
+msgstr "Monospace Normal"
+
+#: engines/glk/dialogs.cpp:196
+msgid "Monospace Bold"
+msgstr "Monospace Negreta"
+
+#: engines/glk/dialogs.cpp:197
+msgid "Monospace Italic"
+msgstr "Monospace Cursiva"
+
+#: engines/glk/dialogs.cpp:198
+msgid "Monospace Bold Italic"
+msgstr "Monospace Negreta Cursiva"
+
+#: engines/glk/dialogs.cpp:199
+msgid "Proportional Regular"
+msgstr "Proporcional Normal"
+
+#: engines/glk/dialogs.cpp:200
+msgid "Proportional Bold"
+msgstr "Proporcional Negreta"
+
+#: engines/glk/dialogs.cpp:201
+msgid "Proportional Italic"
+msgstr "Proporcional Cursiva"
+
+#: engines/glk/dialogs.cpp:202
+msgid "Proportional Bold Italic"
+msgstr "Proporcional Negreta Cursiva"
+
+#: engines/glk/dialogs.cpp:210
+msgid "Font"
+msgstr "Tipus de lletra"
+
+#: engines/glk/dialogs.cpp:212 engines/glk/dialogs.cpp:222
+msgid "Text:"
+msgstr "Text:"
+
+#: engines/glk/dialogs.cpp:212
+msgid "Font for the text"
+msgstr "Tipus de lletra per al text"
+
+#: engines/glk/dialogs.cpp:216 engines/glk/dialogs.cpp:227
+msgid "Grid:"
+msgstr "Quadrícula:"
+
+#: engines/glk/dialogs.cpp:216
+msgid "Font for drawn graphics like maps, diagrams, puzzles, etc"
+msgstr ""
+"Tipus de lletra per a gràfics dibuixats com mapes, diagrames, "
+"trencaclosques, etc"
+
+#: engines/glk/dialogs.cpp:220
+msgid "Color"
+msgstr "Color"
+
+#: engines/glk/dialogs.cpp:222
+msgid "Color of the interactive text"
+msgstr "Color del text interactiu"
+
+#: engines/glk/dialogs.cpp:225 engines/glk/dialogs.cpp:230
+#: engines/glk/dialogs.cpp:236 engines/glk/dialogs.cpp:242
+#: engines/glk/dialogs.cpp:254 engines/glk/dialogs.cpp:260
+#: engines/glk/dialogs.cpp:269
+msgid "<custom>"
+msgstr "<personalitzat>"
+
+#: engines/glk/dialogs.cpp:227
+msgid "Color for drawn graphics such as maps, diagrams, puzzles, etc"
+msgstr ""
+"Color per a gràfics dibuixats com mapes, diagrames, trencaclosques, etc"
+
+#: engines/glk/dialogs.cpp:232
+msgid "Window:"
+msgstr "Finestra:"
+
+#: engines/glk/dialogs.cpp:232
+msgid "Color of the window (background)"
+msgstr "Color de la finestra (fons)"
+
+#: engines/glk/dialogs.cpp:238
+msgid "Border:"
+msgstr "Vora:"
+
+#: engines/glk/dialogs.cpp:238
+msgid "Color of the window border"
+msgstr "Color de la vora de la finestra"
+
+#. I18N: This is a section for text windows border settings
+#: engines/glk/dialogs.cpp:245
+msgid "Border"
+msgstr "Vora"
+
+#: engines/glk/dialogs.cpp:247 engines/glk/dialogs.cpp:341
+#: engines/glk/dialogs.cpp:345 engines/glk/dialogs.cpp:349
+msgid "Horizontal:"
+msgstr "Horitzontal:"
+
+#: engines/glk/dialogs.cpp:247
+msgid "Horizontal border size"
+msgstr "Mida de la vora horitzontal"
+
+#: engines/glk/dialogs.cpp:248 engines/glk/dialogs.cpp:342
+#: engines/glk/dialogs.cpp:346 engines/glk/dialogs.cpp:350
+msgid "Vertical:"
+msgstr "Vertical:"
+
+#: engines/glk/dialogs.cpp:248
+msgid "Vertical border size"
+msgstr "Mida de la vora vertical"
+
+#: engines/glk/dialogs.cpp:250
+msgid "Caret:"
+msgstr "Cursor:"
+
+#: engines/glk/dialogs.cpp:250
+msgid "Color of the cursor"
+msgstr "Color del cursor"
+
+#: engines/glk/dialogs.cpp:256
+msgid "Link:"
+msgstr "Enllaç:"
+
+#: engines/glk/dialogs.cpp:256
+msgid "Color for URLs if they appear in-game"
+msgstr ""
+
+#. I18N: "More..." is a prompt in text windows, which appears when the text exceeds the window size
+#: engines/glk/dialogs.cpp:264
+msgid "More:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:265
+msgid "Color for the \"More...\" markers in the text"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:272
+msgid "Typography"
+msgstr "Tipografia"
+
+#: engines/glk/dialogs.cpp:274
+msgid "Link style:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:274
+msgid "Style for URLs if they appear in-game"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:279
+msgid "Caret shape:"
+msgstr "Forma del cursor:"
+
+#: engines/glk/dialogs.cpp:279
+msgid "Shape of the cursor"
+msgstr "Forma del cursor"
+
+#: engines/glk/dialogs.cpp:286
+msgid "More prompt:"
+msgstr "Més informació:"
+
+#: engines/glk/dialogs.cpp:286
+msgid ""
+"Custom marker in place of the \"More...\" marker for eg. \"continue\". Leave "
+"it blank to use the game's default"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:288
+msgid "Style hints:"
+msgstr "Consells d'estil:"
+
+#: engines/glk/dialogs.cpp:288
+msgid "Let the game suggest text styling options"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:289
+msgid "Safe clicks:"
+msgstr "Clics segurs:"
+
+#: engines/glk/dialogs.cpp:289
+msgid "Safely apply clicks while input is pending"
+msgstr ""
+
+#. I18N: This is setting for number of text columns
+#: engines/glk/dialogs.cpp:292
+msgid "Column count:"
+msgstr "Nombre de columnes:"
+
+#: engines/glk/dialogs.cpp:292
+msgid "Number of columns"
+msgstr ""
+
+#. I18N: This is setting for number of text rows
+#: engines/glk/dialogs.cpp:294
+msgid "Rows count:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:294
+msgid "Number of rows"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:296
+msgid "Lock columns:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:296
+msgid "Check it to manually change the column count"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:297
+msgid "Lock rows:"
+msgstr "Bloqueja les files:"
+
+#: engines/glk/dialogs.cpp:297
+msgid "Check it to manually change the row count"
+msgstr ""
+
+#. I18N: This is a setting for enabling text justification
+#: engines/glk/dialogs.cpp:301
+msgid "Justify:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:302
+msgid "Enable text justification"
+msgstr "Habilita la justificació del text"
+
+#. I18N: These is setting for type of text quote symbols
+#: engines/glk/dialogs.cpp:305
+msgid "Typographic quotes:"
+msgstr "Cometes tipogràfiques:"
+
+#: engines/glk/dialogs.cpp:306
+msgid "Choose typographic quotes"
+msgstr "Trieu les cometes tipogràfiques"
+
+#: engines/glk/dialogs.cpp:307
+msgctxt "quotes"
+msgid "Off"
+msgstr ""
+
+#. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
+#: engines/glk/dialogs.cpp:309
+#, fuzzy
+#| msgid "Normal"
+msgctxt "quotes"
+msgid "Normal"
+msgstr "Normal"
+
+#. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
+#: engines/glk/dialogs.cpp:311
+msgctxt "quotes"
+msgid "Rabid"
+msgstr ""
+
+#. I18N: This is a setting for forcing all input to be in uppercase
+#: engines/glk/dialogs.cpp:314
+msgid "Caps:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:314
+msgid "Force uppercase input"
+msgstr ""
+
+#. I18N: This is a setting for type of text dash symbols
+#: engines/glk/dialogs.cpp:317
+msgid "Dashes:"
+msgstr ""
+
+#. I18N: This is a setting for type of text dash symbols
+#: engines/glk/dialogs.cpp:319
+msgid "Types of dashes"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:320 engines/glk/dialogs.cpp:332
+msgid "Off"
+msgstr ""
+
+#. I18N: This is a setting for using normal typographic dashes, which are like in most books, with the em dash being the longest and the en dash being half of it
+#: engines/glk/dialogs.cpp:322
+msgid "Em dashes"
+msgstr ""
+
+#. I18N: This is a setting for using "en+em" dashes, which are like normal typographic dashes but with the en dash being the same length as the em dash, like in some comic books
+#: engines/glk/dialogs.cpp:324
+msgid "En+Em dashes"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:326
+msgid "User experience"
+msgstr "Experiència d'usuari"
+
+#. I18N: This is a setting for type of spaces in the text
+#: engines/glk/dialogs.cpp:329
+msgid "Spaces:"
+msgstr "Espais:"
+
+#. I18N: This is a setting for type of spaces in the text
+#: engines/glk/dialogs.cpp:331
+msgid "Types of spaces"
+msgstr ""
+
+#. I18N: This is a setting for compressing double spaces into single ones in text
+#: engines/glk/dialogs.cpp:334
+msgid "Compress double spaces"
+msgstr ""
+
+#. I18N: This is a setting for expanding single spaces into double ones in text
+#: engines/glk/dialogs.cpp:336
+msgid "Expand single spaces"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:338
+msgid "Graphics:"
+msgstr "Gràfics:"
+
+#: engines/glk/dialogs.cpp:338
+msgid "Turn graphics on/off"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:340
+msgid "Window margin"
+msgstr "Marge de la finestra"
+
+#: engines/glk/dialogs.cpp:341
+msgid "Horizontal margin for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:342
+msgid "Vertical margin for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:344
+msgid "Window padding"
+msgstr "Espaiat de la finestra"
+
+#: engines/glk/dialogs.cpp:345
+msgid "Horizontal padding for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:346
+msgid "Vertical padding for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:348
+msgid "Text margin"
+msgstr "Marge del text"
+
+#: engines/glk/dialogs.cpp:349
+msgid "Horizontal margin for text"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:350
+msgid "Vertical margin for text"
+msgstr ""
+
+#. I18N: This is a setting for leading, which is the vertical distance between text rows
+#: engines/glk/dialogs.cpp:353
+msgid "Leading:"
+msgstr "Interlineat:"
+
+#: engines/glk/dialogs.cpp:354
+msgid "Vertical distance between text rows. Valid inputs - 12, 16, 22 etc."
+msgstr ""
+
+#. I18N: This is a setting for baseline, which is the invisible horizontal line on which text sits
+#: engines/glk/dialogs.cpp:356
+msgid "Baseline:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:357
+msgid ""
+"Invisible horizontal line on which text sits. Valid inputs - 8, 16 etc. as "
+"per your font size"
+msgstr ""
+
+#. I18N: Font size scaling for the monospace text font
+#: engines/glk/dialogs.cpp:360
+msgid "Monosize:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:361
+msgid "Font size scaling for the monospace text font"
+msgstr ""
+
+#. I18N: Font size scaling for the proportional text font
+#: engines/glk/dialogs.cpp:363
+msgid "Propsize:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:364
+msgid "Font size scaling for the proportional text font"
+msgstr ""
+
+#. I18N: This is a section for settings related to the "More..." prompt in text windows
+#: engines/glk/dialogs.cpp:367
+msgid "More"
+msgstr ""
+
+#. I18N: This is a setting for alignment of the "More..." prompt in text windows
+#: engines/glk/dialogs.cpp:369
+msgid "Align:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:370
+msgid "Alignment of the \"More...\" marker on the window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:375
+msgid "Font:"
+msgstr "Font:"
+
+#: engines/glk/dialogs.cpp:375
+msgid "Font for the \"More...\" marker"
+msgstr ""
+
 #: engines/glk/glulx/glulx.cpp:81
 msgid "This is too short to be a valid Glulx file."
 msgstr "És massa curt per a ser un fitxer Glulx vàlid."
@@ -8916,12 +9296,12 @@ msgid "Save file created by different version."
 msgstr "El fitxer de la partida desada va ser creat per una versió diferent."
 
 #: engines/gob/inter_geisha.cpp:237 engines/gob/inter_playtoons.cpp:285
-#: engines/gob/inter_v2.cpp:1512 engines/tinsel/saveload.cpp:591
+#: engines/gob/inter_v2.cpp:1512 engines/tinsel/saveload.cpp:588
 msgid "Failed to load saved game from file."
 msgstr "No s'ha pogut carregar la partida desada al fitxer."
 
 #: engines/gob/inter_geisha.cpp:268 engines/gob/inter_playtoons.cpp:426
-#: engines/gob/inter_v2.cpp:1591 engines/tinsel/saveload.cpp:604
+#: engines/gob/inter_v2.cpp:1591 engines/tinsel/saveload.cpp:601
 msgid "Failed to save game to file."
 msgstr "No s'ha pogut desar la partida al fitxer."
 
@@ -9659,19 +10039,11 @@ msgid ""
 "backpack inventory slots, with thrown weapons only"
 msgstr ""
 
-#: engines/kyra/metaengine.cpp:279
+#: engines/kyra/metaengine.cpp:275
 msgid "Lands of Lore support is not compiled in"
 msgstr "No s'ha compilat el suport per a Lands of Lore"
 
 #: engines/kyra/metaengine.cpp:289
-msgid ""
-"EOB II FM-TOWNS requires support of 16bit color modes which has not been "
-"activated in your ScummVM build"
-msgstr ""
-"EOB II FM-TOWNS requereix suport de modes de color de 16 bits que no s'ha "
-"activat en la vostra compilació d'ScummVM"
-
-#: engines/kyra/metaengine.cpp:295
 msgid "Eye of Beholder support is not compiled in"
 msgstr "No s'ha compilat el suport per a Eye of Beholder"
 
@@ -9687,7 +10059,7 @@ msgstr "Commuta la pantalla d'inventari / personatge"
 msgid "Camp"
 msgstr "Campa"
 
-#: engines/kyra/engine/eobcommon.cpp:380 engines/mm/mm1/metaengine.cpp:102
+#: engines/kyra/engine/eobcommon.cpp:380 engines/mm/mm1/metaengine.cpp:103
 msgid "Cast spell"
 msgstr "Llança l'encanteri"
 
@@ -9715,20 +10087,20 @@ msgstr "Encanteri nivell 5"
 msgid "Spell level 6"
 msgstr "Encanteri nivell 6"
 
-#: engines/kyra/engine/lol.cpp:506
+#: engines/kyra/engine/lol.cpp:509
 msgid "Attack 1"
 msgstr "Atac 1"
 
-#: engines/kyra/engine/lol.cpp:507
+#: engines/kyra/engine/lol.cpp:510
 msgid "Attack 2"
 msgstr "Atac 2"
 
-#: engines/kyra/engine/lol.cpp:508
+#: engines/kyra/engine/lol.cpp:511
 msgid "Attack 3"
 msgstr "Atac 3"
 
-#: engines/kyra/engine/lol.cpp:509 engines/lab/metaengine.cpp:278
-#: engines/mm/mm1/metaengine.cpp:103 engines/mohawk/myst.cpp:606
+#: engines/kyra/engine/lol.cpp:512 engines/lab/metaengine.cpp:278
+#: engines/mm/mm1/metaengine.cpp:104 engines/mohawk/myst.cpp:606
 #: engines/wintermute/keymapper_tables.h:1526
 #: engines/wintermute/keymapper_tables.h:1673
 #: engines/wintermute/keymapper_tables.h:1722
@@ -9738,19 +10110,19 @@ msgstr "Atac 3"
 msgid "Show map"
 msgstr "Mostra el mapa"
 
-#: engines/kyra/engine/lol.cpp:512
+#: engines/kyra/engine/lol.cpp:515
 msgid "Slide left"
 msgstr "Llisca cap a l'esquerra"
 
-#: engines/kyra/engine/lol.cpp:513
+#: engines/kyra/engine/lol.cpp:516
 msgid "Slide right"
 msgstr "Llisca cap a la dreta"
 
-#: engines/kyra/engine/lol.cpp:517
+#: engines/kyra/engine/lol.cpp:520
 msgid "Options"
 msgstr "Opcions"
 
-#: engines/kyra/engine/lol.cpp:518
+#: engines/kyra/engine/lol.cpp:521
 msgid "Choose spell"
 msgstr "Escull l'encanteri"
 
@@ -10198,130 +10570,129 @@ msgid "Replace a colored gem with bars for hit points and spell points."
 msgstr ""
 "Reemplaça una joia de color amb barres per als punts de salut i de màgia."
 
-#: engines/mm/mm1/metaengine.cpp:54
+#: engines/mm/metaengine.cpp:183
+msgid "Might and Magic"
+msgstr "Might and Magic"
+
+#: engines/mm/mm1/metaengine.cpp:55
 msgid "View party member 1"
 msgstr "Mostra el membre 1"
 
-#: engines/mm/mm1/metaengine.cpp:55
+#: engines/mm/mm1/metaengine.cpp:56
 msgid "View party member 2"
 msgstr "Mostra el membre 2"
 
-#: engines/mm/mm1/metaengine.cpp:56
+#: engines/mm/mm1/metaengine.cpp:57
 msgid "View party member 3"
 msgstr "Mostra el membre 3"
 
-#: engines/mm/mm1/metaengine.cpp:57
+#: engines/mm/mm1/metaengine.cpp:58
 msgid "View party member 4"
 msgstr "Mostra el membre 4"
 
-#: engines/mm/mm1/metaengine.cpp:58
+#: engines/mm/mm1/metaengine.cpp:59
 msgid "View party member 5"
 msgstr "Mostra el membre 5"
 
-#: engines/mm/mm1/metaengine.cpp:59
+#: engines/mm/mm1/metaengine.cpp:60
 msgid "View party member 6"
 msgstr "Mostra el membre 6"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:69 engines/ultima/ultima4/metaengine.cpp:50
+#: engines/mm/mm1/metaengine.cpp:70 engines/ultima/ultima4/metaengine.cpp:50
 #: engines/ultima/nuvie/metaengine.cpp:194
 msgid "Cast"
 msgstr "Llança encanteri"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:71
+#: engines/mm/mm1/metaengine.cpp:72
 msgid "Exchange"
 msgstr "Intercanvi"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:73
+#: engines/mm/mm1/metaengine.cpp:74
 msgid "Fight"
 msgstr "Lluita"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:75 engines/mm/mm1/metaengine.cpp:116
+#: engines/mm/mm1/metaengine.cpp:76 engines/mm/mm1/metaengine.cpp:117
 msgid "Quick reference"
 msgstr "Referència ràpida"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:77
+#: engines/mm/mm1/metaengine.cpp:78
 msgid "Retreat"
 msgstr "Retirat"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:84
+#: engines/mm/mm1/metaengine.cpp:85
 msgid "Delay"
 msgstr "Retarda"
 
 #. I18N: Combat command in Might & Magic 1
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:86 engines/mm/mm1/metaengine.cpp:107
+#: engines/mm/mm1/metaengine.cpp:87 engines/mm/mm1/metaengine.cpp:108
 msgid "Protect"
 msgstr "Protegeix"
 
 #. I18N: Party arrangement command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:94
+#: engines/mm/mm1/metaengine.cpp:95
 msgid "Forwards"
 msgstr "Endavant"
 
 #. I18N: Party arrangement command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:96
+#: engines/mm/mm1/metaengine.cpp:97
 msgid "Backwards"
 msgstr "Enrere"
 
-#: engines/mm/mm1/metaengine.cpp:104
+#: engines/mm/mm1/metaengine.cpp:105
 msgid "Toggle minimap"
 msgstr "Commuta el mapa en miniatura"
 
-#: engines/mm/mm1/metaengine.cpp:105
+#: engines/mm/mm1/metaengine.cpp:106
 msgid "Reorder party"
 msgstr "Reordena el grup"
 
 #. I18N: Action of hero party in Might & Magic 1
 #. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to search the journal
-#: engines/mm/mm1/metaengine.cpp:111 engines/sherlock/metaengine.cpp:514
+#: engines/mm/mm1/metaengine.cpp:112 engines/sherlock/metaengine.cpp:514
 #: engines/sherlock/metaengine.cpp:961 engines/ultima/ultima4/metaengine.cpp:71
 msgid "Search"
 msgstr "Cerca"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:113
+#: engines/mm/mm1/metaengine.cpp:114
 msgid "Bash"
 msgstr "Colpejar"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:115 engines/scumm/help.cpp:147
+#: engines/mm/mm1/metaengine.cpp:116 engines/scumm/help.cpp:147
 msgid "Unlock"
 msgstr "Desbloqueja"
 
-#: engines/mm/mm1/metaengine.cpp:122 engines/ultima/ultima4/metaengine.cpp:112
+#: engines/mm/mm1/metaengine.cpp:123 engines/ultima/ultima4/metaengine.cpp:112
 msgid "Goto location"
 msgstr "Ves a la ubicació"
 
-#: engines/mm/mm1/metaengine.cpp:133 engines/mm/mm1/metaengine.cpp:143
+#: engines/mm/mm1/metaengine.cpp:148
 msgid "Might and Magic 1 - Menus"
 msgstr "Might and Magic 1 - Menús"
 
-#: engines/mm/mm1/metaengine.cpp:138
+#: engines/mm/mm1/metaengine.cpp:149
 msgid "Might and Magic 1 - Minimal Keys"
 msgstr "Might and Magic 1 - Tecles mínimes"
 
-#: engines/mm/mm1/metaengine.cpp:144 engines/mm/mm1/metaengine.cpp:150
-#: engines/mm/mm1/metaengine.cpp:156
+#: engines/mm/mm1/metaengine.cpp:150
+msgid "Might and Magic 1 - Main"
+msgstr "Might and Magic 1 - Principal"
+
+#: engines/mm/mm1/metaengine.cpp:151
 msgid "Might and Magic 1 - Party"
 msgstr "Might and Magic 1 - Grup"
 
-#: engines/mm/mm1/metaengine.cpp:149
+#: engines/mm/mm1/metaengine.cpp:152
 msgid "Might and Magic 1 - Combat"
 msgstr "Might and Magic 1 - Combat"
-
-#: engines/mm/mm1/metaengine.cpp:155
-msgid "Might and Magic 1"
-msgstr "Might and Magic 1"
-
-#: engines/mm/mm1/metaengine.cpp:157
-msgid "Might and Magic 1 - Cheats"
-msgstr "Might and Magic 1 - Trucs"
 
 #: engines/mm/mm1/mm1.cpp:57
 msgid ""
@@ -10452,15 +10823,31 @@ msgstr ""
 "Ajusta la velocitat de les transicions de la pantalla. Desactivar les "
 "transicions de pantalla us permetrà navegar més ràpidament a través del joc."
 
+#: engines/mohawk/dialogs.cpp:364
+#, fuzzy
+#| msgid "Disabled"
+msgctxt "riven-transition"
+msgid "Disabled"
+msgstr "Inhabilitat"
+
 #: engines/mohawk/dialogs.cpp:365
+#, fuzzy
+#| msgid "Fastest"
+msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Més ràpid"
 
 #: engines/mohawk/dialogs.cpp:366
+#, fuzzy
+#| msgid "Normal"
+msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Normal"
 
-#: engines/mohawk/dialogs.cpp:367 engines/scumm/dialogs.cpp:1582
+#: engines/mohawk/dialogs.cpp:367
+#, fuzzy
+#| msgid "Best"
+msgctxt "riven-transition"
 msgid "Best"
 msgstr "Millor"
 
@@ -10922,17 +11309,9 @@ msgstr ""
 "No s'ha pogut desar a l'espai %i\n"
 "\n"
 
-#: engines/parallaction/saveload.cpp:193
-msgid "Load file"
-msgstr "Carrega el fitxer"
-
 #: engines/parallaction/saveload.cpp:200
 msgid "Loading game..."
 msgstr "Carregant la partida..."
-
-#: engines/parallaction/saveload.cpp:208
-msgid "Save file"
-msgstr "Desa el fitxer"
 
 #: engines/parallaction/saveload.cpp:215
 msgid "Saving game..."
@@ -11095,11 +11474,6 @@ msgstr "Omet la subseqüència"
 #: engines/pink/metaengine.cpp:173
 msgid "Restart sequence"
 msgstr "Reinicia la seqüència"
-
-#. I18N: Plumbers is the title of the game. 3DO is the name of platform
-#: engines/plumbers/metaengine.cpp:51
-msgid "3DO Plumbers requires RGB support."
-msgstr ""
 
 #: engines/prince/metaengine.cpp:237
 msgid "Open interaction menu"
@@ -11843,6 +12217,10 @@ msgstr ""
 #: engines/scumm/dialogs.cpp:1582
 msgid "Better"
 msgstr ""
+
+#: engines/scumm/dialogs.cpp:1582
+msgid "Best"
+msgstr "Millor"
 
 #: engines/scumm/dialogs.cpp:1583
 #, c-format
@@ -13142,7 +13520,7 @@ msgid "Use the floppy version's intro (CD version only)"
 msgstr ""
 "Utilitza la introducció de la versió de disquets (només per a la versió CD)"
 
-#: engines/sky/metaengine.cpp:235
+#: engines/sky/metaengine.cpp:237
 msgid "WARNING: Deleting the autosave slot is not supported by this engine"
 msgstr ""
 
@@ -13625,7 +14003,7 @@ msgstr "Ves a l'inici del menú de desar / carregar"
 msgid "Go to end of save / load menu"
 msgstr "Ves al final del menú de desar / carregar"
 
-#: engines/tinsel/tinsel.cpp:1059
+#: engines/tinsel/tinsel.cpp:1058
 msgid "Discworld Noir needs ScummVM with TinyGL enabled"
 msgstr ""
 
@@ -16011,7 +16389,7 @@ msgstr "Extreu la moneda"
 msgid "Preferences"
 msgstr "Preferències"
 
-#: engines/zvision/zvision.cpp:301
+#: engines/zvision/zvision.cpp:306
 msgid ""
 "Before playing this game, you'll need to copy the required fonts into "
 "ScummVM's extras directory, or into the game directory. On Windows, you'll "
@@ -16022,7 +16400,7 @@ msgid ""
 "LiberationSerif."
 msgstr ""
 
-#: engines/zvision/zvision.cpp:316
+#: engines/zvision/zvision.cpp:321
 msgid ""
 "MIDI playback is not available, or else improperly configured. Zork Nemesis "
 "contains several music puzzles which require MIDI audio in order to be "
@@ -16030,10 +16408,44 @@ msgid ""
 "supported. Continue launching game?"
 msgstr ""
 
+#~ msgid "Might and Magic 1 - Cheats"
+#~ msgstr "Might and Magic 1 - Trucs"
+
+#~ msgid "Load game:"
+#~ msgstr "Carrega partida:"
+
+#~ msgid "Load file"
+#~ msgstr "Carrega el fitxer"
+
+#~ msgid "Save file"
+#~ msgstr "Desa el fitxer"
+
 #, fuzzy
 #~| msgid "Center"
 #~ msgid "Centre"
 #~ msgstr "Centra"
+
+#, fuzzy
+#~| msgid "L1"
+#~ msgid "1"
+#~ msgstr "L1"
+
+#, fuzzy
+#~| msgid "L2"
+#~ msgid "2"
+#~ msgstr "L2"
+
+#, fuzzy
+#~| msgid "L3"
+#~ msgid "3"
+#~ msgstr "L3"
+
+#~ msgid ""
+#~ "EOB II FM-TOWNS requires support of 16bit color modes which has not been "
+#~ "activated in your ScummVM build"
+#~ msgstr ""
+#~ "EOB II FM-TOWNS requereix suport de modes de color de 16 bits que no s'ha "
+#~ "activat en la vostra compilació d'ScummVM"
 
 #~ msgid "Move Forward"
 #~ msgstr "Mou endavant"
@@ -17017,10 +17429,6 @@ msgstr ""
 #~ msgstr ""
 #~ "No us oblideu d'assignar una tecla a l'acció 'Ocultar la barra d'eines' "
 #~ "per veure l'inventari complet"
-
-#, fuzzy
-#~ msgid "Loading..."
-#~ msgstr "Carregant la partida..."
 
 #~ msgid "Storage:"
 #~ msgstr "Emmagatzematge:"

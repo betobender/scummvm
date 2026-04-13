@@ -26,6 +26,7 @@
 
 #include "common/array.h"
 #include "common/error.h"
+#include "common/hashmap.h"
 #include "common/keyboard.h"
 #include "common/random.h"
 #include "common/rect.h"
@@ -385,6 +386,9 @@ protected:
 	bool _backFlag;
 
 	Common::Language _language;
+	Common::Language _simon2OverlayLanguage;
+	bool _useSimon2LanguageOverlay;
+	Common::HashMap<Common::String, Common::String> _simon2LanguageOverlay;
 	bool _copyProtection;
 	bool _pause;
 	bool _speech;
@@ -599,6 +603,8 @@ protected:
 
 	uint8 _currentPalette[768];
 	uint8 _displayPalette[768];
+	uint8 _simon2LanguageFlagTimer;
+	bool _simon2LanguageFlagClearPending;
 
 	byte *_planarBuf;
 	byte _videoBuf1[32000];
@@ -775,6 +781,11 @@ protected:
 
 	void showMessageFormat(MSVC_PRINTF const char *s, ...) GCC_PRINTF(2, 3);
 	const byte *getStringPtrByID(uint16 stringId, bool upperCase = false);
+	void loadSimon2LanguageOverlay();
+	bool hasSimon2LanguageFiles() const;
+	Common::Language getNextSimon2OverlayLanguage() const;
+	void cycleSimon2LanguageOverlay();
+	Common::String translateLanguageOverlay(const Common::String &english) const;
 	const byte *getLocalStringByID(uint16 stringId);
 	uint getNextStringID();
 
@@ -890,6 +901,12 @@ protected:
 
 	void endCutscene();
 	virtual void runSubroutine101();
+	bool isSimon2LanguageToggleKeyPressed() const;
+	void refreshSimon2LanguageText();
+	uint8 mapRGBToPaletteIndex(uint8 r, uint8 g, uint8 b) const;
+	void fillSimon2LanguageFlagRect(int x1, int y1, int x2, int y2, uint8 color);
+	void restoreSimon2LanguageFlagArea();
+	void drawSimon2LanguageFlag();
 
 	virtual void inventoryUp(WindowBlock *window);
 	virtual void inventoryDown(WindowBlock *window);

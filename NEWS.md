@@ -3,7 +3,19 @@ For a more comprehensive changelog of the latest experimental code, see:
 
 #### 2026.3.0 (2026-06-XX)
  General:
-   - Highlight clickable links in the URL with cursor change.
+   - Highlight clickable links in the GUI with a cursor change.
+   - Fixed window size when switching out of fullscreen mode on 3D engines.
+   - Implemented NULL OPL driver for lower-base systems.
+
+ AGOS:
+   - Added support for language files used by Amiga and Macintosh
+     versions of Simon2.
+
+ GLK:
+   - Exposed text and engine settings in the GUI.
+
+ MM:
+   - Reworked keymapper for MM1.
 
 
 #### 2026.2.0 "Railmonicon" (2026-03-28)

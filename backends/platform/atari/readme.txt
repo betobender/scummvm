@@ -97,7 +97,11 @@ features but also improves performance and reduces executable size.
 
 - Overlay doesn't support alternative themes => faster loading time.
 
-- "null" music driver is automatically enabled (i.e. MIDI/OPL emulation is never
+- "stmidi" driver is automatically enabled (i.e. MIDI emulation is never used
+  but still allows playing speech/sfx samples and/or CD audio and/or native
+  MIDI music).
+
+- "null" music driver is automatically enabled (i.e. OPL emulation is never
   used but still allows playing speech/sfx samples and/or CD audio).
 
 - DOSBox OPL emulator is disabled => smaller executable size.
@@ -374,9 +378,6 @@ good chunk of CPU time which could be utilised elsewhere. However, there are
 games which are fine with sampled music/speech even on a plain TT (e.g. Lands
 of Lore).
 
-Unfortunately, it is not possible to disable OPL emulation and still use native
-ST MIDI. You have to tweak the setting for each game.
-
 CD music slows everything down
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -514,6 +515,13 @@ Known issues
       https://bugs.scummvm.org/ticket/14790
     - This prevents adding the 15 MB ultima.dat to the release archive.
     - https://wiki.scummvm.org/index.php?title=Ultima
+  - Macintosh engines
+    - Director, Pink, WAGE: explicitly disabled
+    - MacVenture, MTropolis, Colony: implicitly disabled (due to unmet
+      dependencies)
+    - classicmacfonts.dat, macgui.dat: explicitly deleted
+    - SCUMM's mac versions: not supported (but compiled in)
+    - SCI's mac font support: not supported (but compiled in)
 
 - When using FreeMiNT, ScummVM requires a recent kernel (>= 2021), otherwise
   keyboard handling won't work properly.

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.7.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-03 16:26+0000\n"
+"POT-Creation-Date: 2026-04-12 17:14+0000\n"
 "PO-Revision-Date: 2026-02-09 20:22+0000\n"
 "Last-Translator: AsciiWolf <mail@asciiwolf.com>\n"
 "Language-Team: Czech <https://translations.scummvm.org/projects/scummvm/"
@@ -26,45 +26,52 @@ msgstr ""
 msgid "Apple Macintosh Audio"
 msgstr ""
 
+#. I18N: built with <compiler>
+#: gui/about.cpp:113
+#, fuzzy, c-format
+#| msgid "(built on %s with %s)"
+msgid "(built with %s)"
+msgstr "(sestaveno %s pomocí %s)"
+
 #. I18N: built on <build date> with <compiler>
-#: gui/about.cpp:103
+#: gui/about.cpp:116
 #, c-format
 msgid "(built on %s with %s)"
 msgstr "(sestaveno %s pomocí %s)"
 
-#: gui/about.cpp:110
+#: gui/about.cpp:124
 msgid "Features compiled in:"
 msgstr "Zakompilované funkce:"
 
-#: gui/about.cpp:118
+#: gui/about.cpp:132
 #, fuzzy
 #| msgid "Game id not supported"
 msgid "not supported"
 msgstr "Id hry není podporováno"
 
-#: gui/about.cpp:118
+#: gui/about.cpp:132
 #, fuzzy
 #| msgid "Disabled"
 msgid "disabled"
 msgstr "Zakázáno"
 
-#: gui/about.cpp:118
+#: gui/about.cpp:132
 #, fuzzy
 #| msgid "Disabled"
 msgid "enabled"
 msgstr "Zakázáno"
 
 #. I18N: CPU extensions are sets of extra processor instructions used to speed up operations. See Intel AVX2, ARM NEON, etc.
-#: gui/about.cpp:142
+#: gui/about.cpp:156
 msgid "CPU extensions support:"
 msgstr ""
 
-#: gui/about.cpp:155
+#: gui/about.cpp:169
 msgid "Available engines:"
 msgstr "Dostupná jádra:"
 
 #. I18N: Close dialog button
-#: gui/about.cpp:527 gui/downloadpacksdialog.cpp:298
+#: gui/about.cpp:511 gui/about.cpp:640 gui/downloadpacksdialog.cpp:298
 #: gui/downloadpacksdialog.cpp:389 gui/integrity-dialog.cpp:354
 #: gui/gui-manager.cpp:168 gui/helpdialog.cpp:128 gui/imagealbum-dialog.cpp:133
 #: gui/textviewer.cpp:56 gui/unknown-game-dialog.cpp:53
@@ -126,8 +133,8 @@ msgstr "Jít nahoru"
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
 #: gui/shaderbrowser-dialog.cpp:80 gui/themebrowser.cpp:54
 #: gui/unknown-game-dialog.cpp:53 base/main.cpp:604
-#: dists/android.strings.xml.cpp:46 engines/engine.cpp:808
-#: engines/engine.cpp:833 backends/dialogs/gtk/gtk-dialogs.cpp:65
+#: dists/android.strings.xml.cpp:46 engines/engine.cpp:800
+#: engines/engine.cpp:825 backends/dialogs/gtk/gtk-dialogs.cpp:65
 #: backends/events/default/default-events.cpp:193
 #: backends/events/default/default-events.cpp:217
 #: backends/platform/android/options.cpp:293
@@ -283,13 +290,8 @@ msgstr "Vložit"
 msgid "Paste code from clipboard"
 msgstr "Vložit kód ze schránky"
 
-#: gui/cloudconnectionwizard.cpp:387 gui/launcher.cpp:324
-#: engines/dialogs.cpp:97 engines/engine.cpp:1019 engines/mm/xeen/saves.cpp:259
-#: engines/nancy/state/loadsave.cpp:108 engines/nancy/state/loadsave.cpp:153
-#: engines/parallaction/metaengine.cpp:151
-#: engines/parallaction/saveload.cpp:193 engines/pegasus/pegasus.cpp:388
-#: engines/tinsel/metaengine.cpp:329 engines/trecision/saveload.cpp:253
-#: engines/tsage/scenes.cpp:642 engines/wage/saveload.cpp:753
+#: gui/cloudconnectionwizard.cpp:387 engines/nancy/state/loadsave.cpp:108
+#: engines/parallaction/metaengine.cpp:151 engines/tinsel/metaengine.cpp:329
 msgid "Load"
 msgstr "Nahrát"
 
@@ -345,7 +347,7 @@ msgstr "Jiné úložiště právě pracuje. Chcete ho přerušit?"
 #: gui/cloudconnectionwizard.cpp:530 gui/downloaddialog.cpp:118
 #: gui/downloaddialog.cpp:152 gui/filebrowser-dialog.cpp:135
 #: gui/fluidsynth-dialog.cpp:210 gui/launcher.cpp:428 gui/launcher.cpp:457
-#: gui/launcher.cpp:534 gui/launcher.cpp:1926 gui/options.cpp:3485
+#: gui/launcher.cpp:534 gui/launcher.cpp:1938 gui/options.cpp:3485
 #: gui/options.cpp:3859 base/main.cpp:604
 #: backends/events/default/default-events.cpp:193 engines/buried/buried.cpp:598
 #: engines/chamber/metaengine.cpp:91 engines/director/events.cpp:122
@@ -357,14 +359,14 @@ msgstr "Jiné úložiště právě pracuje. Chcete ho přerušit?"
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:638 engines/sherlock/metaengine.cpp:1244
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:321
+#: engines/zvision/zvision.cpp:326
 msgid "Yes"
 msgstr "Ano"
 
 #: gui/cloudconnectionwizard.cpp:530 gui/downloaddialog.cpp:118
 #: gui/downloaddialog.cpp:153 gui/filebrowser-dialog.cpp:135
 #: gui/fluidsynth-dialog.cpp:210 gui/launcher.cpp:428 gui/launcher.cpp:457
-#: gui/launcher.cpp:534 gui/launcher.cpp:1927 gui/options.cpp:3485
+#: gui/launcher.cpp:534 gui/launcher.cpp:1939 gui/options.cpp:3485
 #: gui/options.cpp:3859 engines/buried/buried.cpp:598
 #: engines/chamber/metaengine.cpp:97 engines/director/events.cpp:122
 #: engines/director/lingo/xlibs/j/jitdraw3.cpp:139
@@ -375,7 +377,7 @@ msgstr "Ano"
 #: engines/sci/graphics/controls32.cpp:937 engines/scumm/scumm.cpp:4365
 #: engines/sherlock/metaengine.cpp:643 engines/sherlock/metaengine.cpp:1250
 #: engines/sludge/event.cpp:144 engines/toon/toon.cpp:1550
-#: engines/zvision/zvision.cpp:322
+#: engines/zvision/zvision.cpp:327
 msgid "No"
 msgstr "Ne"
 
@@ -832,7 +834,9 @@ msgstr "Jazyk hry. Toto z vaší Španělské verze neudělá Anglickou"
 #: backends/platform/ios7/ios7_options.mm:132
 #: backends/platform/ios7/ios7_options.mm:133
 #: backends/platform/ios7/ios7_options.mm:158 engines/ags/dialogs.cpp:65
-#: engines/sword1/metaengine.cpp:98
+#: engines/glk/dialogs.cpp:233 engines/glk/dialogs.cpp:239
+#: engines/glk/dialogs.cpp:251 engines/glk/dialogs.cpp:257
+#: engines/glk/dialogs.cpp:266 engines/sword1/metaengine.cpp:98
 msgid "<default>"
 msgstr "<výchozí>"
 
@@ -1106,12 +1110,12 @@ msgstr "Dolů"
 #: gui/gui-manager.cpp:186 engines/metaengine.cpp:149
 #: engines/awe/metaengine.cpp:59 engines/bagel/metaengine.cpp:68
 #: engines/crab/input/input.cpp:107 engines/crab/input/input.cpp:157
-#: engines/dragons/metaengine.cpp:170 engines/got/metaengine.cpp:72
-#: engines/griffon/metaengine.cpp:133 engines/grim/grim.cpp:491
-#: engines/grim/grim.cpp:573 engines/icb/icb.cpp:78 engines/icb/icb.cpp:162
-#: engines/scumm/metaengine.cpp:1020 engines/twine/metaengine.cpp:452
-#: engines/twine/metaengine.cpp:520 engines/twp/metaengine.cpp:152
-#: engines/ultima/ultima4/metaengine.cpp:46
+#: engines/dragons/metaengine.cpp:170 engines/glk/dialogs.cpp:371
+#: engines/got/metaengine.cpp:72 engines/griffon/metaengine.cpp:133
+#: engines/grim/grim.cpp:491 engines/grim/grim.cpp:573 engines/icb/icb.cpp:78
+#: engines/icb/icb.cpp:162 engines/scumm/metaengine.cpp:1020
+#: engines/twine/metaengine.cpp:452 engines/twine/metaengine.cpp:520
+#: engines/twp/metaengine.cpp:152 engines/ultima/ultima4/metaengine.cpp:46
 #: engines/ultima/ultima4/metaengine.cpp:141
 #: engines/ultima/ultima4/metaengine.cpp:151
 #: engines/wintermute/keymapper_tables.h:320
@@ -1126,12 +1130,12 @@ msgstr "Doleva"
 #: gui/gui-manager.cpp:192 engines/metaengine.cpp:155
 #: engines/awe/metaengine.cpp:60 engines/bagel/metaengine.cpp:69
 #: engines/crab/input/input.cpp:113 engines/crab/input/input.cpp:163
-#: engines/dragons/metaengine.cpp:176 engines/got/metaengine.cpp:73
-#: engines/griffon/metaengine.cpp:139 engines/grim/grim.cpp:496
-#: engines/grim/grim.cpp:578 engines/icb/icb.cpp:83 engines/icb/icb.cpp:167
-#: engines/scumm/metaengine.cpp:1027 engines/twine/metaengine.cpp:444
-#: engines/twine/metaengine.cpp:513 engines/twp/metaengine.cpp:153
-#: engines/ultima/ultima4/metaengine.cpp:47
+#: engines/dragons/metaengine.cpp:176 engines/glk/dialogs.cpp:373
+#: engines/got/metaengine.cpp:73 engines/griffon/metaengine.cpp:139
+#: engines/grim/grim.cpp:496 engines/grim/grim.cpp:578 engines/icb/icb.cpp:83
+#: engines/icb/icb.cpp:167 engines/scumm/metaengine.cpp:1027
+#: engines/twine/metaengine.cpp:444 engines/twine/metaengine.cpp:513
+#: engines/twp/metaengine.cpp:153 engines/ultima/ultima4/metaengine.cpp:47
 #: engines/ultima/ultima4/metaengine.cpp:142
 #: engines/ultima/ultima4/metaengine.cpp:152
 #: engines/wintermute/keymapper_tables.h:326
@@ -1511,13 +1515,6 @@ msgstr "Hledat v seznamu her"
 msgid "Search:"
 msgstr "Hledat:"
 
-#: gui/launcher.cpp:324 engines/dialogs.cpp:97 engines/engine.cpp:1019
-#: engines/mm/xeen/saves.cpp:259 engines/nancy/state/loadsave.cpp:153
-#: engines/pegasus/pegasus.cpp:388 engines/trecision/saveload.cpp:253
-#: engines/tsage/scenes.cpp:642 engines/wage/saveload.cpp:753
-msgid "Load game:"
-msgstr "Nahrát hru:"
-
 #: gui/launcher.cpp:416
 msgid "This directory cannot be used yet, it is being downloaded into!"
 msgstr "Tento adresář prozatím nejde použít, je do něj stahováno!"
@@ -1557,7 +1554,7 @@ msgid "ScummVM could not find any game in the specified directory!"
 msgstr "ScummVM nemohl v zadaném adresáři najít žádnou hru!"
 
 #. I18N: Unknown game variant
-#: gui/launcher.cpp:742 engines/engine.cpp:1235
+#: gui/launcher.cpp:742 engines/engine.cpp:1227
 msgid "Unknown variant"
 msgstr "Neznámá varianta"
 
@@ -1569,90 +1566,90 @@ msgstr "Seznam"
 msgid "Grid view"
 msgstr "Mřížka"
 
-#: gui/launcher.cpp:1143
+#: gui/launcher.cpp:1145
 msgid "~S~tart"
 msgstr "~S~pustit"
 
-#: gui/launcher.cpp:1143
+#: gui/launcher.cpp:1145
 msgid "Start selected game"
 msgstr "Spustit zvolenou hru"
 
-#: gui/launcher.cpp:1146
+#: gui/launcher.cpp:1148
 msgid "~L~oad..."
 msgstr "~N~ahrát..."
 
-#: gui/launcher.cpp:1146
+#: gui/launcher.cpp:1148
 msgid "Load saved game for selected game"
 msgstr "Nahrát uloženou pozici pro zvolenou hru"
 
-#: gui/launcher.cpp:1148
+#: gui/launcher.cpp:1150
 msgid "Record..."
 msgstr "Nahrát..."
 
-#: gui/launcher.cpp:1154
+#: gui/launcher.cpp:1156
 msgid "~G~ame Options..."
 msgstr "Volby ~h~ry..."
 
-#: gui/launcher.cpp:1154
+#: gui/launcher.cpp:1156
 msgid "Change game options"
 msgstr "Změnit volby hry"
 
-#: gui/launcher.cpp:1154
+#: gui/launcher.cpp:1156
 msgctxt "lowres"
 msgid "~G~ame Opts..."
 msgstr "Volby ~h~ry..."
 
-#: gui/launcher.cpp:1240
+#: gui/launcher.cpp:1242
 msgid "Add-on"
 msgstr ""
 
 #. I18N: List grouping when no engine is specified
-#: gui/launcher.cpp:1297 gui/launcher.cpp:1542
+#: gui/launcher.cpp:1309 gui/launcher.cpp:1554
 #, fuzzy
 msgid "Unknown Engine"
 msgstr "Neznámá varianta"
 
 #. I18N: List grouping when no publisher is specified
 #. I18N: List group when no publisher is specified
-#: gui/launcher.cpp:1314 gui/launcher.cpp:1559
+#: gui/launcher.cpp:1326 gui/launcher.cpp:1571
 #, fuzzy
 msgid "Unknown Publisher"
 msgstr "Neznámý autor"
 
 #. I18N: List group when no game series is specified
 #. I18N: List grouping when no game series is specified
-#: gui/launcher.cpp:1331 gui/launcher.cpp:1576
+#: gui/launcher.cpp:1343 gui/launcher.cpp:1588
 msgid "No Series"
 msgstr ""
 
 #. I18N: List group when no language is specified
-#: gui/launcher.cpp:1345 gui/launcher.cpp:1590
+#: gui/launcher.cpp:1357 gui/launcher.cpp:1602
 msgid "Language not detected"
 msgstr ""
 
 #. I18N: List group when no platform is specified
-#: gui/launcher.cpp:1359 gui/launcher.cpp:1604
+#: gui/launcher.cpp:1371 gui/launcher.cpp:1616
 msgid "Platform not detected"
 msgstr ""
 
 #. I18N: List group when no year is specified
-#: gui/launcher.cpp:1376 gui/launcher.cpp:1621
+#: gui/launcher.cpp:1388 gui/launcher.cpp:1633
 #, fuzzy
 #| msgid "Unknown error"
 msgid "Unknown Year"
 msgstr "Neznámá chyba"
 
 #. I18N: Group for All items
-#: gui/launcher.cpp:1628 gui/widgets/groupedlist.cpp:81
+#: gui/launcher.cpp:1640 gui/widgets/groupedlist.cpp:81
 #, fuzzy
 msgid "All"
 msgstr "Alt"
 
-#: gui/launcher.cpp:1800
+#: gui/launcher.cpp:1812
 msgid "Icons per row:"
 msgstr ""
 
-#: gui/launcher.cpp:1857
+#: gui/launcher.cpp:1869
 #, fuzzy, c-format
 #| msgid ""
 #| "Do you really want to remove the following %d game configuration(s)?\n"
@@ -1932,7 +1929,7 @@ msgstr "Vykreslovač GUI:"
 msgid "3D Anti-aliasing:"
 msgstr "3D Anti-aliasing:"
 
-#: gui/options.cpp:1731 engines/mohawk/dialogs.cpp:364
+#: gui/options.cpp:1731
 msgid "Disabled"
 msgstr "Zakázáno"
 
@@ -2395,7 +2392,7 @@ msgid "Debug level:"
 msgstr "Ladící program"
 
 #. I18N: Debug level -1, no messages
-#: gui/options.cpp:2749 gui/options.cpp:2886
+#: gui/options.cpp:2749 gui/options.cpp:2886 audio/fmopl.cpp:83
 msgid "None"
 msgstr "Prázdné"
 
@@ -2651,7 +2648,7 @@ msgid ""
 "And more..."
 msgstr "Přidat Hru..."
 
-#: gui/options.cpp:2966 engines/engine.cpp:655
+#: gui/options.cpp:2966 engines/engine.cpp:647
 #: engines/access/metaengine.cpp:281 engines/drascula/metaengine.cpp:255
 #: engines/queen/metaengine.cpp:269 engines/sherlock/metaengine.cpp:410
 #: engines/ultima/nuvie/metaengine.cpp:71
@@ -2801,7 +2798,7 @@ msgstr "Seslat kouzlo"
 
 #: gui/printing-dialog.cpp:60 backends/graphics/opengl/opengl-graphics.cpp:315
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:127
-#: engines/twine/metaengine.cpp:312
+#: engines/glk/dialogs.cpp:372 engines/twine/metaengine.cpp:312
 msgid "Center"
 msgstr "Vystředit"
 
@@ -2822,7 +2819,7 @@ msgstr "Nahrávat nebo přehrát hru"
 
 #: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
-#: dists/android.strings.xml.cpp:47 engines/engine.cpp:649
+#: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "Smazat"
 
@@ -2859,6 +2856,26 @@ msgstr "Neznámý autor"
 #: gui/remotebrowser.cpp:128
 msgid "ScummVM could not access the directory!"
 msgstr "ScummVM nemá k tomuto adresáři přístup!"
+
+#: gui/saveload.cpp:36
+msgid "Save game:"
+msgstr "Uložit hru:"
+
+#: gui/saveload.cpp:36
+msgid "Restore game:"
+msgstr "Obnovit hru:"
+
+#: gui/saveload.cpp:37 engines/groovie/script.cpp:853
+#: engines/lab/savegame.cpp:237 engines/nancy/state/loadsave.cpp:108
+#: engines/parallaction/metaengine.cpp:157 engines/saga/metaengine.cpp:469
+#: engines/tinsel/metaengine.cpp:323 engines/zvision/metaengine.cpp:282
+msgid "Save"
+msgstr "Uložit"
+
+#: gui/saveload.cpp:37 engines/groovie/script.cpp:853
+#: engines/lab/savegame.cpp:237 engines/zvision/metaengine.cpp:287
+msgid "Restore"
+msgstr "Obnovit"
 
 #: gui/saveload-dialog.cpp:56
 msgid "Downloading saves..."
@@ -3570,53 +3587,6 @@ msgctxt "lowres"
 msgid "~R~eturn to Launcher"
 msgstr "~N~ávrat do Spouštěče"
 
-#: engines/dialogs.cpp:98 engines/engine.cpp:1048 engines/agi/saveload.cpp:766
-#: engines/avalanche/parser.cpp:1918 engines/cine/various.cpp:349
-#: engines/dm/loadsave.cpp:199 engines/drascula/saveload.cpp:390
-#: engines/dreamweb/saveload.cpp:261 engines/glk/streams.cpp:1432
-#: engines/gnap/menu.cpp:465 engines/groovie/script.cpp:858
-#: engines/groovie/script.cpp:2256 engines/groovie/script.cpp:2283
-#: engines/groovie/script.cpp:2324 engines/hugo/file.cpp:297
-#: engines/illusions/menusystem.cpp:702 engines/kingdom/kingdom.cpp:731
-#: engines/lab/savegame.cpp:242 engines/mads/nebular/dialogs_nebular.cpp:358
-#: engines/mads/phantom/dialogs_phantom.cpp:354 engines/mm/xeen/saves.cpp:280
-#: engines/mtropolis/saveload.cpp:76 engines/nancy/state/loadsave.cpp:136
-#: engines/neverhood/menumodule.cpp:925 engines/pegasus/pegasus.cpp:407
-#: engines/prince/saveload.cpp:54 engines/sci/engine/guest_additions.cpp:746
-#: engines/sci/engine/kfile.cpp:1104 engines/sherlock/scalpel/scalpel.cpp:1250
-#: engines/sherlock/tattoo/widget_files.cpp:81 engines/startrek/saveload.cpp:42
-#: engines/toltecs/menu.cpp:308 engines/toon/toon.cpp:3820
-#: engines/trecision/saveload.cpp:67 engines/tsage/scenes.cpp:640
-#: engines/wage/saveload.cpp:763 engines/zvision/file/save_manager.cpp:47
-msgid "Save game:"
-msgstr "Uložit hru:"
-
-#: engines/dialogs.cpp:98 engines/engine.cpp:1048 engines/agi/saveload.cpp:766
-#: engines/avalanche/parser.cpp:1918 engines/cine/various.cpp:349
-#: engines/dm/loadsave.cpp:199 engines/drascula/saveload.cpp:390
-#: engines/dreamweb/saveload.cpp:261 engines/glk/streams.cpp:1432
-#: engines/gnap/menu.cpp:465 engines/groovie/script.cpp:853
-#: engines/groovie/script.cpp:858 engines/groovie/script.cpp:2256
-#: engines/groovie/script.cpp:2283 engines/groovie/script.cpp:2324
-#: engines/hugo/file.cpp:297 engines/illusions/menusystem.cpp:702
-#: engines/kingdom/kingdom.cpp:731 engines/lab/savegame.cpp:237
-#: engines/lab/savegame.cpp:242 engines/mads/nebular/dialogs_nebular.cpp:358
-#: engines/mads/phantom/dialogs_phantom.cpp:354 engines/mm/xeen/saves.cpp:280
-#: engines/mtropolis/saveload.cpp:76 engines/nancy/state/loadsave.cpp:108
-#: engines/nancy/state/loadsave.cpp:136 engines/neverhood/menumodule.cpp:925
-#: engines/parallaction/metaengine.cpp:157
-#: engines/parallaction/saveload.cpp:208 engines/pegasus/pegasus.cpp:407
-#: engines/prince/saveload.cpp:54 engines/saga/metaengine.cpp:469
-#: engines/sci/engine/guest_additions.cpp:747 engines/sci/engine/kfile.cpp:1104
-#: engines/sherlock/scalpel/scalpel.cpp:1250
-#: engines/sherlock/tattoo/widget_files.cpp:81 engines/startrek/saveload.cpp:42
-#: engines/tinsel/metaengine.cpp:323 engines/toltecs/menu.cpp:308
-#: engines/toon/toon.cpp:3820 engines/trecision/saveload.cpp:67
-#: engines/tsage/scenes.cpp:640 engines/wage/saveload.cpp:763
-#: engines/zvision/file/save_manager.cpp:47 engines/zvision/metaengine.cpp:282
-msgid "Save"
-msgstr "Uložit"
-
 #: engines/dialogs.cpp:128
 msgid ""
 "Sorry, this engine does not currently provide in-game help. Please consult "
@@ -3671,43 +3641,43 @@ msgstr "~Z~rušit"
 msgid "Could not switch to resolution '%dx%d'."
 msgstr "Nelze přepnout na režim obrazu: '%dx%d'."
 
-#: engines/engine.cpp:381
+#: engines/engine.cpp:380
 msgid "Could not initialize color format."
 msgstr "Nelze zavést barevný formát."
 
-#: engines/engine.cpp:390
+#: engines/engine.cpp:388
 #, c-format
 msgid "Could not switch to video mode '%s'."
 msgstr "Nelze přepnout na režim obrazu '%s'."
 
-#: engines/engine.cpp:398
+#: engines/engine.cpp:396
 #, c-format
 msgid "Could not switch to stretch mode '%s'."
 msgstr "Nelze přepnout na režim roztažení '%s'."
 
-#: engines/engine.cpp:405
+#: engines/engine.cpp:403
 msgid "Could not apply aspect ratio setting."
 msgstr "Nelze použít nastavení poměru stran."
 
-#: engines/engine.cpp:410
+#: engines/engine.cpp:408
 msgid "Could not apply fullscreen setting."
 msgstr "Nelze použít nastavení celé obrazovky."
 
-#: engines/engine.cpp:415
+#: engines/engine.cpp:413
 msgid "Could not apply filtering setting."
 msgstr "Nelze použít nastavení filtrování."
 
-#: engines/engine.cpp:420
+#: engines/engine.cpp:418
 #, fuzzy
 #| msgid "Could not apply filtering setting."
 msgid "Could not apply shader setting."
 msgstr "Nelze použít nastavení filtrování."
 
-#: engines/engine.cpp:536
+#: engines/engine.cpp:528
 msgid "Error"
 msgstr "Chyba"
 
-#: engines/engine.cpp:599
+#: engines/engine.cpp:591
 #, fuzzy
 msgid ""
 "You appear to be playing this game directly\n"
@@ -3722,7 +3692,7 @@ msgstr ""
 "datové soubory na Váš pevný disk.\n"
 "Pro podrobnosti si přečtěte README."
 
-#: engines/engine.cpp:622
+#: engines/engine.cpp:614
 #, fuzzy
 msgid ""
 "This game has audio tracks on its CD. These\n"
@@ -3737,36 +3707,36 @@ msgstr ""
 "abyste mohli poslouchat hudbu ve hře.\n"
 "Pro podrobnosti si přečtěte README."
 
-#: engines/engine.cpp:650
+#: engines/engine.cpp:642
 #, fuzzy
 msgid "Skip autosave"
 msgstr "Automatické ukládání"
 
-#: engines/engine.cpp:652
+#: engines/engine.cpp:644
 #, c-format
 msgid ""
-"WARNING: The autosave slot contains a saved game named %S, and an autosave "
+"WARNING: The autosave slot contains a saved game named %s, and an autosave "
 "is pending.\n"
 "Please move this saved game to a new slot, or delete it if it's no longer "
 "needed.\n"
 "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
 msgstr ""
 
-#: engines/engine.cpp:662
+#: engines/engine.cpp:654
 msgid "ERROR: Could not copy the savegame to a new slot"
 msgstr ""
 
-#: engines/engine.cpp:689 engines/savestate.cpp:98
+#: engines/engine.cpp:681 engines/savestate.cpp:103
 #: backends/platform/ios7/ios7_osys_main.cpp:266 engines/mm/xeen/saves.cpp:293
 #: engines/sky/metaengine.cpp:218
 msgid "Autosave"
 msgstr "Automatické ukládání"
 
-#: engines/engine.cpp:697
+#: engines/engine.cpp:689
 msgid "Error occurred making autosave"
 msgstr "Při ukládání se vyskytla chyba"
 
-#: engines/engine.cpp:780
+#: engines/engine.cpp:772
 #, c-format
 msgid ""
 "Failed to load saved game (%s)! Please consult the README for basic "
@@ -3775,16 +3745,16 @@ msgstr ""
 "Načtení uložené hry selhalo (%s)! Prosím přečtěte si dokumentaci pro "
 "základní informace a pokyny k získání další podpory."
 
-#: engines/engine.cpp:804
+#: engines/engine.cpp:796
 msgid "WARNING: "
 msgstr ""
 
-#: engines/engine.cpp:804
+#: engines/engine.cpp:796
 #, fuzzy
 msgid " Shall we still run the game?"
 msgstr "Úplný název hry"
 
-#: engines/engine.cpp:805
+#: engines/engine.cpp:797
 msgid ""
 "WARNING: The game you are about to start is not yet fully supported by "
 "ScummVM. As such, it is likely to be unstable, and any saved game you make "
@@ -3794,12 +3764,12 @@ msgstr ""
 "ScummVM. Proto je možné, že bude nestabilní a jakékoli uložené hry nemusí "
 "fungovat v budoucích verzích ScummVM."
 
-#: engines/engine.cpp:808 engines/engine.cpp:833
+#: engines/engine.cpp:800 engines/engine.cpp:825
 #: engines/wintermute/wintermute.cpp:174
 msgid "Start anyway"
 msgstr "Přesto spustit"
 
-#: engines/engine.cpp:827
+#: engines/engine.cpp:819
 #, fuzzy, c-format
 #| msgid ""
 #| "WARNING: The game you are about to start is not yet fully supported by "
@@ -3814,7 +3784,7 @@ msgstr ""
 "ScummVM. Proto je možné, že bude nestabilní a jakékoli uložené hry nemusí "
 "fungovat v budoucích verzích ScummVM."
 
-#: engines/engine.cpp:852
+#: engines/engine.cpp:844
 #, c-format
 msgid ""
 "The game \"%s\" you are trying to add is an add-on for \"%s\" that cannot be "
@@ -3822,11 +3792,11 @@ msgid ""
 "the base game, and start the base game itself."
 msgstr ""
 
-#: engines/engine.cpp:869
+#: engines/engine.cpp:861
 msgid "This game is not supported."
 msgstr "Tato hra není podporována"
 
-#: engines/engine.cpp:869
+#: engines/engine.cpp:861
 msgid ""
 "This game is not supported for the following reason:\n"
 "\n"
@@ -3834,22 +3804,22 @@ msgstr ""
 "Tato hra není podporována z důvodu\n"
 "\n"
 
-#: engines/engine.cpp:1015
+#: engines/engine.cpp:1007
 msgid "Loading game is currently unavailable"
 msgstr "Načtení hry je momentálně nedostupné"
 
-#: engines/engine.cpp:1044
+#: engines/engine.cpp:1036
 msgid "Saving game is currently unavailable"
 msgstr "Uložení hry je momentálně nedostupné"
 
-#: engines/engine.cpp:1213
+#: engines/engine.cpp:1205
 #, c-format
 msgid ""
 "The directory '%s' looks like an add-on for the game '%s', but ScummVM could "
 "not find any matching add-on in it."
 msgstr ""
 
-#: engines/engine.cpp:1241
+#: engines/engine.cpp:1233
 #, c-format
 msgid "Directory '%s' matches several add-ons, please pick one."
 msgstr ""
@@ -3892,16 +3862,17 @@ msgstr "Výchozí rozložení kláves"
 #: engines/draci/metaengine.cpp:200 engines/groovie/metaengine.cpp:205
 #: engines/hdb/metaengine.cpp:207 engines/hopkins/metaengine.cpp:211
 #: engines/hugo/metaengine.cpp:134 engines/illusions/metaengine.cpp:94
-#: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:502
+#: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:505
 #: engines/lure/metaengine.cpp:177 engines/made/metaengine.cpp:137
-#: engines/mads/metaengine.cpp:280 engines/mtropolis/metaengine.cpp:161
-#: engines/nancy/input.cpp:181 engines/parallaction/metaengine.cpp:138
-#: engines/saga/metaengine.cpp:278 engines/sludge/keymapper_tables.h:561
-#: engines/sludge/keymapper_tables.h:580 engines/stark/metaengine.cpp:189
-#: engines/sword1/metaengine.cpp:271 engines/tinsel/metaengine.cpp:246
-#: engines/toon/metaengine.cpp:86 engines/touche/metaengine.cpp:122
-#: engines/trecision/metaengine.cpp:125 engines/tsage/metaengine.cpp:178
-#: engines/tucker/metaengine.cpp:172 engines/ultima/ultima0/metaengine.cpp:180
+#: engines/mads/metaengine.cpp:280 engines/mm/metaengine.cpp:186
+#: engines/mtropolis/metaengine.cpp:161 engines/nancy/input.cpp:181
+#: engines/parallaction/metaengine.cpp:138 engines/saga/metaengine.cpp:278
+#: engines/sludge/keymapper_tables.h:561 engines/sludge/keymapper_tables.h:580
+#: engines/stark/metaengine.cpp:189 engines/sword1/metaengine.cpp:271
+#: engines/tinsel/metaengine.cpp:246 engines/toon/metaengine.cpp:86
+#: engines/touche/metaengine.cpp:122 engines/trecision/metaengine.cpp:125
+#: engines/tsage/metaengine.cpp:178 engines/tucker/metaengine.cpp:172
+#: engines/ultima/ultima0/metaengine.cpp:180
 #: engines/ultima/ultima4/metaengine.cpp:227
 #: engines/ultima/nuvie/metaengine.cpp:238
 #: engines/ultima/ultima8/metaengine.cpp:138 engines/vcruise/metaengine.cpp:158
@@ -3929,16 +3900,16 @@ msgstr "Kliknutí prostředním tlačítkem"
 #: engines/draci/metaengine.cpp:206 engines/groovie/metaengine.cpp:211
 #: engines/hopkins/metaengine.cpp:217 engines/hugo/metaengine.cpp:141
 #: engines/illusions/metaengine.cpp:101 engines/kyra/engine/eobcommon.cpp:370
-#: engines/kyra/engine/lol.cpp:503 engines/lure/metaengine.cpp:183
+#: engines/kyra/engine/lol.cpp:506 engines/lure/metaengine.cpp:183
 #: engines/made/metaengine.cpp:144 engines/mads/metaengine.cpp:286
-#: engines/mtropolis/metaengine.cpp:167 engines/nancy/input.cpp:188
-#: engines/parallaction/metaengine.cpp:144 engines/saga/metaengine.cpp:289
-#: engines/sludge/keymapper_tables.h:567 engines/sludge/keymapper_tables.h:586
-#: engines/stark/metaengine.cpp:195 engines/sword1/metaengine.cpp:277
-#: engines/tinsel/metaengine.cpp:252 engines/toon/metaengine.cpp:92
-#: engines/touche/metaengine.cpp:128 engines/trecision/metaengine.cpp:131
-#: engines/tsage/metaengine.cpp:184 engines/tucker/metaengine.cpp:178
-#: engines/ultima/ultima0/metaengine.cpp:186
+#: engines/mm/metaengine.cpp:192 engines/mtropolis/metaengine.cpp:167
+#: engines/nancy/input.cpp:188 engines/parallaction/metaengine.cpp:144
+#: engines/saga/metaengine.cpp:289 engines/sludge/keymapper_tables.h:567
+#: engines/sludge/keymapper_tables.h:586 engines/stark/metaengine.cpp:195
+#: engines/sword1/metaengine.cpp:277 engines/tinsel/metaengine.cpp:252
+#: engines/toon/metaengine.cpp:92 engines/touche/metaengine.cpp:128
+#: engines/trecision/metaengine.cpp:131 engines/tsage/metaengine.cpp:184
+#: engines/tucker/metaengine.cpp:178 engines/ultima/ultima0/metaengine.cpp:186
 #: engines/ultima/ultima4/metaengine.cpp:233
 #: engines/ultima/nuvie/metaengine.cpp:244
 #: engines/ultima/ultima8/metaengine.cpp:144
@@ -4033,31 +4004,31 @@ msgstr ""
 msgid "AdLib emulator"
 msgstr "AdLib emulátor"
 
-#: audio/fmopl.cpp:82
+#: audio/fmopl.cpp:84
 msgid "MAME OPL emulator"
 msgstr "MAME OPL Emulátor"
 
-#: audio/fmopl.cpp:84
+#: audio/fmopl.cpp:86
 msgid "DOSBox OPL emulator"
 msgstr "DOSBox OPL Emulátor"
 
-#: audio/fmopl.cpp:87
+#: audio/fmopl.cpp:89
 msgid "Nuked OPL emulator"
 msgstr "Nuked OPL Emulátor"
 
-#: audio/fmopl.cpp:90
+#: audio/fmopl.cpp:92
 msgid "ALSA Direct FM"
 msgstr "ALSA Přímá FM"
 
-#: audio/fmopl.cpp:93
+#: audio/fmopl.cpp:95
 msgid "OPL2LPT"
 msgstr "OPL2LPT"
 
-#: audio/fmopl.cpp:94
+#: audio/fmopl.cpp:96
 msgid "OPL3LPT"
 msgstr "OPL3LPT"
 
-#: audio/fmopl.cpp:97
+#: audio/fmopl.cpp:99
 msgid "RetroWave OPL3"
 msgstr ""
 
@@ -4102,7 +4073,7 @@ msgstr ""
 "Upřednostňované zvukové zařízení '%s' nelze použít. Podívejte se na záznam "
 "pro více informací."
 
-#: audio/mididrv.cpp:469
+#: audio/mididrv.cpp:474
 msgid "Starting MIDI dump"
 msgstr ""
 
@@ -4303,38 +4274,38 @@ msgstr "Roztáhnout do okna"
 msgid "Fit to window (4:3)"
 msgstr "Přizpůsobit oknu (4:3)"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:966
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:975
 #, c-format
 msgid "Resolution: %dx%d"
 msgstr "Rozlišení: %dx%d"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1010
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2882
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1019
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2869
 msgid "Active graphics filter:"
 msgstr "Aktivní grafický filtr:"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1031
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2916
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1040
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2903
 msgid "Enabled aspect ratio correction"
 msgstr "Povolena korekce poměru stran"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1033
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2922
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1042
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2909
 msgid "Disabled aspect ratio correction"
 msgstr "Zakázána korekce poměru stran"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1046
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2938
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1055
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2925
 msgid "Filtering enabled"
 msgstr "Filtrování povoleno"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1048
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2940
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1057
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2927
 msgid "Filtering disabled"
 msgstr "Filtrování zakázáno"
 
-#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1074
-#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2967
+#: backends/graphics/openglsdl/openglsdl-graphics.cpp:1083
+#: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:2954
 #, fuzzy
 msgid "Stretch mode"
 msgstr "Režim protažení:"
@@ -4908,7 +4879,7 @@ msgstr ""
 #: backends/platform/sdl/ps3/ps3.cpp:49 backends/platform/sdl/psp2/psp2.cpp:51
 #: engines/bagel/metaengine.cpp:64 engines/efh/metaengine.cpp:397
 #: engines/got/metaengine.cpp:76 engines/hypno/metaengine.cpp:363
-#: engines/mm/mm1/metaengine.cpp:49 engines/mm/mm1/metaengine.cpp:92
+#: engines/mm/mm1/metaengine.cpp:50 engines/mm/mm1/metaengine.cpp:93
 #: engines/sherlock/metaengine.cpp:660 engines/sherlock/metaengine.cpp:672
 #: engines/sherlock/metaengine.cpp:1014 engines/supernova/metaengine.cpp:303
 #: engines/titanic/metaengine.cpp:233 engines/ultima/ultima0/metaengine.cpp:47
@@ -5038,12 +5009,12 @@ msgstr ""
 msgid "Magnify Mode Off"
 msgstr ""
 
-#: backends/platform/android/android.cpp:1076
-#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/android/android.cpp:930
+#: backends/platform/ios7/ios7_osys_misc.mm:246
 msgid "Getting help"
 msgstr ""
 
-#: backends/platform/android/android.cpp:1079
+#: backends/platform/android/android.cpp:933
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5065,15 +5036,15 @@ msgid ""
 "checking out a game walkthrough. Good luck!\n"
 msgstr ""
 
-#: backends/platform/android/android.cpp:1088
-#: backends/platform/ios7/ios7_osys_misc.mm:261
-#: backends/platform/ios7/ios7_osys_misc.mm:357
+#: backends/platform/android/android.cpp:942
+#: backends/platform/ios7/ios7_osys_misc.mm:258
+#: backends/platform/ios7/ios7_osys_misc.mm:354
 #, fuzzy
 #| msgid "Control"
 msgid "Touch Controls"
 msgstr "Ovládání"
 
-#: backends/platform/android/android.cpp:1091
+#: backends/platform/android/android.cpp:945
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5142,16 +5113,16 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/android/android.cpp:1147
-#: backends/platform/ios7/ios7_osys_misc.mm:336
-#: backends/platform/ios7/ios7_osys_misc.mm:380
+#: backends/platform/android/android.cpp:1001
+#: backends/platform/ios7/ios7_osys_misc.mm:333
+#: backends/platform/ios7/ios7_osys_misc.mm:377
 #, fuzzy
 #| msgctxt "lowres"
 #| msgid "Add Game..."
 msgid "Adding Games"
 msgstr "Přidat Hru..."
 
-#: backends/platform/android/android.cpp:1150
+#: backends/platform/android/android.cpp:1004
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5402,7 +5373,7 @@ msgstr ""
 msgid "Show keyboard function bar"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:252
+#: backends/platform/ios7/ios7_osys_misc.mm:249
 msgid ""
 "## Help, I'm lost!\n"
 "\n"
@@ -5423,7 +5394,7 @@ msgid ""
 "checking out a game walkthrough. Good luck!\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:264
+#: backends/platform/ios7/ios7_osys_misc.mm:261
 msgid ""
 "## Touch control modes\n"
 "The touch control mode can be changed by tapping or clicking on the "
@@ -5497,13 +5468,13 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:314
+#: backends/platform/ios7/ios7_osys_misc.mm:311
 #, fuzzy
 #| msgid "Virtual keyboard"
 msgid "External keyboard"
 msgstr "Virtuální klávesnice"
 
-#: backends/platform/ios7/ios7_osys_misc.mm:317
+#: backends/platform/ios7/ios7_osys_misc.mm:314
 msgid ""
 "## Use of keyboard\n"
 "External keyboards are supported and from iOS 13.4 most of the special keys, "
@@ -5528,7 +5499,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:339
+#: backends/platform/ios7/ios7_osys_misc.mm:336
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -5549,7 +5520,7 @@ msgid ""
 "other_platforms/ios.html) for more information.\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:360
+#: backends/platform/ios7/ios7_osys_misc.mm:357
 msgid ""
 "## Touch actions \n"
 "\n"
@@ -5571,7 +5542,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_misc.mm:383
+#: backends/platform/ios7/ios7_osys_misc.mm:380
 msgid ""
 "## Adding Games \n"
 "\n"
@@ -6199,7 +6170,7 @@ msgstr "Vzít"
 #: engines/access/metaengine.cpp:291 engines/access/metaengine.cpp:312
 #: engines/bbvs/metaengine.cpp:136 engines/cine/metaengine.cpp:342
 #: engines/efh/metaengine.cpp:462 engines/hdb/metaengine.cpp:237
-#: engines/lab/metaengine.cpp:323 engines/mm/mm1/metaengine.cpp:81
+#: engines/lab/metaengine.cpp:323 engines/mm/mm1/metaengine.cpp:82
 #: engines/petka/metaengine.cpp:151 engines/queen/metaengine.cpp:294
 #: engines/saga/metaengine.cpp:379 engines/scumm/help.cpp:129
 #: engines/scumm/help.cpp:153 engines/scumm/help.cpp:171
@@ -6358,7 +6329,7 @@ msgstr ""
 #: engines/adl/metaengine.cpp:117 engines/agi/metaengine.cpp:220
 #: engines/cge/metaengine.cpp:56 engines/cine/metaengine.cpp:69
 #: engines/cruise/metaengine.cpp:45 engines/drascula/metaengine.cpp:55
-#: engines/efh/metaengine.cpp:44 engines/glk/metaengine.cpp:193
+#: engines/efh/metaengine.cpp:44 engines/glk/metaengine.cpp:205
 #: engines/gob/metaengine.cpp:57 engines/got/metaengine.cpp:48
 #: engines/griffon/metaengine.cpp:40 engines/hugo/metaengine.cpp:56
 #: engines/made/metaengine.cpp:51 engines/mm/metaengine.cpp:91
@@ -6530,48 +6501,6 @@ msgstr "Tato hra není podporována"
 msgid "This game does not support saving"
 msgstr "Tato hra není podporována"
 
-#: engines/agi/saveload.cpp:779 engines/avalanche/parser.cpp:1906
-#: engines/cine/various.cpp:360 engines/dm/dm.cpp:271
-#: engines/dm/loadsave.cpp:187 engines/drascula/saveload.cpp:403
-#: engines/dreamweb/saveload.cpp:169 engines/glk/streams.cpp:1441
-#: engines/gnap/menu.cpp:474 engines/groovie/script.cpp:835
-#: engines/groovie/script.cpp:870 engines/groovie/script.cpp:2243
-#: engines/groovie/script.cpp:2270 engines/groovie/script.cpp:2340
-#: engines/hugo/file.cpp:399 engines/illusions/menusystem.cpp:679
-#: engines/kingdom/kingdom.cpp:741 engines/lab/savegame.cpp:257
-#: engines/mads/nebular/dialogs_nebular.cpp:385
-#: engines/mads/phantom/dialogs_phantom.cpp:381
-#: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:938
-#: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:749
-#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1263
-#: engines/sherlock/tattoo/widget_files.cpp:100
-#: engines/startrek/saveload.cpp:67 engines/toltecs/menu.cpp:278
-#: engines/toon/toon.cpp:3914 engines/zvision/file/save_manager.cpp:60
-msgid "Restore game:"
-msgstr "Obnovit hru:"
-
-#: engines/agi/saveload.cpp:779 engines/avalanche/parser.cpp:1906
-#: engines/cine/various.cpp:360 engines/dm/dm.cpp:271
-#: engines/dm/loadsave.cpp:187 engines/drascula/saveload.cpp:403
-#: engines/dreamweb/saveload.cpp:169 engines/glk/streams.cpp:1441
-#: engines/gnap/menu.cpp:474 engines/groovie/script.cpp:835
-#: engines/groovie/script.cpp:853 engines/groovie/script.cpp:870
-#: engines/groovie/script.cpp:2243 engines/groovie/script.cpp:2270
-#: engines/groovie/script.cpp:2340 engines/hugo/file.cpp:399
-#: engines/illusions/menusystem.cpp:679 engines/kingdom/kingdom.cpp:741
-#: engines/lab/savegame.cpp:237 engines/lab/savegame.cpp:257
-#: engines/mads/nebular/dialogs_nebular.cpp:385
-#: engines/mads/phantom/dialogs_phantom.cpp:381
-#: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:938
-#: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:750
-#: engines/sci/engine/kfile.cpp:1246 engines/sherlock/scalpel/scalpel.cpp:1263
-#: engines/sherlock/tattoo/widget_files.cpp:100
-#: engines/startrek/saveload.cpp:67 engines/toltecs/menu.cpp:278
-#: engines/toon/toon.cpp:3914 engines/zvision/file/save_manager.cpp:60
-#: engines/zvision/metaengine.cpp:287
-msgid "Restore"
-msgstr "Obnovit"
-
 #: engines/agos/animation.cpp:576
 #, c-format
 msgid "Cutscene file '%s' not found!"
@@ -6736,8 +6665,8 @@ msgid "Turn backward"
 msgstr "Vpřed"
 
 #: engines/agos/metaengine.cpp:228 engines/dm/metaengine.cpp:186
-#: engines/kyra/engine/eobcommon.cpp:375 engines/kyra/engine/lol.cpp:514
-#: engines/lab/metaengine.cpp:257 engines/mm/mm1/metaengine.cpp:97
+#: engines/kyra/engine/eobcommon.cpp:375 engines/kyra/engine/lol.cpp:517
+#: engines/lab/metaengine.cpp:257 engines/mm/mm1/metaengine.cpp:98
 #: engines/mohawk/riven.cpp:901 engines/pegasus/pegasus.cpp:2740
 #: engines/twine/metaengine.cpp:353 engines/ultima/ultima0/metaengine.cpp:80
 #: engines/ultima/ultima8/metaengine.cpp:48
@@ -6751,8 +6680,8 @@ msgid "Turn left"
 msgstr "Otočit se doleva"
 
 #: engines/agos/metaengine.cpp:234 engines/dm/metaengine.cpp:206
-#: engines/kyra/engine/eobcommon.cpp:376 engines/kyra/engine/lol.cpp:515
-#: engines/lab/metaengine.cpp:271 engines/mm/mm1/metaengine.cpp:98
+#: engines/kyra/engine/eobcommon.cpp:376 engines/kyra/engine/lol.cpp:518
+#: engines/lab/metaengine.cpp:271 engines/mm/mm1/metaengine.cpp:99
 #: engines/mohawk/riven.cpp:907 engines/pegasus/pegasus.cpp:2747
 #: engines/twine/metaengine.cpp:346 engines/ultima/ultima0/metaengine.cpp:81
 #: engines/ultima/ultima8/metaengine.cpp:49
@@ -7192,8 +7121,8 @@ msgstr ""
 #: engines/bbvs/metaengine.cpp:111 engines/cruise/metaengine.cpp:223
 #: engines/freescape/movement.cpp:107 engines/got/metaengine.cpp:78
 #: engines/hugo/metaengine.cpp:197 engines/lure/metaengine.cpp:209
-#: engines/mads/metaengine.cpp:292 engines/mm/mm1/metaengine.cpp:41
-#: engines/mm/mm1/metaengine.cpp:47 engines/saga/metaengine.cpp:328
+#: engines/mads/metaengine.cpp:292 engines/mm/mm1/metaengine.cpp:42
+#: engines/mm/mm1/metaengine.cpp:48 engines/saga/metaengine.cpp:328
 #: engines/tinsel/metaengine.cpp:258 engines/tsage/metaengine.cpp:190
 #: engines/tucker/metaengine.cpp:221 engines/twine/metaengine.cpp:388
 #: engines/ultima/ultima0/metaengine.cpp:40 engines/vcruise/metaengine.cpp:164
@@ -7498,7 +7427,7 @@ msgstr "Povolit zachycování myši"
 #: engines/freescape/games/castle/castle.cpp:465
 #: engines/freescape/games/dark/dark.cpp:226
 #: engines/freescape/games/driller/driller.cpp:125
-#: engines/freescape/games/eclipse/eclipse.cpp:301
+#: engines/freescape/games/eclipse/eclipse.cpp:351
 #: engines/hopkins/metaengine.cpp:236 engines/hugo/metaengine.cpp:165
 #: engines/lure/metaengine.cpp:191 engines/made/metaengine.cpp:192
 #: engines/mads/metaengine.cpp:305 engines/mohawk/myst.cpp:583
@@ -7526,7 +7455,7 @@ msgstr "Uložit hru"
 #: engines/freescape/games/castle/castle.cpp:470
 #: engines/freescape/games/dark/dark.cpp:231
 #: engines/freescape/games/driller/driller.cpp:130
-#: engines/freescape/games/eclipse/eclipse.cpp:306
+#: engines/freescape/games/eclipse/eclipse.cpp:356
 #: engines/hopkins/metaengine.cpp:242 engines/made/metaengine.cpp:198
 #: engines/mohawk/myst_stacks/menu.cpp:283
 #: engines/mohawk/riven_stacks/aspit.cpp:349 engines/pegasus/pegasus.cpp:2831
@@ -7577,7 +7506,7 @@ msgstr ""
 #: engines/freescape/games/castle/castle.cpp:478
 #: engines/freescape/games/dark/dark.cpp:236
 #: engines/freescape/games/driller/driller.cpp:135
-#: engines/freescape/games/eclipse/eclipse.cpp:311
+#: engines/freescape/games/eclipse/eclipse.cpp:361
 #: engines/mads/metaengine.cpp:361 engines/phoenixvr/metaengine.cpp:80
 #: engines/saga/metaengine.cpp:437 engines/sherlock/metaengine.cpp:359
 #: engines/sherlock/metaengine.cpp:618 engines/sherlock/metaengine.cpp:852
@@ -7587,6 +7516,17 @@ msgstr ""
 #, fuzzy
 msgid "Quit game"
 msgstr " (Hra)"
+
+#: engines/bolt/metaengine.cpp:34
+#, fuzzy
+msgid "Extended game resolution"
+msgstr "Povolit grafiku ve vysokém rozlišení"
+
+#: engines/bolt/metaengine.cpp:35
+msgid ""
+"This option allows the game to play at a slightly extended resolution. This "
+"is what the Mac and CDi versions are supposed to play like."
+msgstr ""
 
 #: engines/buried/buried.cpp:598
 #, fuzzy
@@ -7673,7 +7613,7 @@ msgstr "Dívat se na"
 
 #: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
-#: engines/kyra/engine/lol.cpp:510 engines/mohawk/riven.cpp:881
+#: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
 #: engines/twine/metaengine.cpp:332 engines/ultima/ultima0/metaengine.cpp:78
 #: engines/ultima/ultima8/metaengine.cpp:50
@@ -8036,7 +7976,7 @@ msgstr "Vzad"
 
 #: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
-#: engines/mm/mm1/metaengine.cpp:99
+#: engines/mm/mm1/metaengine.cpp:100
 #, fuzzy
 #| msgid "Slide Left"
 msgid "Strafe left"
@@ -8044,7 +7984,7 @@ msgstr "Přesunout se Doleva"
 
 #: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
-#: engines/mm/mm1/metaengine.cpp:100
+#: engines/mm/mm1/metaengine.cpp:101
 #, fuzzy
 #| msgid "Slide Right"
 msgid "Strafe right"
@@ -8054,7 +7994,7 @@ msgstr "Přesunout se Doprava"
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
-#: engines/freescape/games/eclipse/eclipse.cpp:324
+#: engines/freescape/games/eclipse/eclipse.cpp:374
 #, fuzzy
 #| msgid "Slide Left"
 msgid "Rotate left"
@@ -8064,7 +8004,7 @@ msgstr "Přesunout se Doleva"
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
-#: engines/freescape/games/eclipse/eclipse.cpp:329
+#: engines/freescape/games/eclipse/eclipse.cpp:379
 #, fuzzy
 #| msgid "Slide Right"
 msgid "Rotate right"
@@ -8121,7 +8061,7 @@ msgstr "Interakce"
 #. I18N: Combat command in Might & Magic 1
 #: engines/crab/input/input.cpp:125 engines/efh/metaengine.cpp:487
 #: engines/efh/metaengine.cpp:512 engines/griffon/metaengine.cpp:145
-#: engines/mm/mm1/metaengine.cpp:65 engines/scumm/metaengine.cpp:1053
+#: engines/mm/mm1/metaengine.cpp:66 engines/scumm/metaengine.cpp:1053
 #: engines/ultima/ultima0/metaengine.cpp:82
 #: engines/ultima/ultima4/metaengine.cpp:48
 #: engines/ultima/nuvie/metaengine.cpp:74
@@ -8130,7 +8070,7 @@ msgid "Attack"
 msgstr "Útok 1"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/crab/input/input.cpp:130 engines/mm/mm1/metaengine.cpp:67
+#: engines/crab/input/input.cpp:130 engines/mm/mm1/metaengine.cpp:68
 #, fuzzy
 #| msgid "Unlock"
 msgid "Block"
@@ -8365,11 +8305,13 @@ msgid "Brighten the graphics to simulate a Macintosh monitor"
 msgstr ""
 
 #: engines/director/metaengine.cpp:81
-msgid "Force true color"
+msgid "Force true color (32bpp) mode"
 msgstr ""
 
 #: engines/director/metaengine.cpp:82
-msgid "Use true color graphics mode, even if the game is not designed for it"
+msgid ""
+"Use true color graphics mode (32 bits per pixel), even if the game is not "
+"designed for it"
 msgstr ""
 
 #: engines/dm/metaengine.cpp:125
@@ -8418,7 +8360,7 @@ msgid "Toggle champion 4 inventory"
 msgstr "Přepínat zobrazení inventáře/chytrostních bodů"
 
 #: engines/dm/metaengine.cpp:226 engines/kyra/engine/eobcommon.cpp:372
-#: engines/kyra/engine/lol.cpp:511 engines/mohawk/riven.cpp:895
+#: engines/kyra/engine/lol.cpp:514 engines/mohawk/riven.cpp:895
 #: engines/titanic/metaengine.cpp:343 engines/titanic/metaengine.cpp:384
 #: engines/twine/metaengine.cpp:339 engines/wintermute/keymapper_tables.h:155
 #: engines/wintermute/keymapper_tables.h:736
@@ -9056,7 +8998,7 @@ msgid "Enable background music ported from the C64 version"
 msgstr ""
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/freescape/movement.cpp:69 engines/mm/mm1/metaengine.cpp:79
+#: engines/freescape/movement.cpp:69 engines/mm/mm1/metaengine.cpp:80
 msgid "Shoot"
 msgstr ""
 
@@ -9103,7 +9045,7 @@ msgstr "Vyberte Vzhled"
 #: engines/freescape/games/castle/castle.cpp:483
 #: engines/freescape/games/dark/dark.cpp:246
 #: engines/freescape/games/driller/driller.cpp:143
-#: engines/freescape/games/eclipse/eclipse.cpp:319
+#: engines/freescape/games/eclipse/eclipse.cpp:369
 #: engines/hugo/metaengine.cpp:154
 #, fuzzy
 msgid "Toggle sound"
@@ -9114,7 +9056,7 @@ msgid "Crawl"
 msgstr ""
 
 #: engines/freescape/games/castle/castle.cpp:515
-#: engines/freescape/games/eclipse/eclipse.cpp:367
+#: engines/freescape/games/eclipse/eclipse.cpp:417
 #, fuzzy
 #| msgid "Move Forward"
 msgid "Face forward"
@@ -9197,37 +9139,37 @@ msgid "Collect drilling rig"
 msgstr ""
 
 #. I18N: Illustrates the angle at which you turn left or right.
-#: engines/freescape/games/eclipse/eclipse.cpp:335
+#: engines/freescape/games/eclipse/eclipse.cpp:385
 #, fuzzy
 #| msgid "Fast mode"
 msgid "Change angle"
 msgstr "Rychlý režim"
 
 #. I18N: STEP SIZE: Measures the size of one movement in the direction you are facing (1-250 standard distance units (SDUs))
-#: engines/freescape/games/eclipse/eclipse.cpp:341
+#: engines/freescape/games/eclipse/eclipse.cpp:391
 #, fuzzy
 #| msgid "Increase the scale factor"
 msgid "Change step size"
 msgstr "Zvětšit faktor změny velikosti"
 
-#: engines/freescape/games/eclipse/eclipse.cpp:347
+#: engines/freescape/games/eclipse/eclipse.cpp:397
 msgid "Sprint (hold)"
 msgstr ""
 
-#: engines/freescape/games/eclipse/eclipse.cpp:355
+#: engines/freescape/games/eclipse/eclipse.cpp:405
 #, fuzzy
 msgid "Toggle height"
 msgstr "Povolit zachycování myši"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/freescape/games/eclipse/eclipse.cpp:361
-#: engines/kyra/engine/lol.cpp:516 engines/mm/mm1/metaengine.cpp:109
+#: engines/freescape/games/eclipse/eclipse.cpp:411
+#: engines/kyra/engine/lol.cpp:519 engines/mm/mm1/metaengine.cpp:110
 #: engines/ultima/nuvie/metaengine.cpp:195
 #: engines/ultima/nuvie/metaengine.cpp:200
 msgid "Rest"
 msgstr "Odpočinout si"
 
-#: engines/freescape/games/eclipse/eclipse.cpp:372
+#: engines/freescape/games/eclipse/eclipse.cpp:422
 #, fuzzy
 #| msgid "Fly straight"
 msgid "Toggle flashlight"
@@ -9242,17 +9184,17 @@ msgstr ""
 msgid "Untitled Savegame"
 msgstr "Bezejmenná uložená hra"
 
-#: engines/glk/metaengine.cpp:194
+#: engines/glk/metaengine.cpp:206
 #, fuzzy
 msgid "Use TTS to read the text"
 msgstr "Nelze smazat soubor."
 
-#: engines/glk/metaengine.cpp:201
+#: engines/glk/metaengine.cpp:213
 #, fuzzy
 msgid "Also read input text"
 msgstr "Nelze smazat soubor."
 
-#: engines/glk/metaengine.cpp:202
+#: engines/glk/metaengine.cpp:214
 #, fuzzy
 msgid "Use TTS to read the input text"
 msgstr "Nelze smazat soubor."
@@ -9307,6 +9249,495 @@ msgstr "Uložit hru"
 msgid "Picture window toggled\n"
 msgstr ""
 
+#: engines/glk/dialogs.cpp:141
+msgid "white"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:142
+msgid "green"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:143
+#, fuzzy
+#| msgid "Proceed"
+msgid "red"
+msgstr "Pokračovat"
+
+#: engines/glk/dialogs.cpp:144
+msgid "blue"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:145
+msgid "black"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:146
+msgid "grey"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:195
+msgid "Monospace Regular"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:196
+msgid "Monospace Bold"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:197
+msgid "Monospace Italic"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:198
+msgid "Monospace Bold Italic"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:199
+msgid "Proportional Regular"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:200
+msgid "Proportional Bold"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:201
+msgid "Proportional Italic"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:202
+msgid "Proportional Bold Italic"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:210
+#, fuzzy
+#| msgid "SoundFont:"
+msgid "Font"
+msgstr "SoundFont:"
+
+#: engines/glk/dialogs.cpp:212 engines/glk/dialogs.cpp:222
+msgid "Text:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:212
+msgid "Font for the text"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:216 engines/glk/dialogs.cpp:227
+msgid "Grid:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:216
+msgid "Font for drawn graphics like maps, diagrams, puzzles, etc"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:220
+msgid "Color"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:222
+#, fuzzy
+msgid "Color of the interactive text"
+msgstr "Volby"
+
+#: engines/glk/dialogs.cpp:225 engines/glk/dialogs.cpp:230
+#: engines/glk/dialogs.cpp:236 engines/glk/dialogs.cpp:242
+#: engines/glk/dialogs.cpp:254 engines/glk/dialogs.cpp:260
+#: engines/glk/dialogs.cpp:269
+msgid "<custom>"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:227
+msgid "Color for drawn graphics such as maps, diagrams, puzzles, etc"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:232
+#, fuzzy
+#| msgid "Window"
+msgid "Window:"
+msgstr "Okno"
+
+#: engines/glk/dialogs.cpp:232
+#, fuzzy
+msgid "Color of the window (background)"
+msgstr "Rychlý režim"
+
+#: engines/glk/dialogs.cpp:238
+#, fuzzy
+#| msgid "New kid"
+msgid "Border:"
+msgstr "Nové dítě"
+
+#: engines/glk/dialogs.cpp:238
+#, fuzzy
+msgid "Color of the window border"
+msgstr "Rychlý režim"
+
+#. I18N: This is a section for text windows border settings
+#: engines/glk/dialogs.cpp:245
+#, fuzzy
+#| msgid "New kid"
+msgid "Border"
+msgstr "Nové dítě"
+
+#: engines/glk/dialogs.cpp:247 engines/glk/dialogs.cpp:341
+#: engines/glk/dialogs.cpp:345 engines/glk/dialogs.cpp:349
+#, fuzzy
+#| msgid "Horizontal underscan:"
+msgid "Horizontal:"
+msgstr "Horizontální zmenšení:"
+
+#: engines/glk/dialogs.cpp:247
+#, fuzzy
+#| msgid "Horizontal underscan:"
+msgid "Horizontal border size"
+msgstr "Horizontální zmenšení:"
+
+#: engines/glk/dialogs.cpp:248 engines/glk/dialogs.cpp:342
+#: engines/glk/dialogs.cpp:346 engines/glk/dialogs.cpp:350
+#, fuzzy
+#| msgid "Vertical underscan:"
+msgid "Vertical:"
+msgstr "Vertikální zmenšení:"
+
+#: engines/glk/dialogs.cpp:248
+#, fuzzy
+#| msgid "Vertical underscan:"
+msgid "Vertical border size"
+msgstr "Vertikální zmenšení:"
+
+#: engines/glk/dialogs.cpp:250
+msgid "Caret:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:250
+#, fuzzy
+#| msgid "Regular cursor"
+msgid "Color of the cursor"
+msgstr "Obyčejný kurzor"
+
+#: engines/glk/dialogs.cpp:256
+msgid "Link:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:256
+msgid "Color for URLs if they appear in-game"
+msgstr ""
+
+#. I18N: "More..." is a prompt in text windows, which appears when the text exceeds the window size
+#: engines/glk/dialogs.cpp:264
+msgid "More:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:265
+msgid "Color for the \"More...\" markers in the text"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:272
+#, fuzzy
+#| msgid "Graphics mode:"
+msgid "Typography"
+msgstr "Režim obrazu:"
+
+#: engines/glk/dialogs.cpp:274
+msgid "Link style:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:274
+msgid "Style for URLs if they appear in-game"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:279
+msgid "Caret shape:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:279
+#, fuzzy
+#| msgid "Show mouse cursor"
+msgid "Shape of the cursor"
+msgstr "Zobrazit kurzor myši"
+
+#: engines/glk/dialogs.cpp:286
+#, fuzzy
+msgid "More prompt:"
+msgstr " (Hra)"
+
+#: engines/glk/dialogs.cpp:286
+msgid ""
+"Custom marker in place of the \"More...\" marker for eg. \"continue\". Leave "
+"it blank to use the game's default"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:288
+#, fuzzy
+msgid "Style hints:"
+msgstr "Skrýt Ostatní"
+
+#: engines/glk/dialogs.cpp:288
+msgid "Let the game suggest text styling options"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:289
+#, fuzzy
+#| msgid "Left Click"
+msgid "Safe clicks:"
+msgstr "Levé Kliknutí"
+
+#: engines/glk/dialogs.cpp:289
+msgid "Safely apply clicks while input is pending"
+msgstr ""
+
+#. I18N: This is setting for number of text columns
+#: engines/glk/dialogs.cpp:292
+#, fuzzy
+#| msgid "Control"
+msgid "Column count:"
+msgstr "Ovládání"
+
+#: engines/glk/dialogs.cpp:292
+msgid "Number of columns"
+msgstr ""
+
+#. I18N: This is setting for number of text rows
+#: engines/glk/dialogs.cpp:294
+msgid "Rows count:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:294
+msgid "Number of rows"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:296
+msgid "Lock columns:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:296
+msgid "Check it to manually change the column count"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:297
+#, fuzzy
+#| msgid "Block low"
+msgid "Lock rows:"
+msgstr "Bránit dole"
+
+#: engines/glk/dialogs.cpp:297
+msgid "Check it to manually change the row count"
+msgstr ""
+
+#. I18N: This is a setting for enabling text justification
+#: engines/glk/dialogs.cpp:301
+msgid "Justify:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:302
+#, fuzzy
+msgid "Enable text justification"
+msgstr "Povolit cenzuru obsahu"
+
+#. I18N: These is setting for type of text quote symbols
+#: engines/glk/dialogs.cpp:305
+#, fuzzy
+#| msgid "Graphics mode:"
+msgid "Typographic quotes:"
+msgstr "Režim obrazu:"
+
+#: engines/glk/dialogs.cpp:306
+#, fuzzy
+msgid "Choose typographic quotes"
+msgstr "Použít barevné grafiky"
+
+#: engines/glk/dialogs.cpp:307
+msgctxt "quotes"
+msgid "Off"
+msgstr ""
+
+#. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
+#: engines/glk/dialogs.cpp:309
+#, fuzzy
+#| msgid "Normal"
+msgctxt "quotes"
+msgid "Normal"
+msgstr "Normální"
+
+#. I18N: This is a setting for using "rabid" quotes, which are like normal typographic quotes but with the opening quote lower than the closing one, like in some comic books
+#: engines/glk/dialogs.cpp:311
+msgctxt "quotes"
+msgid "Rabid"
+msgstr ""
+
+#. I18N: This is a setting for forcing all input to be in uppercase
+#: engines/glk/dialogs.cpp:314
+msgid "Caps:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:314
+msgid "Force uppercase input"
+msgstr ""
+
+#. I18N: This is a setting for type of text dash symbols
+#: engines/glk/dialogs.cpp:317
+msgid "Dashes:"
+msgstr ""
+
+#. I18N: This is a setting for type of text dash symbols
+#: engines/glk/dialogs.cpp:319
+msgid "Types of dashes"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:320 engines/glk/dialogs.cpp:332
+msgid "Off"
+msgstr ""
+
+#. I18N: This is a setting for using normal typographic dashes, which are like in most books, with the em dash being the longest and the en dash being half of it
+#: engines/glk/dialogs.cpp:322
+msgid "Em dashes"
+msgstr ""
+
+#. I18N: This is a setting for using "en+em" dashes, which are like normal typographic dashes but with the en dash being the same length as the em dash, like in some comic books
+#: engines/glk/dialogs.cpp:324
+msgid "En+Em dashes"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:326
+#, fuzzy
+msgid "User experience"
+msgstr "Prioritní zařízení:"
+
+#. I18N: This is a setting for type of spaces in the text
+#: engines/glk/dialogs.cpp:329
+#, fuzzy
+#| msgid "Space"
+msgid "Spaces:"
+msgstr "Mezerník"
+
+#. I18N: This is a setting for type of spaces in the text
+#: engines/glk/dialogs.cpp:331
+msgid "Types of spaces"
+msgstr ""
+
+#. I18N: This is a setting for compressing double spaces into single ones in text
+#: engines/glk/dialogs.cpp:334
+msgid "Compress double spaces"
+msgstr ""
+
+#. I18N: This is a setting for expanding single spaces into double ones in text
+#: engines/glk/dialogs.cpp:336
+msgid "Expand single spaces"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:338
+#, fuzzy
+#| msgid "Graphics"
+msgid "Graphics:"
+msgstr "Obraz"
+
+#: engines/glk/dialogs.cpp:338
+msgid "Turn graphics on/off"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:340
+#, fuzzy
+#| msgid "Window"
+msgid "Window margin"
+msgstr "Okno"
+
+#: engines/glk/dialogs.cpp:341
+msgid "Horizontal margin for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:342
+msgid "Vertical margin for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:344
+#, fuzzy
+#| msgid "Window"
+msgid "Window padding"
+msgstr "Okno"
+
+#: engines/glk/dialogs.cpp:345
+msgid "Horizontal padding for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:346
+msgid "Vertical padding for window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:348
+#, fuzzy
+msgid "Text margin"
+msgstr "~P~ředchozí"
+
+#: engines/glk/dialogs.cpp:349
+msgid "Horizontal margin for text"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:350
+msgid "Vertical margin for text"
+msgstr ""
+
+#. I18N: This is a setting for leading, which is the vertical distance between text rows
+#: engines/glk/dialogs.cpp:353
+#, fuzzy
+msgid "Leading:"
+msgstr "Nahrávání hry..."
+
+#: engines/glk/dialogs.cpp:354
+msgid "Vertical distance between text rows. Valid inputs - 12, 16, 22 etc."
+msgstr ""
+
+#. I18N: This is a setting for baseline, which is the invisible horizontal line on which text sits
+#: engines/glk/dialogs.cpp:356
+msgid "Baseline:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:357
+msgid ""
+"Invisible horizontal line on which text sits. Valid inputs - 8, 16 etc. as "
+"per your font size"
+msgstr ""
+
+#. I18N: Font size scaling for the monospace text font
+#: engines/glk/dialogs.cpp:360
+msgid "Monosize:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:361
+msgid "Font size scaling for the monospace text font"
+msgstr ""
+
+#. I18N: Font size scaling for the proportional text font
+#: engines/glk/dialogs.cpp:363
+msgid "Propsize:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:364
+msgid "Font size scaling for the proportional text font"
+msgstr ""
+
+#. I18N: This is a section for settings related to the "More..." prompt in text windows
+#: engines/glk/dialogs.cpp:367
+msgid "More"
+msgstr ""
+
+#. I18N: This is a setting for alignment of the "More..." prompt in text windows
+#: engines/glk/dialogs.cpp:369
+msgid "Align:"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:370
+msgid "Alignment of the \"More...\" marker on the window"
+msgstr ""
+
+#: engines/glk/dialogs.cpp:375
+#, fuzzy
+#| msgid "SoundFont:"
+msgid "Font:"
+msgstr "SoundFont:"
+
+#: engines/glk/dialogs.cpp:375
+msgid "Font for the \"More...\" marker"
+msgstr ""
+
 #: engines/glk/glulx/glulx.cpp:81
 msgid "This is too short to be a valid Glulx file."
 msgstr ""
@@ -9347,12 +9778,12 @@ msgid "Save file created by different version."
 msgstr ""
 
 #: engines/gob/inter_geisha.cpp:237 engines/gob/inter_playtoons.cpp:285
-#: engines/gob/inter_v2.cpp:1512 engines/tinsel/saveload.cpp:591
+#: engines/gob/inter_v2.cpp:1512 engines/tinsel/saveload.cpp:588
 msgid "Failed to load saved game from file."
 msgstr "Načteni hry ze souboru selhalo."
 
 #: engines/gob/inter_geisha.cpp:268 engines/gob/inter_playtoons.cpp:426
-#: engines/gob/inter_v2.cpp:1591 engines/tinsel/saveload.cpp:604
+#: engines/gob/inter_v2.cpp:1591 engines/tinsel/saveload.cpp:601
 msgid "Failed to save game to file."
 msgstr "Uložení hry do souboru selhalo."
 
@@ -10119,18 +10550,12 @@ msgid ""
 "backpack inventory slots, with thrown weapons only"
 msgstr ""
 
-#: engines/kyra/metaengine.cpp:279
+#: engines/kyra/metaengine.cpp:275
 #, fuzzy
 msgid "Lands of Lore support is not compiled in"
 msgstr "Zakompilované funkce:"
 
 #: engines/kyra/metaengine.cpp:289
-msgid ""
-"EOB II FM-TOWNS requires support of 16bit color modes which has not been "
-"activated in your ScummVM build"
-msgstr ""
-
-#: engines/kyra/metaengine.cpp:295
 #, fuzzy
 msgid "Eye of Beholder support is not compiled in"
 msgstr "Zakompilované funkce:"
@@ -10151,7 +10576,7 @@ msgstr "Zaměnit obrazovku Postavy/Inventáře"
 msgid "Camp"
 msgstr "Tábořit"
 
-#: engines/kyra/engine/eobcommon.cpp:380 engines/mm/mm1/metaengine.cpp:102
+#: engines/kyra/engine/eobcommon.cpp:380 engines/mm/mm1/metaengine.cpp:103
 #, fuzzy
 #| msgid "Cast Spell"
 msgid "Cast spell"
@@ -10193,20 +10618,20 @@ msgstr "Kouzlo úrovně 5"
 msgid "Spell level 6"
 msgstr "Kouzlo úrovně 6"
 
-#: engines/kyra/engine/lol.cpp:506
+#: engines/kyra/engine/lol.cpp:509
 msgid "Attack 1"
 msgstr "Útok 1"
 
-#: engines/kyra/engine/lol.cpp:507
+#: engines/kyra/engine/lol.cpp:510
 msgid "Attack 2"
 msgstr "Útok 2"
 
-#: engines/kyra/engine/lol.cpp:508
+#: engines/kyra/engine/lol.cpp:511
 msgid "Attack 3"
 msgstr "Útok 3"
 
-#: engines/kyra/engine/lol.cpp:509 engines/lab/metaengine.cpp:278
-#: engines/mm/mm1/metaengine.cpp:103 engines/mohawk/myst.cpp:606
+#: engines/kyra/engine/lol.cpp:512 engines/lab/metaengine.cpp:278
+#: engines/mm/mm1/metaengine.cpp:104 engines/mohawk/myst.cpp:606
 #: engines/wintermute/keymapper_tables.h:1526
 #: engines/wintermute/keymapper_tables.h:1673
 #: engines/wintermute/keymapper_tables.h:1722
@@ -10217,23 +10642,23 @@ msgstr "Útok 3"
 msgid "Show map"
 msgstr "~Z~obrazit mapu"
 
-#: engines/kyra/engine/lol.cpp:512
+#: engines/kyra/engine/lol.cpp:515
 #, fuzzy
 #| msgid "Slide Left"
 msgid "Slide left"
 msgstr "Přesunout se Doleva"
 
-#: engines/kyra/engine/lol.cpp:513
+#: engines/kyra/engine/lol.cpp:516
 #, fuzzy
 #| msgid "Slide Right"
 msgid "Slide right"
 msgstr "Přesunout se Doprava"
 
-#: engines/kyra/engine/lol.cpp:517
+#: engines/kyra/engine/lol.cpp:520
 msgid "Options"
 msgstr "Volby"
 
-#: engines/kyra/engine/lol.cpp:518
+#: engines/kyra/engine/lol.cpp:521
 #, fuzzy
 #| msgid "Choose Spell"
 msgid "Choose spell"
@@ -10706,95 +11131,99 @@ msgstr "Povolit sloupcový indikátor zdraví"
 msgid "Replace a colored gem with bars for hit points and spell points."
 msgstr ""
 
-#: engines/mm/mm1/metaengine.cpp:54
-msgid "View party member 1"
+#: engines/mm/metaengine.cpp:183
+msgid "Might and Magic"
 msgstr ""
 
 #: engines/mm/mm1/metaengine.cpp:55
-msgid "View party member 2"
+msgid "View party member 1"
 msgstr ""
 
 #: engines/mm/mm1/metaengine.cpp:56
-msgid "View party member 3"
+msgid "View party member 2"
 msgstr ""
 
 #: engines/mm/mm1/metaengine.cpp:57
-msgid "View party member 4"
+msgid "View party member 3"
 msgstr ""
 
 #: engines/mm/mm1/metaengine.cpp:58
-msgid "View party member 5"
+msgid "View party member 4"
 msgstr ""
 
 #: engines/mm/mm1/metaengine.cpp:59
+msgid "View party member 5"
+msgstr ""
+
+#: engines/mm/mm1/metaengine.cpp:60
 msgid "View party member 6"
 msgstr ""
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:69 engines/ultima/ultima4/metaengine.cpp:50
+#: engines/mm/mm1/metaengine.cpp:70 engines/ultima/ultima4/metaengine.cpp:50
 #: engines/ultima/nuvie/metaengine.cpp:194
 msgid "Cast"
 msgstr ""
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:71
+#: engines/mm/mm1/metaengine.cpp:72
 msgid "Exchange"
 msgstr ""
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:73
+#: engines/mm/mm1/metaengine.cpp:74
 #, fuzzy
 #| msgid "Right"
 msgid "Fight"
 msgstr "Doprava"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:75 engines/mm/mm1/metaengine.cpp:116
+#: engines/mm/mm1/metaengine.cpp:76 engines/mm/mm1/metaengine.cpp:117
 #, fuzzy
 msgid "Quick reference"
 msgstr "Prioritní zařízení:"
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:77
+#: engines/mm/mm1/metaengine.cpp:78
 msgid "Retreat"
 msgstr ""
 
 #. I18N: Combat command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:84
+#: engines/mm/mm1/metaengine.cpp:85
 msgid "Delay"
 msgstr ""
 
 #. I18N: Combat command in Might & Magic 1
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:86 engines/mm/mm1/metaengine.cpp:107
+#: engines/mm/mm1/metaengine.cpp:87 engines/mm/mm1/metaengine.cpp:108
 msgid "Protect"
 msgstr ""
 
 #. I18N: Party arrangement command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:94
+#: engines/mm/mm1/metaengine.cpp:95
 #, fuzzy
 #| msgid "Move Forward"
 msgid "Forwards"
 msgstr "Vpřed"
 
 #. I18N: Party arrangement command in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:96
+#: engines/mm/mm1/metaengine.cpp:97
 #, fuzzy
 msgid "Backwards"
 msgstr "Vzad"
 
-#: engines/mm/mm1/metaengine.cpp:104
+#: engines/mm/mm1/metaengine.cpp:105
 #, fuzzy
 msgid "Toggle minimap"
 msgstr "Povolit zachycování myši"
 
-#: engines/mm/mm1/metaengine.cpp:105
+#: engines/mm/mm1/metaengine.cpp:106
 msgid "Reorder party"
 msgstr ""
 
 #. I18N: Action of hero party in Might & Magic 1
 #. I18N: (Game: The Lost Files of Sherlock Holmes: The Case of the Serrated Scalpel) The game has a journal, this action is used to search the journal
-#: engines/mm/mm1/metaengine.cpp:111 engines/sherlock/metaengine.cpp:514
+#: engines/mm/mm1/metaengine.cpp:112 engines/sherlock/metaengine.cpp:514
 #: engines/sherlock/metaengine.cpp:961 engines/ultima/ultima4/metaengine.cpp:71
 #, fuzzy
 #| msgid "Search:"
@@ -10802,43 +11231,38 @@ msgid "Search"
 msgstr "Hledat:"
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:113
+#: engines/mm/mm1/metaengine.cpp:114
 msgid "Bash"
 msgstr ""
 
 #. I18N: Action of hero party in Might & Magic 1
-#: engines/mm/mm1/metaengine.cpp:115 engines/scumm/help.cpp:147
+#: engines/mm/mm1/metaengine.cpp:116 engines/scumm/help.cpp:147
 msgid "Unlock"
 msgstr "Odemknout"
 
-#: engines/mm/mm1/metaengine.cpp:122 engines/ultima/ultima4/metaengine.cpp:112
+#: engines/mm/mm1/metaengine.cpp:123 engines/ultima/ultima4/metaengine.cpp:112
 #, fuzzy
 msgid "Goto location"
 msgstr "~P~ředchozí"
 
-#: engines/mm/mm1/metaengine.cpp:133 engines/mm/mm1/metaengine.cpp:143
+#: engines/mm/mm1/metaengine.cpp:148
 msgid "Might and Magic 1 - Menus"
 msgstr ""
 
-#: engines/mm/mm1/metaengine.cpp:138
+#: engines/mm/mm1/metaengine.cpp:149
 msgid "Might and Magic 1 - Minimal Keys"
 msgstr ""
 
-#: engines/mm/mm1/metaengine.cpp:144 engines/mm/mm1/metaengine.cpp:150
-#: engines/mm/mm1/metaengine.cpp:156
+#: engines/mm/mm1/metaengine.cpp:150
+msgid "Might and Magic 1 - Main"
+msgstr ""
+
+#: engines/mm/mm1/metaengine.cpp:151
 msgid "Might and Magic 1 - Party"
 msgstr ""
 
-#: engines/mm/mm1/metaengine.cpp:149
+#: engines/mm/mm1/metaengine.cpp:152
 msgid "Might and Magic 1 - Combat"
-msgstr ""
-
-#: engines/mm/mm1/metaengine.cpp:155
-msgid "Might and Magic 1"
-msgstr ""
-
-#: engines/mm/mm1/metaengine.cpp:157
-msgid "Might and Magic 1 - Cheats"
 msgstr ""
 
 #: engines/mm/mm1/mm1.cpp:57
@@ -10952,15 +11376,31 @@ msgid ""
 "enable you to navigate more quickly through the game."
 msgstr ""
 
+#: engines/mohawk/dialogs.cpp:364
+#, fuzzy
+#| msgid "Disabled"
+msgctxt "riven-transition"
+msgid "Disabled"
+msgstr "Zakázáno"
+
 #: engines/mohawk/dialogs.cpp:365
+#, fuzzy
+#| msgid "Fastest"
+msgctxt "riven-transition"
 msgid "Fastest"
 msgstr "Nejrychlejší"
 
 #: engines/mohawk/dialogs.cpp:366
+#, fuzzy
+#| msgid "Normal"
+msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Normální"
 
-#: engines/mohawk/dialogs.cpp:367 engines/scumm/dialogs.cpp:1582
+#: engines/mohawk/dialogs.cpp:367
+#, fuzzy
+#| msgid "Best"
+msgctxt "riven-transition"
 msgid "Best"
 msgstr "Nejlepší"
 
@@ -11458,17 +11898,9 @@ msgstr ""
 "Nelze uložit hru do pozice %i\n"
 "\n"
 
-#: engines/parallaction/saveload.cpp:193
-msgid "Load file"
-msgstr "Načíst soubor"
-
 #: engines/parallaction/saveload.cpp:200
 msgid "Loading game..."
 msgstr "Nahrávání hry..."
-
-#: engines/parallaction/saveload.cpp:208
-msgid "Save file"
-msgstr "Uložit soubor"
 
 #: engines/parallaction/saveload.cpp:215
 msgid "Saving game..."
@@ -11661,11 +12093,6 @@ msgstr "Přeskočit video"
 #, fuzzy
 msgid "Restart sequence"
 msgstr "Spustit ladící program"
-
-#. I18N: Plumbers is the title of the game. 3DO is the name of platform
-#: engines/plumbers/metaengine.cpp:51
-msgid "3DO Plumbers requires RGB support."
-msgstr ""
 
 #: engines/prince/metaengine.cpp:237
 #, fuzzy
@@ -12492,6 +12919,10 @@ msgstr ""
 #: engines/scumm/dialogs.cpp:1582
 msgid "Better"
 msgstr ""
+
+#: engines/scumm/dialogs.cpp:1582
+msgid "Best"
+msgstr "Nejlepší"
 
 #: engines/scumm/dialogs.cpp:1583
 #, c-format
@@ -13894,7 +14325,7 @@ msgstr "Úvod z diskety"
 msgid "Use the floppy version's intro (CD version only)"
 msgstr "Použít verzi úvodu z diskety (Pouze verze CD)"
 
-#: engines/sky/metaengine.cpp:235
+#: engines/sky/metaengine.cpp:237
 msgid "WARNING: Deleting the autosave slot is not supported by this engine"
 msgstr ""
 
@@ -14446,7 +14877,7 @@ msgstr "Vložte herní disk pro uložení/načtení"
 msgid "Go to end of save / load menu"
 msgstr "Vložte herní disk pro uložení/načtení"
 
-#: engines/tinsel/tinsel.cpp:1059
+#: engines/tinsel/tinsel.cpp:1058
 msgid "Discworld Noir needs ScummVM with TinyGL enabled"
 msgstr ""
 
@@ -17164,7 +17595,7 @@ msgstr ""
 msgid "Preferences"
 msgstr "Prioritní zařízení:"
 
-#: engines/zvision/zvision.cpp:301
+#: engines/zvision/zvision.cpp:306
 msgid ""
 "Before playing this game, you'll need to copy the required fonts into "
 "ScummVM's extras directory, or into the game directory. On Windows, you'll "
@@ -17175,13 +17606,22 @@ msgid ""
 "LiberationSerif."
 msgstr ""
 
-#: engines/zvision/zvision.cpp:316
+#: engines/zvision/zvision.cpp:321
 msgid ""
 "MIDI playback is not available, or else improperly configured. Zork Nemesis "
 "contains several music puzzles which require MIDI audio in order to be "
 "solved.  These puzzles may alternatively be solved using subtitles, if "
 "supported. Continue launching game?"
 msgstr ""
+
+#~ msgid "Load game:"
+#~ msgstr "Nahrát hru:"
+
+#~ msgid "Load file"
+#~ msgstr "Načíst soubor"
+
+#~ msgid "Save file"
+#~ msgstr "Uložit soubor"
 
 #, fuzzy
 #~| msgid "Center"
@@ -18317,10 +18757,6 @@ msgstr ""
 
 #~ msgid "Saved games sync complete."
 #~ msgstr "Synchronizace uložených her dokončena."
-
-#, fuzzy
-#~ msgid "Loading..."
-#~ msgstr "Nahrávání hry..."
 
 #~ msgid "Scanlines"
 #~ msgstr "Linie snímání"

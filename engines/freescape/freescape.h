@@ -339,6 +339,7 @@ public:
 
 	void parseAmigaAtariHeader(Common::SeekableReadStream *file);
 	Common::SeekableReadStream *decryptFileAmigaAtari(const Common::Path &packed, const Common::Path &unpacker, uint32 unpackArrayOffset);
+	Common::SeekableReadStream *decryptFileAtariVirtualWorlds(const Common::Path &filename);
 
 	// Areas
 	uint16 _startArea;
@@ -427,6 +428,7 @@ public:
 
 	Math::Vector3d directionToVector(float pitch, float heading, bool useTable);
 	void updateCamera();
+	virtual void onRotate(float xoffset, float yoffset, float zoffset) {}
 
 	// Camera options
 	Common::Point _crossairPosition;
