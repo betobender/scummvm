@@ -21,6 +21,7 @@
 
 #include "backends/translation_overlay/translation-overlay-helpers.h"
 
+#include "common/array.h"
 #include "common/fs.h"
 #include "common/formats/json.h"
 #include "common/ptr.h"

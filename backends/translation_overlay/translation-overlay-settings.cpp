@@ -25,6 +25,7 @@
 #include "common/config-manager.h"
 #include "common/debug.h"
 #include "common/formats/json.h"
+#include "common/fs.h"
 
 namespace TranslationOverlay {
 

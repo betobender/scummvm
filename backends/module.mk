@@ -585,7 +585,12 @@ endif
 endif
 
 MODULE_OBJS += \
-	translation_overlay/translation-overlay-plugin.o
+	translation_overlay/translation-overlay-plugin.o \
+	translation_overlay/translation-overlay-helpers.o \
+	translation_overlay/translation-overlay-stream.o \
+	translation_overlay/translation-overlay-settings.o \
+	translation_overlay/translation-overlay-report.o
+
 
 # Include common rules
 include $(srcdir)/rules.mk

@@ -302,12 +302,12 @@ void MixerImpl::playStream(
 	// If the translation overlay plugin is active and has a replacement for this
 	// sound ID, substitute the original stream with the AI-generated one.
 	if (type == kSpeechSoundType && id != -1 && TranslationMan.isActive()) {
-		Audio::SeekableAudioStream *replacement = TranslationMan.createReplacementStream(id);
-		if (replacement) {
+		Audio::SeekableAudioStream *replacement = TranslationMan.translateStream(id, stream);
+		if (replacement != nullptr) {
 			if (autofreeStream == DisposeAfterUse::YES)
 				delete stream;
 			stream = replacement;
-			autofreeStream = DisposeAfterUse::YES;
+			autofreeStream = DisposeAfterUse::NO; // rbender: need to extract this info from the TranslationMan
 		}
 	}
 

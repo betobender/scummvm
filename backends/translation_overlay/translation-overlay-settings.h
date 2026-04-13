@@ -24,8 +24,8 @@
 
 #include "backends/translation_overlay/translation-overlay-stream.h"
 
+#include "common/array.h"
 #include "common/hash-str.h"
-#include "common/fs.h"
 
 namespace TranslationOverlay {
 

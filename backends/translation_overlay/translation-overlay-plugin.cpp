@@ -22,17 +22,8 @@
 #include "backends/translation_overlay/translation-overlay-plugin.h"
 #include "backends/translation_overlay/translation-overlay-helpers.h"
 
-#include "audio/decoders/wave.h"
-#include "common/config-manager.h"
 #include "common/debug.h"
-#include "common/file.h"
-#include "common/formats/json.h"
-#include "common/fs.h"
-#include "common/ptr.h"
-#include "common/stream.h"
 #include "common/str.h"
-#include "common/str-enc.h"
-#include "common/textconsole.h"
 
 // ---------------------------------------------------------------------------
 // TranslationOverlayPlugin

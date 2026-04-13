@@ -1114,42 +1114,34 @@ void VoiceReplacementManager::setActivePlugin(int index) {
 		_activePlugin = plugins[index];
 }
 
-Audio::SeekableAudioStream *VoiceReplacementManager::createReplacementStream(int soundId) const {
+Audio::SeekableAudioStream *VoiceReplacementManager::translateStream(int soundId, Audio::AudioStream *original) const {
 	if (!_activePlugin)
 		return nullptr;
 	const VoiceReplacementPluginObject &plugin = _activePlugin->get<VoiceReplacementPluginObject>();
-	if (!plugin.hasReplacement(soundId))
-		return nullptr;
-	return plugin.createReplacementStream(soundId);
+	return plugin.translateStream(soundId, original);
 }
 
-bool VoiceReplacementManager::hasTagReplacement(const char *tag) const {
-	if (!_activePlugin || !tag || !tag[0])
-		return false;
-	return _activePlugin->get<VoiceReplacementPluginObject>().hasTagReplacement(tag);
-}
-
-Audio::SeekableAudioStream *VoiceReplacementManager::createTagReplacementStream(const char *tag) const {
+Audio::SeekableAudioStream *VoiceReplacementManager::translateStream(const char *tag, Audio::AudioStream *original) const {
 	if (!_activePlugin || !tag || !tag[0])
 		return nullptr;
-	return _activePlugin->get<VoiceReplacementPluginObject>().createTagReplacementStream(tag);
+	return _activePlugin->get<VoiceReplacementPluginObject>().translateStream(tag, original);
 }
 
-int VoiceReplacementManager::buildOutput(const byte *rawMsg, int actorId,
+int VoiceReplacementManager::translateText(const byte *rawMsg, int actorId,
                                           byte *dst, int dstSize) const {
 	if (!_activePlugin)
 		return -1;
-	return _activePlugin->get<VoiceReplacementPluginObject>().buildOutput(rawMsg, actorId, dst, dstSize);
-}
-
-Common::String VoiceReplacementManager::resolveV6Voice(const byte *rawMsg, int actorId) const {
-	if (!_activePlugin)
-		return Common::String();
-	return _activePlugin->get<VoiceReplacementPluginObject>().resolveV6Voice(rawMsg, actorId);
+	return _activePlugin->get<VoiceReplacementPluginObject>().translateText(rawMsg, actorId, dst, dstSize);
 }
 
 void VoiceReplacementManager::reloadConfig() {
 	if (!_activePlugin)
 		return;
 	_activePlugin->get<VoiceReplacementPluginObject>().loadConfig();
+}
+
+int VoiceReplacementManager::getLastSoundId() const {
+	if (!_activePlugin)
+		return -1;
+	return _activePlugin->get<VoiceReplacementPluginObject>().getLastSoundId();
 }

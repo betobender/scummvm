@@ -146,28 +146,8 @@ void ScummEngine::debugMessage(const byte *msg) {
 		if (_game.id == GID_SAMNMAX)
 			channel = VAR(VAR_V6_SOUNDMODE);
 
-		if (channel != 2) {
-			// V6 voice replacement: check TranslationOverlayPlugin for a dubbed
-			// WAV keyed by the original (English) message text.  If found, play it
-			// directly via the mixer and skip the original SFX bundle audio.
-			// This mirrors the V7 approach in ScummEngine_v7::playSpeech().
-			Common::String voicePath = TranslationMan.resolveV6Voice(msg, _actorToPrintStrFor);
-			if (!voicePath.empty()) {
-				_sound->stopTalkSound();
-				Common::File *f = new Common::File();
-				if (f->open(Common::Path(voicePath))) {
-					Audio::SeekableAudioStream *stream = Audio::makeWAVStream(f, DisposeAfterUse::YES);
-					if (stream)
-						_mixer->playStream(Audio::Mixer::kSpeechSoundType,
-						                   _sound->_talkChannelHandle, stream);
-				} else {
-					delete f;
-				}
-				// Subtitle text substitution still runs via convertMessageToString above.
-			} else {
-				_sound->talkSound(offset, length, DIGI_SND_MODE_SFX, channel);
-			}
-		}
+		if (channel != 2)
+			_sound->talkSound(offset, length, DIGI_SND_MODE_SFX, channel);
 	}
 }
 
@@ -1616,7 +1596,7 @@ int ScummEngine::convertMessageToString(const byte *msg, byte *dst, int dstSize)
 	} else if (TranslationMan.isActive()) {
 		// SCUMM v6 text substitution via TranslationOverlayPlugin: replaces English
 		// dialogue from the game scripts with translated text from dialogue.json.
-		int written = TranslationMan.buildOutput(
+		int written = TranslationMan.translateText(
 		    msg, _actorToPrintStrFor, dst, (int)(end - dst));
 		if (written >= 0) {
 			dst += written;
@@ -2233,10 +2213,9 @@ void ScummEngine_v7::playSpeech(const byte *ptr) {
 
 	if ((_game.id == GID_DIG || _game.id == GID_CMI) && ptr[0]) {
 		// Check for tag-based voice replacement (e.g. pt-BR dubbing via ScummTagVoicePlugin)
-		if (VoiceMan.hasTagReplacement((const char *)ptr)) {
+		if (Audio::SeekableAudioStream *stream = TranslationMan.translateStream((const char *)ptr)) {
 			_sound->stopTalkSound();
 			_imuseDigital->stopSound(kTalkSoundID);
-			Audio::SeekableAudioStream *stream = VoiceMan.createTagReplacementStream((const char *)ptr);
 			if (stream) {
 				_mixer->playStream(Audio::Mixer::kSpeechSoundType, _sound->_talkChannelHandle, stream);
 				_sound->talkSound(0, 0, DIGI_SND_MODE_TALKIE);

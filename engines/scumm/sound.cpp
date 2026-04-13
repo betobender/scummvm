@@ -36,6 +36,7 @@
 #include "audio/decoders/flac.h"
 #include "audio/mididrv.h"
 #include "audio/mixer.h"
+#include "audio/voiceplugin.h"
 #include "audio/decoders/mp3.h"
 #include "audio/decoders/raw.h"
 #include "audio/decoders/voc.h"
@@ -814,6 +815,8 @@ void Sound::startTalkSound(uint32 offset, uint32 length, int mode, Audio::SoundH
 			if (mode == DIGI_SND_MODE_SFX) {
 				_mixer->playStream(Audio::Mixer::kSFXSoundType, handle, input, id);
 			} else {
+				if (TranslationMan.isActive())
+					id = TranslationMan.getLastSoundId();
 				_mixer->playStream(Audio::Mixer::kSpeechSoundType, handle, input, id);
 			}
 		}

@@ -22,13 +22,9 @@
 #ifndef BACKENDS_TRANSLATION_OVERLAY_PLUGIN_H
 #define BACKENDS_TRANSLATION_OVERLAY_PLUGIN_H
 
-#include "backends/translation_overlay/translation-overlay-stream.h"
 #include "backends/translation_overlay/translation-overlay-settings.h"
 
 #include "audio/voiceplugin.h"
-#include "common/fs.h"
-#include "common/hashmap.h"
-#include "common/hash-str.h"
 #include "common/path.h"
 #include "common/str.h"
 
