@@ -30,15 +30,11 @@
 // ---------------------------------------------------------------------------
 
 TranslationOverlayPlugin::TranslationOverlayPlugin() {
-	readConfig();
-}
-
-void TranslationOverlayPlugin::readConfig() {
-	_settings.loadSettings();
+	loadConfig();
 }
 
 void TranslationOverlayPlugin::loadConfig() {
-	readConfig();
+	_settings.loadSettings();
 }
 
 void TranslationOverlayPlugin::dumpOriginal(const Common::String &id, Audio::AudioStream *original) const {

@@ -54,13 +54,9 @@ public:
 	int getLastSoundId() const override;
 
 private:
-	TranslationOverlay::Settings _settings;
-
 	mutable int _cachedIndex = -1;
-
-	void readConfig();
+	TranslationOverlay::Settings _settings;
 	void dumpOriginal(const Common::String &id, Audio::AudioStream *original) const;
-	Common::Path buildWavPath(const Common::String &stem) const;
 	Common::String getStemFromId(int soundId) const;
 };
 
