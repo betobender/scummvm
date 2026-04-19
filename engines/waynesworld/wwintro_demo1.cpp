@@ -25,7 +25,6 @@
 #include "waynesworld/gxlarchive.h"
 
 #include "audio/audiostream.h"
-#include "graphics/paletteman.h"
 
 namespace WaynesWorld {
 
@@ -36,10 +35,37 @@ WWIntro_demo1::~WWIntro_demo1() {
 }
 
 void WWIntro_demo1::runIntro() {
+	// continueFl is used like in the full version, but for the moment it's not possible to skip (demo is not interactive)
 	bool continueFl = initOanGxl();
+	// continueFl = false; // For debug purposes
 
 	if (continueFl)
-		introPt1();
+		continueFl = introPt1();
+	if (continueFl)
+		continueFl = introPt3();
+	if (continueFl)
+		continueFl = introPt4();
+	if (continueFl)
+		continueFl = introPt3Bis();
+
+	cleanOanGxl();
+
+	if (continueFl)
+		continueFl = introDisplaySign();
+
+	introPreviewRoom00();
+	
+	if (continueFl)
+		continueFl = introMapStonebridge();
+	if (continueFl)
+		continueFl = introPreviewRoom08and22();
+	if (continueFl)
+		continueFl = introMapButterfield();
+	if (continueFl)
+		continueFl = introPreviewRoom07and15and16();
+
+	introMapDowntown();
+	introPreviewRoom10();
 }
 
 bool WWIntro_demo1::introPt1() {
@@ -143,4 +169,738 @@ bool WWIntro_demo1::introPt1() {
 	return true;
 }
 
+bool WWIntro_demo1::introPt3() {
+	// sub1 - Parameter is always 'true' so it has been removed and the code simplified
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->loadPalette(_oanGxl, "backg1.pcx");
+	_vm->paletteFadeOut(0, 256, 64);
+	
+	introPt3_init();
+	// End of sub1
+
+	_demoPt2Surface->clear(0);
+	_demoPt2Surface->drawSurface(_logoSurface, 47, 25);
+	wwEffect(1, 0);
+	_vm->paletteFadeIn(0, 256, 6);
+
+	_vm->playSound("theme1.snd", 0);
+
+	wwEffect(1, 1);
+	wwEffect(1, 2);
+	wwEffect(1, 3);
+
+	for (int i = 0; i < 24; ++i) {
+		setColor236(i % 19);
+		wwEffect((i % 8) + 1, 4);
+	}
+
+	wwEffect(1, 3);
+	wwEffect(1, 2);
+	wwEffect(1, 1);
+	wwEffect(1, 0);
+
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
+
+	_vm->_sound->playSound("exclnt.snd", false);
+
+	introPt3_clean();
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt3Bis() {
+	// sub1 - Parameter is always 'true' so it has been removed and the code simplified
+	introPt3_init();
+	// End of sub1
+	_vm->stopMusic();
+	_vm->playSound("theme1.snd", false);
+
+	wwEffect(1, 0);
+	wwEffect(1, 1);
+	wwEffect(1, 2);
+	wwEffect(1, 3);
+
+	for (int i = 0; i < 20; ++i) {
+		setColor236(i % 19);
+		wwEffect((i % 8) + 1, 4);
+	}
+
+	introPt3_clean();
+	_vm->waitSeconds(9);
+
+	return true;
+}
+
+void WWIntro_demo1::introPt4_init() {
+	_vm->_fontWW = new GFTFont();
+	_vm->_fontWW->loadFromFile("ww.gft");
+
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(30);
+
+	_introBackg1Image = new WWSurface(320, 170);
+	_vm->drawImageToSurface(_oanGxl, "backg1.pcx", _introBackg1Image, 0, 0);
+
+	for (int i = 0; i < 5; ++i) {
+		_introWbodyImage[i] = new WWSurface(145, 118);
+		Common::String filename = Common::String::format("wbody%d.pcx", i == 0 ? 0 : i + 8);
+		_vm->drawImageToSurface(_oanGxl, filename.c_str(), _introWbodyImage[i], 0, 0);
+	}
+
+	_introGbodyImage = new WWSurface(160, 149);
+	_vm->drawImageToSurface(_oanGxl, "gbody0.pcx", _introGbodyImage, 0, 0);
+
+	// The original is overwriting the song name (default metal1.xmi) instead of setting the musicIndex.
+	_vm->_musicIndex = 2; // metal2.xmi
+	_vm->changeMusic();
+
+	for (int i = 0; i < 8; ++i) {
+		_introWhead1[i] = new WWSurface(98, 71);
+		Common::String filename = Common::String::format("whead1%d.pcx", i);
+		_vm->drawImageToSurface(_oanGxl, filename.c_str(), _introWhead1[i], 0, 0);
+	}
+
+	for (int i = 0; i < 11; ++i) {
+		_introGhead1[i] = new WWSurface(138, 80);
+		Common::String filename = Common::String::format("ghead1%d.pcx", i);
+		_vm->drawImageToSurface(_oanGxl, filename.c_str(), _introGhead1[i], 0, 0);
+	}
+	
+	_vm->drawImageToScreen(_oanGxl, "backg1.pcx", 0, 15);
+	_vm->paletteFadeIn(0, 256, 2);
+}
+
+bool WWIntro_demo1::introPt4_intro() {
+	_vm->_sound->playSound("ok.abt", false);
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 20; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+
+		++_startOawPos;
+	}
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller1() {
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 15; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+
+		for (int j = 0; j < 5; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+	_vm->playSound("ok.abt", false);
+
+	for (int i = 0; i < 10; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	_vm->playSound("shya!2.abt", false);
+
+	for (int j = 0; j < 10; ++j) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int j = 0; j < 15; ++j) {
+		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+	}
+	++_startOagPos;
+	
+	_vm->playSound("not!.abt", true);
+	
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 15; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("hello.abt", true);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller2() {
+	for (int i = 0; i < 4; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->playSound("flash-bk.abt", true);
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int j = 0; j < 10; ++j) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(2);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 4; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("no-way.abt", false);
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+	_vm->_sound->playSound("goodc-g.abt", false);
+
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller3() {
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 0);
+	}
+	++_startOawPos;
+	++_startOagPos;
+	_vm->_sound->playSound("worthy.snd", true);
+
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	_vm->_sound->playSound("not!.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 0);
+	}
+	++_startOawPos;
+	++_startOagPos;
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	for (int j = 0; j < 4; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+	_vm->_sound->playSound("as-if.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 0);
+	}
+	++_startOawPos;
+	++_startOagPos;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPt4_caller4() {
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(2);
+
+	for (int i = 0; i < 15; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < 15; ++i) {
+			sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+		}
+		++_startOagPos;
+	}
+
+	_vm->_sound->playSound("ilovetw.abt", true);
+
+	for (int i = 0; i < 15; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(2);
+	_vm->_sound->playSound("cool!.abt", false);
+
+	for (int i = 0; i < 3; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 2; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("nway-way.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+	}
+	++_startOagPos;
+
+	sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+	_vm->waitSeconds(1);
+
+	for (int j = 0; j < 3; ++j) {
+		for (int i = 0; i < 8; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	for (int i = 0; i < 8; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+	_vm->_sound->playSound("exskweez.abt", false);
+
+	for (int i = 0; i < 8; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+	}
+	++_startOawPos;
+
+	for (int i = 0; i < 6; ++i) {
+		sub2FEFB(1, 0, 1, _vm->getRandom(3), _vm->getRandom(11), 2);
+		_vm->waitSeconds(2);
+	}
+
+	_vm->_sound->playSound("donut.snd", true);
+
+	for (int j = 0; j < 3; ++j) {
+		for (int i = 0; i < 8; ++i) {
+			sub2FEFB(1, 0, 1, _vm->getRandom(3), 9, 0);
+		}
+		++_startOawPos;
+	}
+
+	_vm->_sound->playSound("partyon.abt", false);
+
+	for (int i = 0; i < 5; ++i) {
+		sub2FEFB(1, 0, 1, 0, _vm->getRandom(11), 1);
+	}
+	++_startOagPos;
+
+	return true;
+}
+
+bool WWIntro_demo1::introDisplaySign() {
+	WWSurface *introPt6Surface[5] = {nullptr};
+
+	GxlArchive *signGxl = new GxlArchive("sign");
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+
+	for (int i = 0; i < 5; ++i) {
+		introPt6Surface[i] = new WWSurface(320, 200);
+		Common::String filename = Common::String::format("sign%d.pcx", i);
+		_vm->drawImageToSurface(signGxl, filename.c_str(), introPt6Surface[i], 0, 0);
+	}
+
+	_vm->_sound->playSound("ex-clsp2.snd", false);
+
+	for (int i = 0; i < 5; ++i) {
+		_vm->_screen->drawSurface(introPt6Surface[i], 0, 0);
+		_vm->waitMillis(150);
+	}
+
+	WWSurface *signBottomSurface = new WWSurface(320, 94);
+	_vm->drawImageToSurface(signGxl, "signbot.pcx", signBottomSurface, 0, 0);
+
+	_vm->waitSeconds(4);
+	_vm->_musicIndex = 1;
+	_vm->changeMusic();
+
+	WWSurface *scrollSurface = new WWSurface(320, 200);
+
+	for (int i = 199; i > 106; --i) {
+		scrollSurface->copyRectToSurface((Graphics::Surface)*introPt6Surface[4], 0, 0, Common::Rect(0, 200 - i, 319, 200));
+		scrollSurface->copyRectToSurface((Graphics::Surface)*signBottomSurface, 0, i, Common::Rect(0, 0, 319, 200 - i));
+		_vm->_screen->drawSurface(scrollSurface, 0, 0);
+	}
+
+	delete scrollSurface;
+	delete signBottomSurface;
+	for (int i = 0; i < 5; ++i)
+		delete introPt6Surface[i];
+
+	delete signGxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom00() {
+	GxlArchive *r00Gxl = new GxlArchive("r00");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	_vm->loadPalette(r00Gxl, "backg.pcx");
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_musicIndex = 0;
+	_vm->changeMusic();
+	_vm->drawImageToScreen(r00Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	delete m00Gxl;
+	delete r00Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapStonebridge() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 109);
+		Common::String filename = Common::String::format("stn_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "stn_tag.pcx", 173, 90);
+	_vm->playSound("flash-bk.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 0; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 173, 13);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "may_tag.pcx", 193, 40);
+	_vm->drawImageToScreen(m02Gxl, "eug_tag.pcx", 241, 82);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom08and22() {
+	GxlArchive *r08Gxl = new GxlArchive("r08");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+	GxlArchive *r22Gxl = new GxlArchive("r22");
+
+	WWSurface *r22Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r22Gxl, "backg.pcx", r22Back, 0, 0);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r08Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+
+	_vm->playSound("zeetsa.abt", false);
+	_vm->drawSpiralEffect(r22Back, 0, 0, 5, 5);
+	_vm->waitSeconds(3);
+
+	delete r22Back;
+
+	delete r22Gxl;
+	delete m00Gxl;
+	delete r08Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapButterfield() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(171, 109);
+		Common::String filename = Common::String::format("but_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "but_tag.pcx", 247, 38);
+	_vm->playSound("flash-bk.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 0; i < 12; ++i) {
+		_vm->_screen->drawSurface(zmPcx[i], 127, 11);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "cin_tag.pcx", 147, 27);
+	_vm->drawImageToScreen(m02Gxl, "c35_tag.pcx", 208, 72);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom07and15and16() {
+	GxlArchive *r07Gxl = new GxlArchive("r07");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+	GxlArchive *r15Gxl = new GxlArchive("r15");
+	GxlArchive *r16Gxl = new GxlArchive("r16");
+
+	WWSurface *r15Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r15Gxl, "backg.pcx", r15Back, 0, 0);
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r07Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->paletteFadeIn(0, 256, 3);
+	_vm->waitSeconds(3);
+
+	_vm->drawSpiralEffect(r15Back, 0, 0, 5, 5);
+	_vm->waitSeconds(3);
+	delete r15Back;
+
+	WWSurface *r16Back = new WWSurface(320, 150);
+	_vm->drawImageToSurface(r16Gxl, "backg.pcx", r16Back, 0, 0);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->_sound->playSound("zang!.abt", false);
+	_vm->waitSeconds(3);
+	_vm->drawSpiralEffect(r16Back, 0, 0, 5, 5);
+	_vm->waitSeconds(3);
+	delete r16Back;
+
+	delete r16Gxl;
+	delete r15Gxl;
+	delete m00Gxl;
+	delete r07Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introMapDowntown() {
+	GxlArchive *m02Gxl = new GxlArchive("m02");
+
+	WWSurface *zmPcx[12] = {nullptr};
+	for (int i = 0; i < 12; ++i) {
+		zmPcx[i] = new WWSurface(137, 110);
+		Common::String filename = Common::String::format("dt_zm%d.pcx", i);
+		_vm->drawImageToSurface(m02Gxl, filename.c_str(), zmPcx[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(m02Gxl, "main_map.pcx", 0, 0);
+	_vm->paletteFadeIn(0, 256, 4);
+	_vm->drawImageToScreen(m02Gxl, "dt_tag.pcx", 125, 137);
+	_vm->waitSeconds(1);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("flash-bk.abt", false);
+
+	for (int i = 3; i < 12; ++i) {
+		// The original starts the loop at 3. It looks like a typo, but it's on purpose: there's a visible glitch on the left on the first 3 frames.
+		_vm->_screen->drawSurface(zmPcx[i], 70, 69);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(m02Gxl, "jun_tag.pcx", 78, 87);
+	_vm->drawImageToScreen(m02Gxl, "cih_tag.pcx", 134, 102);
+	_vm->drawImageToScreen(m02Gxl, "uno_tag.pcx", 142, 137);
+	_vm->waitSeconds(4);
+
+	for (int i = 0; i < 12; ++i)
+		delete zmPcx[i];
+
+	delete m02Gxl;
+
+	return true;
+}
+
+bool WWIntro_demo1::introPreviewRoom10() {
+	GxlArchive *r10Gxl = new GxlArchive("r10");
+	GxlArchive *m00Gxl = new GxlArchive("m00");
+
+	WWSurface *r10Win = new WWSurface(141, 92);
+	_vm->drawImageToSurface(r10Gxl, "win.pcx", r10Win, 0, 0);
+	WWSurface *r10Getmon[5] = {nullptr};
+	for (int i = 0; i < 5; ++i) {
+		r10Getmon[i] = new WWSurface(84, 100);
+		Common::String filename = Common::String::format("getmon%d.pcx", i);
+		_vm->drawImageToSurface(r10Gxl, filename.c_str(), r10Getmon[i], 0, 0);
+	}
+
+	WWSurface *r10Puttick[4] = {nullptr};
+	for (int i = 0; i < 4; ++i) {
+		r10Puttick[i] = new WWSurface(84, 100);
+		Common::String filename = Common::String::format("puttick%d.pcx", i);
+		_vm->drawImageToSurface(r10Gxl, filename.c_str(), r10Puttick[i], 0, 0);
+	}
+
+	_vm->paletteFadeOut(0, 256, 4);
+	_vm->_screen->clear(0);
+	_vm->drawImageToScreen(r10Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(m00Gxl, "ginter.pcx", 0, 151);
+	_vm->drawImageToScreen(r10Gxl, "money.pcx", 136, 100);
+	_vm->paletteFadeIn(0, 256, 3);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("ilovetw.abt", false);
+	_vm->waitSeconds(1);
+
+	for (int i = 0; i < 5; ++i) {
+		_vm->_screen->drawSurface(r10Getmon[i], 98, 7);
+		_vm->waitMillis(75);
+	}
+	
+	for (int i = 0; i < 4; ++i) {
+		_vm->_screen->drawSurface(r10Puttick[i], 98, 7);
+		_vm->waitMillis(75);
+	}
+
+	_vm->drawImageToScreen(r10Gxl, "backg.pcx", 0, 0);
+	_vm->drawImageToScreen(r10Gxl, "cticket.pcx", 147, 101);
+
+	for (int i = 0; i < 4; ++i)
+		delete r10Puttick[i];
+	for (int i = 0; i < 5; ++i)
+		delete r10Getmon[i];
+
+	_vm->waitSeconds(2);
+	_vm->paletteFadeOut(0, 256, 64);
+	_vm->_screen->clear(0);
+	while (_vm->_sound->isSFXPlaying())
+		_vm->waitMillis(10);
+	_vm->playSound("ex-clsp2.snd", false);
+	_vm->drawImageToScreen(r10Gxl, "ticket.pcx", 0, 13);
+	_vm->paletteFadeIn(0, 256, 64);
+	_vm->waitSeconds(2);
+
+	_vm->drawRandomEffect(r10Win, 157, 38, 1, 1);
+
+	delete r10Win;
+
+	delete m00Gxl;
+	delete r10Gxl;
+
+	return true;
+}
 } // End of namespace WaynesWorld

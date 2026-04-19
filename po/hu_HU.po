@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.3.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 17:14+0000\n"
+"POT-Creation-Date: 2026-04-17 20:58+0000\n"
 "PO-Revision-Date: 2025-03-07 00:18+0000\n"
 "Last-Translator: Hovánszki Tamás <gahex68379@lofiey.com>\n"
 "Language-Team: Hungarian <https://translations.scummvm.org/projects/scummvm/"
@@ -25,45 +25,45 @@ msgid "Apple Macintosh Audio"
 msgstr "Apple Macintosh Hang"
 
 #. I18N: built with <compiler>
-#: gui/about.cpp:113
+#: gui/about.cpp:119
 #, fuzzy, c-format
 #| msgid "(built on %s with %s)"
 msgid "(built with %s)"
 msgstr "(összeállítva %s dátummal, %s segítségével)"
 
 #. I18N: built on <build date> with <compiler>
-#: gui/about.cpp:116
+#: gui/about.cpp:122
 #, c-format
 msgid "(built on %s with %s)"
 msgstr "(összeállítva %s dátummal, %s segítségével)"
 
-#: gui/about.cpp:124
+#: gui/about.cpp:130
 msgid "Features compiled in:"
 msgstr "Fordítói funkciók:"
 
-#: gui/about.cpp:132
+#: gui/about.cpp:138
 msgid "not supported"
 msgstr "nem támogatott"
 
-#: gui/about.cpp:132
+#: gui/about.cpp:138
 msgid "disabled"
 msgstr "kikapcsolva"
 
-#: gui/about.cpp:132
+#: gui/about.cpp:138
 msgid "enabled"
 msgstr "bekapcsolva"
 
 #. I18N: CPU extensions are sets of extra processor instructions used to speed up operations. See Intel AVX2, ARM NEON, etc.
-#: gui/about.cpp:156
+#: gui/about.cpp:162
 msgid "CPU extensions support:"
 msgstr "CPU bővítmények támogatása:"
 
-#: gui/about.cpp:169
+#: gui/about.cpp:175
 msgid "Available engines:"
 msgstr "Támogatott játékmotorok:"
 
 #. I18N: Close dialog button
-#: gui/about.cpp:511 gui/about.cpp:640 gui/downloadpacksdialog.cpp:298
+#: gui/about.cpp:531 gui/about.cpp:663 gui/downloadpacksdialog.cpp:298
 #: gui/downloadpacksdialog.cpp:389 gui/integrity-dialog.cpp:354
 #: gui/gui-manager.cpp:168 gui/helpdialog.cpp:128 gui/imagealbum-dialog.cpp:133
 #: gui/textviewer.cpp:56 gui/unknown-game-dialog.cpp:53
@@ -119,7 +119,7 @@ msgstr "Fentebb lépés"
 #: gui/integrity-dialog.cpp:253 gui/filebrowser-dialog.cpp:68
 #: gui/fluidsynth-dialog.cpp:153 gui/massadd.cpp:93 gui/options.cpp:2416
 #: gui/predictivedialog.cpp:68 gui/printing-dialog.cpp:96
-#: gui/recorderdialog.cpp:73 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:211
 #: gui/remotebrowser.cpp:59 gui/saveload-dialog.cpp:64
 #: gui/saveload-dialog.cpp:456 gui/saveload-dialog.cpp:540
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
@@ -2881,43 +2881,43 @@ msgstr "Mutató Sebesség:"
 msgid "Orientation:"
 msgstr "Következõ akció"
 
-#: gui/recorderdialog.cpp:67
+#: gui/recorderdialog.cpp:66
 msgid "Recorder or Playback Gameplay"
 msgstr "Játékmenet felvétel vagy visszajátszás"
 
-#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:71 gui/recorderdialog.cpp:211
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
 #: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "Törlés"
 
-#: gui/recorderdialog.cpp:74
+#: gui/recorderdialog.cpp:73
 msgid "Record"
 msgstr "Felvétel"
 
-#: gui/recorderdialog.cpp:75
+#: gui/recorderdialog.cpp:74
 msgid "Playback"
 msgstr "Visszajátszás"
 
-#: gui/recorderdialog.cpp:77 gui/widgets/grid.cpp:340
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
 msgid "Edit"
 msgstr "Szerkesztés"
 
-#: gui/recorderdialog.cpp:142 gui/recorderdialog.cpp:301
-#: gui/recorderdialog.cpp:308
+#: gui/recorderdialog.cpp:141 gui/recorderdialog.cpp:300
+#: gui/recorderdialog.cpp:307
 msgid "Author: "
 msgstr "Szerző: "
 
-#: gui/recorderdialog.cpp:144 gui/recorderdialog.cpp:302
-#: gui/recorderdialog.cpp:309
+#: gui/recorderdialog.cpp:143 gui/recorderdialog.cpp:301
+#: gui/recorderdialog.cpp:308
 msgid "Notes: "
 msgstr "Megjegyzés: "
 
-#: gui/recorderdialog.cpp:211
+#: gui/recorderdialog.cpp:210
 msgid "Do you really want to delete this record?"
 msgstr "Biztosan le akarja törölni ezt a felvételt?"
 
-#: gui/recorderdialog.cpp:228
+#: gui/recorderdialog.cpp:227
 msgid "Unknown Author"
 msgstr "Ismeretlen Szerző"
 
@@ -3033,28 +3033,28 @@ msgstr "Válasszon shadert"
 msgid "Select a Theme"
 msgstr "Válassz témát"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgid "Disabled GFX"
 msgstr "GFX letiltva"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgctxt "lowres"
 msgid "Disabled GFX"
 msgstr "GFX letiltva"
 
-#: gui/ThemeEngine.cpp:267
+#: gui/ThemeEngine.cpp:257
 msgid "Standard renderer"
 msgstr "Szabványos render"
 
-#: gui/ThemeEngine.cpp:267 engines/scumm/dialogs.cpp:1054
+#: gui/ThemeEngine.cpp:257 engines/scumm/dialogs.cpp:1054
 msgid "Standard"
 msgstr "Szabványos"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased renderer"
 msgstr "Élsimított rederer"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased"
 msgstr "Élsimított"
 
@@ -3109,15 +3109,15 @@ msgstr ""
 "Ezt a beállítást később módosíthatja az Egyéb lapon\n"
 "az Opciók párbeszédablakban."
 
-#: gui/widget.cpp:466 gui/widget.cpp:468 gui/widget.cpp:473 gui/widget.cpp:475
+#: gui/widget.cpp:467 gui/widget.cpp:469 gui/widget.cpp:474 gui/widget.cpp:476
 msgid "Clear value"
 msgstr "Érték törlése"
 
-#: gui/widgets/grid.cpp:334
+#: gui/widgets/grid.cpp:330
 msgid "Play"
 msgstr "Indítás"
 
-#: gui/widgets/grid.cpp:337
+#: gui/widgets/grid.cpp:333
 msgid "Saves"
 msgstr "Mentések"
 
@@ -3829,7 +3829,7 @@ msgid "ERROR: Could not copy the savegame to a new slot"
 msgstr "HIBA: A játékmentés nem másolható az új helyre"
 
 #: engines/engine.cpp:681 engines/savestate.cpp:103
-#: backends/platform/ios7/ios7_osys_main.cpp:266 engines/mm/xeen/saves.cpp:293
+#: backends/platform/ios7/ios7_osys_main.cpp:269 engines/mm/xeen/saves.cpp:293
 #: engines/sky/metaengine.cpp:218
 msgid "Autosave"
 msgstr "Automata mentés"
@@ -4429,7 +4429,7 @@ msgstr "Sikertelen képernyőkép mentés"
 msgid "Windowed mode"
 msgstr "Ablakos mód"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:169
+#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:168
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "Teljesképernyős kapcsoló"
@@ -6335,7 +6335,7 @@ msgstr "R2"
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
 #: backends/platform/sdl/miyoo/miyoo.cpp:114
-#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:180
+#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:179
 #: engines/grim/grim.cpp:545 engines/grim/grim.cpp:645
 #: engines/hdb/metaengine.cpp:264 engines/made/metaengine.cpp:186
 #: engines/phoenixvr/metaengine.cpp:101 engines/toltecs/metaengine.cpp:252
@@ -6825,7 +6825,7 @@ msgstr "A későbbi Apple II modelles kockás kurzor használata"
 #: engines/griffon/metaengine.cpp:40 engines/hugo/metaengine.cpp:56
 #: engines/made/metaengine.cpp:51 engines/mm/metaengine.cpp:91
 #: engines/mortevielle/metaengine.cpp:37 engines/parallaction/metaengine.cpp:52
-#: engines/sci/detection_options.h:223 engines/scumm/dialogs.cpp:1252
+#: engines/sci/detection_options.h:221 engines/scumm/dialogs.cpp:1252
 #: engines/scumm/metaengine.cpp:872 engines/supernova/metaengine.cpp:53
 #: engines/wage/metaengine.cpp:51 engines/wintermute/metaengine.cpp:81
 msgid "Enable Text to Speech"
@@ -6865,7 +6865,7 @@ msgstr ""
 #: engines/got/metaengine.cpp:35 engines/groovie/metaengine.cpp:53
 #: engines/m4/metaengine.cpp:37 engines/nancy/metaengine.cpp:104
 #: engines/neverhood/dialogs.cpp:47 engines/phoenixvr/metaengine.cpp:38
-#: engines/sci/detection_options.h:107 engines/sherlock/metaengine.cpp:47
+#: engines/sci/detection_options.h:105 engines/sherlock/metaengine.cpp:47
 #: engines/toltecs/metaengine.cpp:44 engines/trecision/metaengine.cpp:41
 #: engines/ultima/metaengine.cpp:56 engines/waynesworld/metaengine.cpp:37
 #: engines/zvision/metaengine.cpp:42
@@ -6879,7 +6879,7 @@ msgstr "Eredeti mentés/töltés képernyők használata"
 #: engines/got/metaengine.cpp:36 engines/groovie/metaengine.cpp:54
 #: engines/m4/metaengine.cpp:38 engines/nancy/metaengine.cpp:105
 #: engines/neverhood/dialogs.cpp:48 engines/phoenixvr/metaengine.cpp:39
-#: engines/sci/detection_options.h:108 engines/sherlock/metaengine.cpp:48
+#: engines/sci/detection_options.h:106 engines/sherlock/metaengine.cpp:48
 #: engines/toltecs/metaengine.cpp:45 engines/trecision/metaengine.cpp:42
 #: engines/ultima/metaengine.cpp:57 engines/waynesworld/metaengine.cpp:38
 #: engines/zvision/metaengine.cpp:43
@@ -7029,11 +7029,11 @@ msgstr ""
 "diktált tempóval fog lejátszódni. Ellenkező esetben a Windows-verzió "
 "gyorsabb tempója kerül felhasználásra."
 
-#: engines/agos/dialogs.cpp:71 engines/sci/detection_options.h:95
+#: engines/agos/dialogs.cpp:71 engines/sci/detection_options.h:93
 msgid "Prefer digital sound effects"
 msgstr "Digitális hangeffektusok preferálása"
 
-#: engines/agos/dialogs.cpp:72 engines/sci/detection_options.h:96
+#: engines/agos/dialogs.cpp:72 engines/sci/detection_options.h:94
 msgid "Prefer digital sound effects instead of synthesized ones"
 msgstr "Digitális hanghatások előnyben részesítése a szintetizáltakkal szemben"
 
@@ -7055,11 +7055,11 @@ msgstr "Eredeti mentés/töltés képernyők használata"
 msgid "Toggle between the system cursor and the default cursor."
 msgstr ""
 
-#: engines/agos/dialogs.cpp:107 engines/sci/detection_options.h:263
+#: engines/agos/dialogs.cpp:107 engines/sci/detection_options.h:261
 msgid "MIDI mode:"
 msgstr "MIDI mód:"
 
-#: engines/agos/dialogs.cpp:108 engines/sci/detection_options.h:264
+#: engines/agos/dialogs.cpp:108 engines/sci/detection_options.h:262
 msgid ""
 "When using external MIDI devices (e.g. through USB-MIDI), select your device "
 "here"
@@ -7067,15 +7067,15 @@ msgstr ""
 "Külső MIDI-eszköz használatakor (pl. USB-MIDI-n keresztül), itt válassza ki "
 "eszközét"
 
-#: engines/agos/dialogs.cpp:113 engines/sci/detection_options.h:269
+#: engines/agos/dialogs.cpp:113 engines/sci/detection_options.h:267
 msgid "Standard (GM / MT-32)"
 msgstr "Szabványos (GM / MT-32)"
 
-#: engines/agos/dialogs.cpp:117 engines/sci/detection_options.h:281
+#: engines/agos/dialogs.cpp:117 engines/sci/detection_options.h:279
 msgid "Casio MT-540"
 msgstr "Casio MT-540"
 
-#: engines/agos/dialogs.cpp:121 engines/sci/detection_options.h:285
+#: engines/agos/dialogs.cpp:121 engines/sci/detection_options.h:283
 msgid "Casio CT-460 / CSM-1"
 msgstr "Casio CT-460 / CSM-1"
 
@@ -8115,19 +8115,19 @@ msgstr "Felfelé néz"
 msgid "Look down"
 msgstr "Lefelé néz"
 
-#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:138
+#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:137
 #, fuzzy
 #| msgid "Look at"
 msgid "Look left"
 msgstr "Megnéz"
 
-#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:143
+#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:142
 #, fuzzy
 #| msgid "Look at"
 msgid "Look right"
 msgstr "Megnéz"
 
-#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
+#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:99
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
 #: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
@@ -8350,7 +8350,7 @@ msgstr "Szövegfelolvasó engedélyezése az Objektumok és Opciókban"
 #: engines/dreamweb/metaengine.cpp:74 engines/griffon/metaengine.cpp:41
 #: engines/lure/metaengine.cpp:54 engines/mads/metaengine.cpp:125
 #: engines/parallaction/metaengine.cpp:53 engines/prince/metaengine.cpp:41
-#: engines/sci/detection_options.h:224 engines/sherlock/metaengine.cpp:121
+#: engines/sci/detection_options.h:222 engines/sherlock/metaengine.cpp:121
 #: engines/supernova/metaengine.cpp:54 engines/teenagent/metaengine.cpp:50
 #: engines/twine/metaengine.cpp:145 engines/wage/metaengine.cpp:52
 msgid "Use TTS to read the descriptions (if TTS is available)"
@@ -8480,21 +8480,21 @@ msgstr ""
 "emiatt hibák merülhetnek fel. Ajánlott az Operation Stealth egy új mentésből "
 "való visszatöltése."
 
-#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:40
+#: engines/colony/metaengine.cpp:45 engines/myst3/metaengine.cpp:40
 msgid "Widescreen mod"
 msgstr "Szélesvásznú mód"
 
-#: engines/colony/metaengine.cpp:47 engines/myst3/metaengine.cpp:41
+#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:41
 msgid "Enable widescreen rendering in fullscreen mode."
 msgstr "Engedélyezi a szélesvásznú megjelenítést teljesképernyős módban."
 
-#: engines/colony/metaengine.cpp:107
+#: engines/colony/metaengine.cpp:106
 #, fuzzy
 #| msgid "Move backwards"
 msgid "Move backward"
 msgstr "Menj hátrafelé"
 
-#: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
+#: engines/colony/metaengine.cpp:113 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
 #: engines/mm/mm1/metaengine.cpp:100
 #, fuzzy
@@ -8502,7 +8502,7 @@ msgstr "Menj hátrafelé"
 msgid "Strafe left"
 msgstr "Balra oldalazás"
 
-#: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
+#: engines/colony/metaengine.cpp:120 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
 #: engines/mm/mm1/metaengine.cpp:101
 #, fuzzy
@@ -8510,7 +8510,7 @@ msgstr "Balra oldalazás"
 msgid "Strafe right"
 msgstr "Oldalazás jobbra"
 
-#: engines/colony/metaengine.cpp:128
+#: engines/colony/metaengine.cpp:127
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
@@ -8520,7 +8520,7 @@ msgstr "Oldalazás jobbra"
 msgid "Rotate left"
 msgstr "Forgatás Balra"
 
-#: engines/colony/metaengine.cpp:133
+#: engines/colony/metaengine.cpp:132
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
@@ -8530,38 +8530,38 @@ msgstr "Forgatás Balra"
 msgid "Rotate right"
 msgstr "Forgatás Jobbra"
 
-#: engines/colony/metaengine.cpp:148
+#: engines/colony/metaengine.cpp:147
 #, fuzzy
 #| msgid "Look down"
 msgid "Look behind"
 msgstr "Lefelé néz"
 
-#: engines/colony/metaengine.cpp:153
+#: engines/colony/metaengine.cpp:152
 #, fuzzy
 #| msgid "Toggle mute"
 msgid "Toggle mouselook"
 msgstr "Némítás kapcsolása"
 
-#: engines/colony/metaengine.cpp:159
+#: engines/colony/metaengine.cpp:158
 #, fuzzy
 #| msgid "Toggle sound"
 msgid "Toggle dashboard"
 msgstr "Hang ki/be Kapcsolása"
 
-#: engines/colony/metaengine.cpp:164
+#: engines/colony/metaengine.cpp:163
 #, fuzzy
 #| msgid "Toggle panel style"
 msgid "Toggle wireframe"
 msgstr "Ablak stílus kapcsoló"
 
-#: engines/colony/metaengine.cpp:174 engines/hypno/metaengine.cpp:146
+#: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
 #: engines/sherlock/metaengine.cpp:872 engines/teenagent/metaengine.cpp:232
 #: engines/toon/metaengine.cpp:98 engines/voyeur/metaengine.cpp:235
 msgid "Skip intro"
 msgstr "Nyitóvideó átugrása"
 
-#: engines/colony/metaengine.cpp:186 engines/ultima/ultima8/metaengine.cpp:89
+#: engines/colony/metaengine.cpp:185 engines/ultima/ultima8/metaengine.cpp:89
 #, fuzzy
 #| msgid "Next action"
 msgid "Fire weapon"
@@ -9434,114 +9434,114 @@ msgstr ""
 msgid "Play sound type 16"
 msgstr "1. Hangjegy: A"
 
-#: engines/freescape/metaengine.cpp:42
+#: engines/freescape/metaengine.cpp:41
 msgid "Prerecorded sounds"
 msgstr "Előre felvett hangok"
 
-#: engines/freescape/metaengine.cpp:43
+#: engines/freescape/metaengine.cpp:42
 msgid "Use high-quality pre-recorded sounds instead of pc speaker emulation"
 msgstr ""
 "Jó minőségű előre rögzített hangok használata a pc speaker emuláció helyett"
 
-#: engines/freescape/metaengine.cpp:53
+#: engines/freescape/metaengine.cpp:52
 msgid "Extended timer"
 msgstr "Kiterjesztett időzítő"
 
-#: engines/freescape/metaengine.cpp:54
+#: engines/freescape/metaengine.cpp:53
 msgid "Start the game timer at 99:59:59"
 msgstr "Játékidőzítő indítás 99:59:59-nél"
 
-#: engines/freescape/metaengine.cpp:64
+#: engines/freescape/metaengine.cpp:63
 msgid "Automatic drilling"
 msgstr "Automatikus fúrás"
 
-#: engines/freescape/metaengine.cpp:65
+#: engines/freescape/metaengine.cpp:64
 msgid "Allow to successfully drill in any part of the area in Driller"
 msgstr "Sikeres fúrás engedélyezése bármely területen a Driller-ben"
 
-#: engines/freescape/metaengine.cpp:75
+#: engines/freescape/metaengine.cpp:74
 msgid "Disable demo mode"
 msgstr "Demó mód tiltása"
 
-#: engines/freescape/metaengine.cpp:76
+#: engines/freescape/metaengine.cpp:75
 msgid "Never activate demo mode"
 msgstr "Soha ne aktiválja a demó módot"
 
-#: engines/freescape/metaengine.cpp:86
+#: engines/freescape/metaengine.cpp:85
 msgid "Disable sensors"
 msgstr "Érzékelők letiltása"
 
-#: engines/freescape/metaengine.cpp:87
+#: engines/freescape/metaengine.cpp:86
 msgid "Sensors will not shoot the player"
 msgstr "Az érzékelők nem lövik le a játékost"
 
-#: engines/freescape/metaengine.cpp:97
+#: engines/freescape/metaengine.cpp:96
 msgid "Disable falling"
 msgstr "Leesés tiltása"
 
-#: engines/freescape/metaengine.cpp:98
+#: engines/freescape/metaengine.cpp:97
 msgid "Player cannot fall over edges"
 msgstr "A játékos nem eshet át a széleken"
 
-#: engines/freescape/metaengine.cpp:108
+#: engines/freescape/metaengine.cpp:107
 msgid "Invert Y-axis on mouse"
 msgstr "Egér Y tengely invertálása"
 
-#: engines/freescape/metaengine.cpp:109
+#: engines/freescape/metaengine.cpp:108
 msgid "Use alternative camera controls"
 msgstr "Alternatív kamera irányítás használata"
 
-#: engines/freescape/metaengine.cpp:119
+#: engines/freescape/metaengine.cpp:118
 msgid "Authentic graphics"
 msgstr "Autentikus grafika"
 
-#: engines/freescape/metaengine.cpp:120
+#: engines/freescape/metaengine.cpp:119
 msgid "Keep graphics as close as possible to the original"
 msgstr "A grafika az eredetihez lehető legjobban közelítsen"
 
-#: engines/freescape/metaengine.cpp:130
+#: engines/freescape/metaengine.cpp:129
 msgid "Enable rock travel"
 msgstr "Kő utazás engedélyezése"
 
-#: engines/freescape/metaengine.cpp:131
+#: engines/freescape/metaengine.cpp:130
 msgid "Enable traveling using a rock shoot at start"
 msgstr "A kezdésnél lehessen kő kilövéssel utazni"
 
-#: engines/freescape/metaengine.cpp:141
+#: engines/freescape/metaengine.cpp:140
 msgid "Smoother movement"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:142
+#: engines/freescape/metaengine.cpp:141
 msgid "Use smoother movements instead of discrete steps"
 msgstr ""
 
 #. I18N: Use modern FPS-style controls: WASD for movement, Shift to run
-#: engines/freescape/metaengine.cpp:153
+#: engines/freescape/metaengine.cpp:152
 #, fuzzy
 #| msgid "Touch Controls"
 msgid "WASD controls"
 msgstr "Érintő irányítás"
 
-#: engines/freescape/metaengine.cpp:154
+#: engines/freescape/metaengine.cpp:153
 msgid "Use WASD keys for movement and Shift to run"
 msgstr ""
 
 #. I18N: Enable background music using AdLib/OPL2 FM synthesis
-#: engines/freescape/metaengine.cpp:165
+#: engines/freescape/metaengine.cpp:164
 msgid "Backported music from C64 releases (AdLib)"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:166
+#: engines/freescape/metaengine.cpp:165
 msgid ""
 "Enable background music ported from the C64 version using AdLib FM synthesis"
 msgstr ""
 
 #. I18N: Enable background music using AY chip emulation
-#: engines/freescape/metaengine.cpp:177
+#: engines/freescape/metaengine.cpp:176
 msgid "Backported music from C64 releases"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:178
+#: engines/freescape/metaengine.cpp:177
 msgid "Enable background music ported from the C64 version"
 msgstr ""
 
@@ -10326,12 +10326,12 @@ msgid "Save file created by different version."
 msgstr "Más verzióval létrehozott fájl mentés."
 
 #: engines/gob/inter_geisha.cpp:237 engines/gob/inter_playtoons.cpp:285
-#: engines/gob/inter_v2.cpp:1512 engines/tinsel/saveload.cpp:588
+#: engines/gob/inter_v2.cpp:1523 engines/tinsel/saveload.cpp:588
 msgid "Failed to load saved game from file."
 msgstr "Nem sikerült a mentett játékállás betöltése fájlból."
 
 #: engines/gob/inter_geisha.cpp:268 engines/gob/inter_playtoons.cpp:426
-#: engines/gob/inter_v2.cpp:1591 engines/tinsel/saveload.cpp:601
+#: engines/gob/inter_v2.cpp:1602 engines/tinsel/saveload.cpp:601
 msgid "Failed to save game to file."
 msgstr "Nem sikerült a játékállás mentése fájlba."
 
@@ -11591,7 +11591,7 @@ msgstr ""
 "Bekapcsolása esetén a játék a digitális betétdalt játssza le a nyitófilm "
 "alatt. Ellenkező esetben a MIDI zene került lejátszásra."
 
-#: engines/made/metaengine.cpp:63 engines/sci/detection_options.h:132
+#: engines/made/metaengine.cpp:63 engines/sci/detection_options.h:130
 msgid "Use Windows cursors"
 msgstr "Windows kurzorok használata"
 
@@ -13070,91 +13070,91 @@ msgstr "Feketevonalas videó engedélyezése"
 msgid "Draw black lines over videos to increase their apparent sharpness"
 msgstr "A videó fölé fekete vonalakat rajzol, ezzel élesebb hatást keltve"
 
-#: engines/sci/detection_options.h:70
+#: engines/sci/detection_options.h:69
 msgid "Use high-quality video scaling"
 msgstr "Magas minőségû videó átméretezés használata"
 
-#: engines/sci/detection_options.h:71
+#: engines/sci/detection_options.h:70
 msgid "Use linear interpolation when upscaling videos, where possible"
 msgstr ""
 "Ha lehetséges, használja a lineáris interpolációt a videók átméretezésekor"
 
-#: engines/sci/detection_options.h:83
+#: engines/sci/detection_options.h:81
 msgid "Use high-quality \"LarryScale\" cel scaling"
 msgstr "Magas minőségű \"LarryScale\" pont skálázás használata"
 
-#: engines/sci/detection_options.h:84
+#: engines/sci/detection_options.h:82
 msgid "Use special cartoon scaler for drawing character sprites"
 msgstr ""
 "Használjon speciális rajzfilm-skálázást a karakter sprite-ok rajzolásához"
 
-#: engines/sci/detection_options.h:119
+#: engines/sci/detection_options.h:117
 msgid "Use CD audio"
 msgstr "CD hang használata"
 
-#: engines/sci/detection_options.h:120
+#: engines/sci/detection_options.h:118
 msgid "Use CD audio instead of in-game audio, if available"
 msgstr "CD hang használata a játékban lévővel szemben, ha rendelkezésre áll"
 
-#: engines/sci/detection_options.h:133
+#: engines/sci/detection_options.h:131
 msgid ""
 "Use the Windows cursors (smaller and monochrome) instead of the DOS ones"
 msgstr "Windows kurzorok használata (kisebb és monokróm) a DOS-osok helyett"
 
-#: engines/sci/detection_options.h:145
+#: engines/sci/detection_options.h:143
 msgid "Use silver cursors"
 msgstr "Ezüst kurzor használata"
 
-#: engines/sci/detection_options.h:146
+#: engines/sci/detection_options.h:144
 msgid ""
 "Use the alternate set of silver cursors instead of the normal golden ones"
 msgstr "Használjon alternatív ezüst kurzorokat, a normál arany színűek helyett"
 
-#: engines/sci/detection_options.h:158
+#: engines/sci/detection_options.h:156
 msgid "Enable content censoring"
 msgstr "Tartalom cenzúrázásának engedélyezése"
 
-#: engines/sci/detection_options.h:159
+#: engines/sci/detection_options.h:157
 msgid "Enable the game's built-in optional content censoring"
 msgstr "Engedélyezze a játék beépített opcionális tartalom cenzúrázását"
 
-#: engines/sci/detection_options.h:171
+#: engines/sci/detection_options.h:169
 msgid "Upscale videos"
 msgstr "Felskálázott videók"
 
-#: engines/sci/detection_options.h:172
+#: engines/sci/detection_options.h:170
 msgid "Upscale videos to double their size"
 msgstr "Videók méretének megduplázása felskálázással"
 
-#: engines/sci/detection_options.h:184
+#: engines/sci/detection_options.h:182
 msgid "Use RGB rendering"
 msgstr "RGB megjelenítés használata"
 
-#: engines/sci/detection_options.h:185
+#: engines/sci/detection_options.h:183
 msgid "Use RGB rendering to improve screen transitions"
 msgstr "Használjon RGB renderelést a képernyőátmenet javításához"
 
-#: engines/sci/detection_options.h:197
+#: engines/sci/detection_options.h:195
 msgid "Use per-resource modified palettes"
 msgstr "Használjon erőforrásonkénti módosított palettákat"
 
-#: engines/sci/detection_options.h:198
+#: engines/sci/detection_options.h:196
 msgid "Use custom per-resource palettes to improve visuals"
 msgstr "Használjon egyedi erőforrás palettákat a látvány javításához"
 
-#: engines/sci/detection_options.h:210
+#: engines/sci/detection_options.h:208
 msgid "Enable bearded musicians"
 msgstr "Szakállas zenészek engedélyezése"
 
-#: engines/sci/detection_options.h:211
+#: engines/sci/detection_options.h:209
 msgid "Enable graphics that were disabled for legal reasons"
 msgstr "Engedélyezze a jogi okok miatt letiltott grafikai tartalmakat"
 
-#: engines/sci/detection_options.h:236
+#: engines/sci/detection_options.h:234
 msgid "Enable saving via the GMM"
 msgstr "GMM-en keresztüli mentés engedélyezése"
 
-#: engines/sci/detection_options.h:237
+#: engines/sci/detection_options.h:235
 msgid ""
 "Allows saving via the GMM. WARNING: saves created via the GMM may be "
 "corrupted and unusable. Use at your own risk!"
@@ -13163,11 +13163,11 @@ msgstr ""
 "mentések eredménye sérült vagy használhatatlan is lehet. Saját felelősségre "
 "használja!"
 
-#: engines/sci/detection_options.h:248
+#: engines/sci/detection_options.h:246
 msgid "Repair speech audio"
 msgstr "Beszédhangok javítása"
 
-#: engines/sci/detection_options.h:249
+#: engines/sci/detection_options.h:247
 msgid ""
 "Detect and attempt to repair overflows in DPCM8 audio, which cause "
 "noticeable pops and crackles."
@@ -13175,11 +13175,11 @@ msgstr ""
 "A DPCM8 hang túlfolyások felismerése és kipróbálása, amely máskülönben "
 "recsegést okozhat."
 
-#: engines/sci/detection_options.h:273
+#: engines/sci/detection_options.h:271
 msgid "Roland D-110 / D-10 / D-20"
 msgstr "Roland D-110 / D-10 / D-20"
 
-#: engines/sci/detection_options.h:277
+#: engines/sci/detection_options.h:275
 msgid "Yamaha FB-01"
 msgstr "Yamaha FB-01"
 
@@ -13231,10 +13231,11 @@ msgid ""
 msgstr ""
 "Ez a mentett játék a játék másik verziójával készült, ezért nem tölthető be"
 
-#: engines/sci/graphics/video32.cpp:68
-#, c-format
-msgid ""
-"Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+#: engines/sci/graphics/video32.cpp:70
+#, fuzzy, c-format
+#| msgid ""
+#| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+msgid "Cannot play back %s video on a system with maximum color depth of 8bpp"
 msgstr ""
 "Nem lehet lejátszani %d bpp videót olyan rendszeren, melynek maximális "
 "színmélysége 8 bpp"

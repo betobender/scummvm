@@ -48,26 +48,18 @@ FilmLoopCastMember::FilmLoopCastMember(Cast *cast, uint16 castId, Common::Seekab
 	_crop = false;
 	_center = false;
 	_index = -1;
+	_score = nullptr;
 
-	// We are ignoring some of the bits in the flags
-	if (cast->_version >= kFileVer400 && cast->_version < kFileVer500) {
+	if (cast->_version >= kFileVer400) {
 		_initialRect = Movie::readRect(stream);
 		uint32 flags = stream.readUint32BE();
 		uint16 unk1 = stream.readUint16BE();
-		debugC(5, kDebugLoading, "FilmLoopCastMember::FilmLoopCastMember(): flags: %d, unk1: %d", flags, unk1);
-		_looping = flags & 64 ? 0 : 1;
-		_enableSound = flags & 8 ? 1 : 0;
-		_crop = flags & 2 ? 0 : 1;
-		_center = flags & 1 ? 1 : 0;
-	} else if (cast->_version >= kFileVer500 && cast->_version < kFileVer600) {
-		_initialRect = Movie::readRect(stream);
-		uint32 flags = stream.readUint32BE();
-		uint16 unk1 = stream.readUint16BE();
-		debugC(5, kDebugLoading, "FilmLoopCastMember::FilmLoopCastMember(): flags: %d, unk1: %d", flags, unk1);
 		_looping = flags & 32 ? 0 : 1;
 		_enableSound = flags & 8 ? 1 : 0;
 		_crop = flags & 2 ? 0 : 1;
 		_center = flags & 1 ? 1 : 0;
+
+		debugC(5, kDebugLoading, "FilmLoopCastMember::FilmLoopCastMember(): flags: %d, unk1: %d, looping: %d, enableSound: %d, crop: %d, center: %d", flags, unk1, _looping, _enableSound, _crop, _center);
 	}
 }
 
@@ -209,7 +201,7 @@ Common::String FilmLoopCastMember::formatInfo() {
 		_initialRect.left, _initialRect.top,
 		_boundingRect.width(), _boundingRect.height(),
 		_boundingRect.left, _boundingRect.top,
-		_score->_scoreCache.size(), _subchannels.size(), _enableSound, _looping,
+		_score ? _score->_scoreCache.size() : -1, _score ? _subchannels.size() : -1, _enableSound, _looping,
 		_crop, _center
 	);
 }
@@ -284,12 +276,7 @@ void FilmLoopCastMember::writeCastData(Common::SeekableWriteStream *writeStream)
 	Movie::writeRect(writeStream, _initialRect);
 
 	uint32 flags = 0;
-	if (_cast->_version >= kFileVer400 && _cast->_version < kFileVer500) {
-		flags |= (_looping) ? 0 : 64;
-		flags |= (_enableSound) ? 8 : 0;
-		flags |= (_crop) ? 0 : 2;
-		flags |= (_center) ? 1 : 0;
-	} else if (_cast->_version >= kFileVer500 && _cast->_version < kFileVer600) {
+	if (_cast->_version >= kFileVer400) {
 		flags |= (_looping) ? 0 : 32;
 		flags |= (_enableSound) ? 8 : 0;
 		flags |= (_crop) ? 0 : 2;

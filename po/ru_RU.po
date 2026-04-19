@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.8.0svn\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2026-04-12 17:14+0000\n"
-"PO-Revision-Date: 2026-03-28 17:49+0000\n"
+"POT-Creation-Date: 2026-04-17 20:58+0000\n"
+"PO-Revision-Date: 2026-04-15 22:03+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Russian <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ru/>\n"
@@ -25,45 +25,44 @@ msgid "Apple Macintosh Audio"
 msgstr "Звук Apple Macintosh"
 
 #. I18N: built with <compiler>
-#: gui/about.cpp:113
-#, fuzzy, c-format
-#| msgid "(built on %s with %s)"
+#: gui/about.cpp:119
+#, c-format
 msgid "(built with %s)"
-msgstr "(собрано %s c %s)"
+msgstr "(собрано c %s)"
 
 #. I18N: built on <build date> with <compiler>
-#: gui/about.cpp:116
+#: gui/about.cpp:122
 #, c-format
 msgid "(built on %s with %s)"
 msgstr "(собрано %s c %s)"
 
-#: gui/about.cpp:124
+#: gui/about.cpp:130
 msgid "Features compiled in:"
 msgstr "Включённые в сборку опции:"
 
-#: gui/about.cpp:132
+#: gui/about.cpp:138
 msgid "not supported"
 msgstr "не поддерживается"
 
-#: gui/about.cpp:132
+#: gui/about.cpp:138
 msgid "disabled"
 msgstr "выключено"
 
-#: gui/about.cpp:132
+#: gui/about.cpp:138
 msgid "enabled"
 msgstr "включено"
 
 #. I18N: CPU extensions are sets of extra processor instructions used to speed up operations. See Intel AVX2, ARM NEON, etc.
-#: gui/about.cpp:156
+#: gui/about.cpp:162
 msgid "CPU extensions support:"
 msgstr "Поддержка расширений процессоров:"
 
-#: gui/about.cpp:169
+#: gui/about.cpp:175
 msgid "Available engines:"
 msgstr "Доступные движки:"
 
 #. I18N: Close dialog button
-#: gui/about.cpp:511 gui/about.cpp:640 gui/downloadpacksdialog.cpp:298
+#: gui/about.cpp:531 gui/about.cpp:663 gui/downloadpacksdialog.cpp:298
 #: gui/downloadpacksdialog.cpp:389 gui/integrity-dialog.cpp:354
 #: gui/gui-manager.cpp:168 gui/helpdialog.cpp:128 gui/imagealbum-dialog.cpp:133
 #: gui/textviewer.cpp:56 gui/unknown-game-dialog.cpp:53
@@ -119,7 +118,7 @@ msgstr "Вверх"
 #: gui/integrity-dialog.cpp:253 gui/filebrowser-dialog.cpp:68
 #: gui/fluidsynth-dialog.cpp:153 gui/massadd.cpp:93 gui/options.cpp:2416
 #: gui/predictivedialog.cpp:68 gui/printing-dialog.cpp:96
-#: gui/recorderdialog.cpp:73 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:211
 #: gui/remotebrowser.cpp:59 gui/saveload-dialog.cpp:64
 #: gui/saveload-dialog.cpp:456 gui/saveload-dialog.cpp:540
 #: gui/saveload-dialog.cpp:839 gui/saveload-dialog.cpp:1243
@@ -2829,43 +2828,43 @@ msgstr "Принтер:"
 msgid "Orientation:"
 msgstr "Ориентация:"
 
-#: gui/recorderdialog.cpp:67
+#: gui/recorderdialog.cpp:66
 msgid "Recorder or Playback Gameplay"
 msgstr "Воспроизвести или записать игровой процесс"
 
-#: gui/recorderdialog.cpp:72 gui/recorderdialog.cpp:212
+#: gui/recorderdialog.cpp:71 gui/recorderdialog.cpp:211
 #: gui/saveload-dialog.cpp:460 gui/saveload-dialog.cpp:540
 #: dists/android.strings.xml.cpp:47 engines/engine.cpp:641
 msgid "Delete"
 msgstr "Удалить"
 
-#: gui/recorderdialog.cpp:74
+#: gui/recorderdialog.cpp:73
 msgid "Record"
 msgstr "Записать"
 
-#: gui/recorderdialog.cpp:75
+#: gui/recorderdialog.cpp:74
 msgid "Playback"
 msgstr "Воспроизвести"
 
-#: gui/recorderdialog.cpp:77 gui/widgets/grid.cpp:340
+#: gui/recorderdialog.cpp:76 gui/widgets/grid.cpp:336
 msgid "Edit"
 msgstr "Редактировать"
 
-#: gui/recorderdialog.cpp:142 gui/recorderdialog.cpp:301
-#: gui/recorderdialog.cpp:308
+#: gui/recorderdialog.cpp:141 gui/recorderdialog.cpp:300
+#: gui/recorderdialog.cpp:307
 msgid "Author: "
 msgstr "Автор: "
 
-#: gui/recorderdialog.cpp:144 gui/recorderdialog.cpp:302
-#: gui/recorderdialog.cpp:309
+#: gui/recorderdialog.cpp:143 gui/recorderdialog.cpp:301
+#: gui/recorderdialog.cpp:308
 msgid "Notes: "
 msgstr "Примечания: "
 
-#: gui/recorderdialog.cpp:211
+#: gui/recorderdialog.cpp:210
 msgid "Do you really want to delete this record?"
 msgstr "Вы действительно хотите удалить эту запись?"
 
-#: gui/recorderdialog.cpp:228
+#: gui/recorderdialog.cpp:227
 msgid "Unknown Author"
 msgstr "Неизвестный автор"
 
@@ -2979,28 +2978,28 @@ msgstr "Выбрать шейдер"
 msgid "Select a Theme"
 msgstr "Выбрать тему"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgid "Disabled GFX"
 msgstr "Без графики"
 
-#: gui/ThemeEngine.cpp:266
+#: gui/ThemeEngine.cpp:256
 msgctxt "lowres"
 msgid "Disabled GFX"
 msgstr "Без графики"
 
-#: gui/ThemeEngine.cpp:267
+#: gui/ThemeEngine.cpp:257
 msgid "Standard renderer"
 msgstr "Стандартный растеризатор"
 
-#: gui/ThemeEngine.cpp:267 engines/scumm/dialogs.cpp:1054
+#: gui/ThemeEngine.cpp:257 engines/scumm/dialogs.cpp:1054
 msgid "Standard"
 msgstr "Стандартный"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased renderer"
 msgstr "Растеризатор со сглаживанием"
 
-#: gui/ThemeEngine.cpp:269
+#: gui/ThemeEngine.cpp:259
 msgid "Antialiased"
 msgstr "Со сглаживанием"
 
@@ -3056,15 +3055,15 @@ msgstr ""
 "Вы можете изменить эту настройку\n"
 "во вкладке \"Разное\" в окне \"Настройки\"."
 
-#: gui/widget.cpp:466 gui/widget.cpp:468 gui/widget.cpp:473 gui/widget.cpp:475
+#: gui/widget.cpp:467 gui/widget.cpp:469 gui/widget.cpp:474 gui/widget.cpp:476
 msgid "Clear value"
 msgstr "Очистить значение"
 
-#: gui/widgets/grid.cpp:334
+#: gui/widgets/grid.cpp:330
 msgid "Play"
 msgstr "Играть"
 
-#: gui/widgets/grid.cpp:337
+#: gui/widgets/grid.cpp:333
 msgid "Saves"
 msgstr "Сохранения"
 
@@ -3744,13 +3743,7 @@ msgid "Skip autosave"
 msgstr "Пропустить автосохранение"
 
 #: engines/engine.cpp:644
-#, fuzzy, c-format
-#| msgid ""
-#| "WARNING: The autosave slot contains a saved game named %S, and an "
-#| "autosave is pending.\n"
-#| "Please move this saved game to a new slot, or delete it if it's no longer "
-#| "needed.\n"
-#| "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
+#, c-format
 msgid ""
 "WARNING: The autosave slot contains a saved game named %s, and an autosave "
 "is pending.\n"
@@ -3758,7 +3751,7 @@ msgid ""
 "needed.\n"
 "Alternatively, you can skip the autosave (will prompt again in 5 minutes)."
 msgstr ""
-"ПРЕДУПРЕЖДЕНИЕ: В слоте для автосохранений находится сохранение %S, и "
+"ПРЕДУПРЕЖДЕНИЕ: В слоте для автосохранений находится сохранение %s, и "
 "поступил запрос на автосохранение.\n"
 "Вы можете либо перенести существующее сохранение в новый слот, либо удалить "
 "его, если оно не нужно.\n"
@@ -3770,7 +3763,7 @@ msgid "ERROR: Could not copy the savegame to a new slot"
 msgstr "ОШИБКА: Не удалось перенести сохранение в новый слот"
 
 #: engines/engine.cpp:681 engines/savestate.cpp:103
-#: backends/platform/ios7/ios7_osys_main.cpp:266 engines/mm/xeen/saves.cpp:293
+#: backends/platform/ios7/ios7_osys_main.cpp:269 engines/mm/xeen/saves.cpp:293
 #: engines/sky/metaengine.cpp:218
 msgid "Autosave"
 msgstr "Автосохранение"
@@ -4366,7 +4359,7 @@ msgstr "Не удалось сохранить скриншот"
 msgid "Windowed mode"
 msgstr "Оконный режим"
 
-#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:169
+#: backends/graphics/sdl/sdl-graphics.cpp:492 engines/colony/metaengine.cpp:168
 #: engines/scumm/help.cpp:88
 msgid "Toggle fullscreen"
 msgstr "Переключить полноэкранный режим"
@@ -6102,7 +6095,7 @@ msgstr "R2"
 #. I18N: Hardware key
 #: backends/platform/sdl/miyoo/miyoo.cpp:83
 #: backends/platform/sdl/miyoo/miyoo.cpp:114
-#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:180
+#: engines/alcachofa/metaengine.cpp:110 engines/colony/metaengine.cpp:179
 #: engines/grim/grim.cpp:545 engines/grim/grim.cpp:645
 #: engines/hdb/metaengine.cpp:264 engines/made/metaengine.cpp:186
 #: engines/phoenixvr/metaengine.cpp:101 engines/toltecs/metaengine.cpp:252
@@ -6584,7 +6577,7 @@ msgstr "Используйте курсор-шахматку из более п�
 #: engines/griffon/metaengine.cpp:40 engines/hugo/metaengine.cpp:56
 #: engines/made/metaengine.cpp:51 engines/mm/metaengine.cpp:91
 #: engines/mortevielle/metaengine.cpp:37 engines/parallaction/metaengine.cpp:52
-#: engines/sci/detection_options.h:223 engines/scumm/dialogs.cpp:1252
+#: engines/sci/detection_options.h:221 engines/scumm/dialogs.cpp:1252
 #: engines/scumm/metaengine.cpp:872 engines/supernova/metaengine.cpp:53
 #: engines/wage/metaengine.cpp:51 engines/wintermute/metaengine.cpp:81
 msgid "Enable Text to Speech"
@@ -6622,7 +6615,7 @@ msgstr ""
 #: engines/got/metaengine.cpp:35 engines/groovie/metaengine.cpp:53
 #: engines/m4/metaengine.cpp:37 engines/nancy/metaengine.cpp:104
 #: engines/neverhood/dialogs.cpp:47 engines/phoenixvr/metaengine.cpp:38
-#: engines/sci/detection_options.h:107 engines/sherlock/metaengine.cpp:47
+#: engines/sci/detection_options.h:105 engines/sherlock/metaengine.cpp:47
 #: engines/toltecs/metaengine.cpp:44 engines/trecision/metaengine.cpp:41
 #: engines/ultima/metaengine.cpp:56 engines/waynesworld/metaengine.cpp:37
 #: engines/zvision/metaengine.cpp:42
@@ -6636,7 +6629,7 @@ msgstr "Использовать оригинальные экраны запи�
 #: engines/got/metaengine.cpp:36 engines/groovie/metaengine.cpp:54
 #: engines/m4/metaengine.cpp:38 engines/nancy/metaengine.cpp:105
 #: engines/neverhood/dialogs.cpp:48 engines/phoenixvr/metaengine.cpp:39
-#: engines/sci/detection_options.h:108 engines/sherlock/metaengine.cpp:48
+#: engines/sci/detection_options.h:106 engines/sherlock/metaengine.cpp:48
 #: engines/toltecs/metaengine.cpp:45 engines/trecision/metaengine.cpp:42
 #: engines/ultima/metaengine.cpp:57 engines/waynesworld/metaengine.cpp:38
 #: engines/zvision/metaengine.cpp:43
@@ -6791,11 +6784,11 @@ msgstr ""
 "Выбор этой опции будет проигрывать музыку с использованием темпа DOS-версии "
 "игры. Иначе будет использован более быстрый темп от Windows-версии."
 
-#: engines/agos/dialogs.cpp:71 engines/sci/detection_options.h:95
+#: engines/agos/dialogs.cpp:71 engines/sci/detection_options.h:93
 msgid "Prefer digital sound effects"
 msgstr "Предпочитать цифровые звуковые эффекты"
 
-#: engines/agos/dialogs.cpp:72 engines/sci/detection_options.h:96
+#: engines/agos/dialogs.cpp:72 engines/sci/detection_options.h:94
 msgid "Prefer digital sound effects instead of synthesized ones"
 msgstr ""
 "Отдавать предпочтение цифровым звуковым эффектам вместо синтезированных"
@@ -6816,11 +6809,11 @@ msgstr "Использовать оригинальный системный к�
 msgid "Toggle between the system cursor and the default cursor."
 msgstr "Переключить между системным курсором и курсором по умолчанию."
 
-#: engines/agos/dialogs.cpp:107 engines/sci/detection_options.h:263
+#: engines/agos/dialogs.cpp:107 engines/sci/detection_options.h:261
 msgid "MIDI mode:"
 msgstr "Режим MIDI:"
 
-#: engines/agos/dialogs.cpp:108 engines/sci/detection_options.h:264
+#: engines/agos/dialogs.cpp:108 engines/sci/detection_options.h:262
 msgid ""
 "When using external MIDI devices (e.g. through USB-MIDI), select your device "
 "here"
@@ -6828,15 +6821,15 @@ msgstr ""
 "Если вы используете внешнее MIDI-устройство (т.е. через USB-MIDI), выберите "
 "своё устройство здесь"
 
-#: engines/agos/dialogs.cpp:113 engines/sci/detection_options.h:269
+#: engines/agos/dialogs.cpp:113 engines/sci/detection_options.h:267
 msgid "Standard (GM / MT-32)"
 msgstr "Стандартное (GM / MT-32)"
 
-#: engines/agos/dialogs.cpp:117 engines/sci/detection_options.h:281
+#: engines/agos/dialogs.cpp:117 engines/sci/detection_options.h:279
 msgid "Casio MT-540"
 msgstr "Casio MT-540"
 
-#: engines/agos/dialogs.cpp:121 engines/sci/detection_options.h:285
+#: engines/agos/dialogs.cpp:121 engines/sci/detection_options.h:283
 msgid "Casio CT-460 / CSM-1"
 msgstr "Casio CT-460 / CSM-1"
 
@@ -7749,16 +7742,16 @@ msgid "Quit game"
 msgstr "Выйти из игры"
 
 #: engines/bolt/metaengine.cpp:34
-#, fuzzy
-#| msgid "Enable high resolution"
 msgid "Extended game resolution"
-msgstr "Включить отображение высокого разрешения"
+msgstr "Расширенное разрешение игры"
 
 #: engines/bolt/metaengine.cpp:35
 msgid ""
 "This option allows the game to play at a slightly extended resolution. This "
 "is what the Mac and CDi versions are supposed to play like."
 msgstr ""
+"Эта опция позволяет запускать игру в немного расширенном разрешении. Именно "
+"так должны работать версии для Mac и CDi."
 
 #: engines/buried/buried.cpp:598
 msgid "Are you sure you want to quit?"
@@ -7818,15 +7811,15 @@ msgstr "Смотреть вверх"
 msgid "Look down"
 msgstr "Смотреть вниз"
 
-#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:138
+#: engines/buried/metaengine.cpp:204 engines/colony/metaengine.cpp:137
 msgid "Look left"
 msgstr "Смотреть налево"
 
-#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:143
+#: engines/buried/metaengine.cpp:211 engines/colony/metaengine.cpp:142
 msgid "Look right"
 msgstr "Смотреть направо"
 
-#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:100
+#: engines/buried/metaengine.cpp:218 engines/colony/metaengine.cpp:99
 #: engines/dm/metaengine.cpp:196 engines/kyra/engine/eobcommon.cpp:371
 #: engines/kyra/engine/lol.cpp:513 engines/mohawk/riven.cpp:881
 #: engines/titanic/metaengine.cpp:336 engines/titanic/metaengine.cpp:378
@@ -8012,7 +8005,7 @@ msgstr "Включить озвучку текста для объектов и 
 #: engines/dreamweb/metaengine.cpp:74 engines/griffon/metaengine.cpp:41
 #: engines/lure/metaengine.cpp:54 engines/mads/metaengine.cpp:125
 #: engines/parallaction/metaengine.cpp:53 engines/prince/metaengine.cpp:41
-#: engines/sci/detection_options.h:224 engines/sherlock/metaengine.cpp:121
+#: engines/sci/detection_options.h:222 engines/sherlock/metaengine.cpp:121
 #: engines/supernova/metaengine.cpp:54 engines/teenagent/metaengine.cpp:50
 #: engines/twine/metaengine.cpp:145 engines/wage/metaengine.cpp:52
 msgid "Use TTS to read the descriptions (if TTS is available)"
@@ -8138,31 +8131,31 @@ msgstr ""
 "Игра будет поломана. Наверное придётся начать играть в Operation Stealth с "
 "самого начала, с новыми сохранениями."
 
-#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:40
+#: engines/colony/metaengine.cpp:45 engines/myst3/metaengine.cpp:40
 msgid "Widescreen mod"
 msgstr "Широкоэкранный мод"
 
-#: engines/colony/metaengine.cpp:47 engines/myst3/metaengine.cpp:41
+#: engines/colony/metaengine.cpp:46 engines/myst3/metaengine.cpp:41
 msgid "Enable widescreen rendering in fullscreen mode."
 msgstr "Включить отрисовку в широком формате в полноэкранном режиме."
 
-#: engines/colony/metaengine.cpp:107
+#: engines/colony/metaengine.cpp:106
 msgid "Move backward"
 msgstr "Идти назад"
 
-#: engines/colony/metaengine.cpp:114 engines/dm/metaengine.cpp:216
+#: engines/colony/metaengine.cpp:113 engines/dm/metaengine.cpp:216
 #: engines/freescape/movement.cpp:53 engines/hpl1/metaengine.cpp:78
 #: engines/mm/mm1/metaengine.cpp:100
 msgid "Strafe left"
 msgstr "Стрейф влево"
 
-#: engines/colony/metaengine.cpp:121 engines/dm/metaengine.cpp:236
+#: engines/colony/metaengine.cpp:120 engines/dm/metaengine.cpp:236
 #: engines/freescape/movement.cpp:61 engines/hpl1/metaengine.cpp:79
 #: engines/mm/mm1/metaengine.cpp:101
 msgid "Strafe right"
 msgstr "Стрейф вправо"
 
-#: engines/colony/metaengine.cpp:128
+#: engines/colony/metaengine.cpp:127
 #: engines/freescape/games/castle/castle.cpp:488
 #: engines/freescape/games/dark/dark.cpp:252
 #: engines/freescape/games/driller/driller.cpp:149
@@ -8170,7 +8163,7 @@ msgstr "Стрейф вправо"
 msgid "Rotate left"
 msgstr "Вращение влево"
 
-#: engines/colony/metaengine.cpp:133
+#: engines/colony/metaengine.cpp:132
 #: engines/freescape/games/castle/castle.cpp:493
 #: engines/freescape/games/dark/dark.cpp:257
 #: engines/freescape/games/driller/driller.cpp:154
@@ -8178,38 +8171,30 @@ msgstr "Вращение влево"
 msgid "Rotate right"
 msgstr "Вращение вправо"
 
-#: engines/colony/metaengine.cpp:148
-#, fuzzy
-#| msgid "Look down"
+#: engines/colony/metaengine.cpp:147
 msgid "Look behind"
-msgstr "Смотреть вниз"
+msgstr "Смотреть назад"
 
-#: engines/colony/metaengine.cpp:153
-#, fuzzy
-#| msgid "Toggle mute"
+#: engines/colony/metaengine.cpp:152
 msgid "Toggle mouselook"
-msgstr "Вкл/выкл звук"
+msgstr "Переключить обзор мышью"
 
-#: engines/colony/metaengine.cpp:159
-#, fuzzy
-#| msgid "Toggle sound"
+#: engines/colony/metaengine.cpp:158
 msgid "Toggle dashboard"
-msgstr "Переключить звук"
+msgstr "Переключить панель управления"
 
-#: engines/colony/metaengine.cpp:164
-#, fuzzy
-#| msgid "Toggle frame by frame"
+#: engines/colony/metaengine.cpp:163
 msgid "Toggle wireframe"
-msgstr "Переключить кадр за кадром"
+msgstr "Переключить режим каркаса"
 
-#: engines/colony/metaengine.cpp:174 engines/hypno/metaengine.cpp:146
+#: engines/colony/metaengine.cpp:173 engines/hypno/metaengine.cpp:146
 #: engines/lab/metaengine.cpp:209 engines/ngi/metaengine.cpp:168
 #: engines/sherlock/metaengine.cpp:872 engines/teenagent/metaengine.cpp:232
 #: engines/toon/metaengine.cpp:98 engines/voyeur/metaengine.cpp:235
 msgid "Skip intro"
 msgstr "Пропустить вступление"
 
-#: engines/colony/metaengine.cpp:186 engines/ultima/ultima8/metaengine.cpp:89
+#: engines/colony/metaengine.cpp:185 engines/ultima/ultima8/metaengine.cpp:89
 msgid "Fire weapon"
 msgstr "Выстрелить из оружия"
 
@@ -8445,21 +8430,16 @@ msgid "Brighten the graphics to simulate a Macintosh monitor"
 msgstr "Увеличить яркость картинки для симуляции монитора Macinotsh"
 
 #: engines/director/metaengine.cpp:81
-#, fuzzy
-#| msgid "Force true color"
 msgid "Force true color (32bpp) mode"
-msgstr "Принудительно истинный цвет"
+msgstr "Принудительно 32-битный цвет"
 
 #: engines/director/metaengine.cpp:82
-#, fuzzy
-#| msgid ""
-#| "Use true color graphics mode, even if the game is not designed for it"
 msgid ""
 "Use true color graphics mode (32 bits per pixel), even if the game is not "
 "designed for it"
 msgstr ""
-"Использовать режим полной цветопередачи, даже если игра его не "
-"предусматривала"
+"Использовать режим полной цветопередачи (32 бита на пиксель), даже если игра "
+"его не предусматривет"
 
 #: engines/dm/metaengine.cpp:125
 msgid "Dialog choice selection keymappings"
@@ -8933,112 +8913,112 @@ msgstr "Проиграть звук тип 9"
 msgid "Play sound type 16"
 msgstr "Проиграть звук тип 16"
 
-#: engines/freescape/metaengine.cpp:42
+#: engines/freescape/metaengine.cpp:41
 msgid "Prerecorded sounds"
 msgstr "Записанные звуки"
 
-#: engines/freescape/metaengine.cpp:43
+#: engines/freescape/metaengine.cpp:42
 msgid "Use high-quality pre-recorded sounds instead of pc speaker emulation"
 msgstr ""
 "Использовать высококачественные записи звуков вместо эмуляции PC Speaker"
 
-#: engines/freescape/metaengine.cpp:53
+#: engines/freescape/metaengine.cpp:52
 msgid "Extended timer"
 msgstr "Продлённый таймер"
 
-#: engines/freescape/metaengine.cpp:54
+#: engines/freescape/metaengine.cpp:53
 msgid "Start the game timer at 99:59:59"
 msgstr "Стартовать таймер в игре с 99:59:59"
 
-#: engines/freescape/metaengine.cpp:64
+#: engines/freescape/metaengine.cpp:63
 msgid "Automatic drilling"
 msgstr "Автоматическое сверление"
 
-#: engines/freescape/metaengine.cpp:65
+#: engines/freescape/metaengine.cpp:64
 msgid "Allow to successfully drill in any part of the area in Driller"
 msgstr "Позволяет успешно сверлить любую часть пространства в Driller"
 
-#: engines/freescape/metaengine.cpp:75
+#: engines/freescape/metaengine.cpp:74
 msgid "Disable demo mode"
 msgstr "Выключить режим демо"
 
-#: engines/freescape/metaengine.cpp:76
+#: engines/freescape/metaengine.cpp:75
 msgid "Never activate demo mode"
 msgstr "Никогда не включать режим демо"
 
-#: engines/freescape/metaengine.cpp:86
+#: engines/freescape/metaengine.cpp:85
 msgid "Disable sensors"
 msgstr "Выключить сенсоры"
 
-#: engines/freescape/metaengine.cpp:87
+#: engines/freescape/metaengine.cpp:86
 msgid "Sensors will not shoot the player"
 msgstr "Сенсоры не будут стрелять в игрока"
 
-#: engines/freescape/metaengine.cpp:97
+#: engines/freescape/metaengine.cpp:96
 msgid "Disable falling"
 msgstr "Запретить падение"
 
-#: engines/freescape/metaengine.cpp:98
+#: engines/freescape/metaengine.cpp:97
 msgid "Player cannot fall over edges"
 msgstr "Игрок не будет падать в пропасть"
 
-#: engines/freescape/metaengine.cpp:108
+#: engines/freescape/metaengine.cpp:107
 msgid "Invert Y-axis on mouse"
 msgstr "Инвертировать ось Y мыши"
 
-#: engines/freescape/metaengine.cpp:109
+#: engines/freescape/metaengine.cpp:108
 msgid "Use alternative camera controls"
 msgstr "Использовать альтернативное управление камерой"
 
-#: engines/freescape/metaengine.cpp:119
+#: engines/freescape/metaengine.cpp:118
 msgid "Authentic graphics"
 msgstr "Аутентичная графика"
 
-#: engines/freescape/metaengine.cpp:120
+#: engines/freescape/metaengine.cpp:119
 msgid "Keep graphics as close as possible to the original"
 msgstr "Сделать графику максимально приближенной к оригиналу"
 
-#: engines/freescape/metaengine.cpp:130
+#: engines/freescape/metaengine.cpp:129
 msgid "Enable rock travel"
 msgstr "Включить путешествие камнем"
 
-#: engines/freescape/metaengine.cpp:131
+#: engines/freescape/metaengine.cpp:130
 msgid "Enable traveling using a rock shoot at start"
 msgstr "Разрешить путешествовать с помощью бросания камней на старте"
 
-#: engines/freescape/metaengine.cpp:141
+#: engines/freescape/metaengine.cpp:140
 msgid "Smoother movement"
 msgstr "Более плавное передвижение"
 
-#: engines/freescape/metaengine.cpp:142
+#: engines/freescape/metaengine.cpp:141
 msgid "Use smoother movements instead of discrete steps"
 msgstr "Использовать более плавное передвижение вместо дискретных шагов"
 
 #. I18N: Use modern FPS-style controls: WASD for movement, Shift to run
-#: engines/freescape/metaengine.cpp:153
+#: engines/freescape/metaengine.cpp:152
 msgid "WASD controls"
 msgstr "Управление WASD"
 
-#: engines/freescape/metaengine.cpp:154
+#: engines/freescape/metaengine.cpp:153
 msgid "Use WASD keys for movement and Shift to run"
 msgstr "Использовать клавиши WASD для движения, а Shift — для бега"
 
 #. I18N: Enable background music using AdLib/OPL2 FM synthesis
-#: engines/freescape/metaengine.cpp:165
+#: engines/freescape/metaengine.cpp:164
 msgid "Backported music from C64 releases (AdLib)"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:166
+#: engines/freescape/metaengine.cpp:165
 msgid ""
 "Enable background music ported from the C64 version using AdLib FM synthesis"
 msgstr ""
 
 #. I18N: Enable background music using AY chip emulation
-#: engines/freescape/metaengine.cpp:177
+#: engines/freescape/metaengine.cpp:176
 msgid "Backported music from C64 releases"
 msgstr ""
 
-#: engines/freescape/metaengine.cpp:178
+#: engines/freescape/metaengine.cpp:177
 msgid "Enable background music ported from the C64 version"
 msgstr ""
 
@@ -9260,10 +9240,8 @@ msgid "green"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:143
-#, fuzzy
-#| msgid "Proceed"
 msgid "red"
-msgstr "Продолжить"
+msgstr "красный"
 
 #: engines/glk/dialogs.cpp:144
 msgid "blue"
@@ -9310,16 +9288,12 @@ msgid "Proportional Bold Italic"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:210
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font"
-msgstr "SoundFont:"
+msgstr "Шрифт"
 
 #: engines/glk/dialogs.cpp:212 engines/glk/dialogs.cpp:222
-#, fuzzy
-#| msgid "ProText"
 msgid "Text:"
-msgstr "ПроТекст"
+msgstr "Текст:"
 
 #: engines/glk/dialogs.cpp:212
 msgid "Font for the text"
@@ -9338,10 +9312,8 @@ msgid "Color"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:222
-#, fuzzy
-#| msgid "Move focus to interactive object"
 msgid "Color of the interactive text"
-msgstr "Переместить фокус на следующий объект"
+msgstr "Цвет интерактивного текста"
 
 #: engines/glk/dialogs.cpp:225 engines/glk/dialogs.cpp:230
 #: engines/glk/dialogs.cpp:236 engines/glk/dialogs.cpp:242
@@ -9355,71 +9327,51 @@ msgid "Color for drawn graphics such as maps, diagrams, puzzles, etc"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:232
-#, fuzzy
-#| msgid "Window"
 msgid "Window:"
-msgstr "Окно"
+msgstr "Окно:"
 
 #: engines/glk/dialogs.cpp:232
-#, fuzzy
-#| msgid "Toggle windows mode"
 msgid "Color of the window (background)"
-msgstr "Переключить оконный режим"
+msgstr "Цвет окна (фона)"
 
 #: engines/glk/dialogs.cpp:238
-#, fuzzy
-#| msgid "New order"
 msgid "Border:"
-msgstr "Новый приказ"
+msgstr "Рамка:"
 
 #: engines/glk/dialogs.cpp:238
-#, fuzzy
-#| msgid "Toggle windows mode"
 msgid "Color of the window border"
-msgstr "Переключить оконный режим"
+msgstr "Цвет рамки окна"
 
 #. I18N: This is a section for text windows border settings
 #: engines/glk/dialogs.cpp:245
-#, fuzzy
-#| msgid "New order"
 msgid "Border"
-msgstr "Новый приказ"
+msgstr "Рамка"
 
 #: engines/glk/dialogs.cpp:247 engines/glk/dialogs.cpp:341
 #: engines/glk/dialogs.cpp:345 engines/glk/dialogs.cpp:349
-#, fuzzy
-#| msgid "Horizontal underscan:"
 msgid "Horizontal:"
-msgstr "Горизонтальный underscan:"
+msgstr "Горизонтальная:"
 
 #: engines/glk/dialogs.cpp:247
-#, fuzzy
-#| msgid "Horizontal underscan:"
 msgid "Horizontal border size"
-msgstr "Горизонтальный underscan:"
+msgstr "Размер рамки по-горизонтали"
 
 #: engines/glk/dialogs.cpp:248 engines/glk/dialogs.cpp:342
 #: engines/glk/dialogs.cpp:346 engines/glk/dialogs.cpp:350
-#, fuzzy
-#| msgid "Vertical underscan:"
 msgid "Vertical:"
-msgstr "Вертикальный underscan:"
+msgstr "Вертикальная:"
 
 #: engines/glk/dialogs.cpp:248
-#, fuzzy
-#| msgid "Vertical underscan:"
 msgid "Vertical border size"
-msgstr "Вертикальный underscan:"
+msgstr "Размер рамки по-вертикали"
 
 #: engines/glk/dialogs.cpp:250
 msgid "Caret:"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:250
-#, fuzzy
-#| msgid "Teleport to cursor"
 msgid "Color of the cursor"
-msgstr "Телепортироваться к курсору"
+msgstr "Цвета курсора"
 
 #: engines/glk/dialogs.cpp:256
 msgid "Link:"
@@ -9439,10 +9391,8 @@ msgid "Color for the \"More...\" markers in the text"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:272
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typography"
-msgstr "Граф. режим:"
+msgstr "Типографика"
 
 #: engines/glk/dialogs.cpp:274
 msgid "Link style:"
@@ -9453,22 +9403,16 @@ msgid "Style for URLs if they appear in-game"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Change shadow type"
 msgid "Caret shape:"
-msgstr "Изменить тип тени"
+msgstr "Форма каретки:"
 
 #: engines/glk/dialogs.cpp:279
-#, fuzzy
-#| msgid "Show mouse cursor"
 msgid "Shape of the cursor"
-msgstr "Показывать курсор мыши"
+msgstr "Форма курсора"
 
 #: engines/glk/dialogs.cpp:286
-#, fuzzy
-#| msgid "Quit prompt"
 msgid "More prompt:"
-msgstr "Подтверждение выхода из игры"
+msgstr "Приглашение «Ещё»:"
 
 #: engines/glk/dialogs.cpp:286
 msgid ""
@@ -9477,20 +9421,16 @@ msgid ""
 msgstr ""
 
 #: engines/glk/dialogs.cpp:288
-#, fuzzy
-#| msgid "Hide hints"
 msgid "Style hints:"
-msgstr "Скрыть подсказки"
+msgstr "Стиль автоматом:"
 
 #: engines/glk/dialogs.cpp:288
 msgid "Let the game suggest text styling options"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:289
-#, fuzzy
-#| msgid "Left click"
 msgid "Safe clicks:"
-msgstr "Левый щелчок"
+msgstr "Безопасные щелчки:"
 
 #: engines/glk/dialogs.cpp:289
 msgid "Safely apply clicks while input is pending"
@@ -9498,10 +9438,8 @@ msgstr ""
 
 #. I18N: This is setting for number of text columns
 #: engines/glk/dialogs.cpp:292
-#, fuzzy
-#| msgid "Volume controls"
 msgid "Column count:"
-msgstr "Управление громкостью"
+msgstr "Количество колонок:"
 
 #: engines/glk/dialogs.cpp:292
 msgid "Number of columns"
@@ -9525,10 +9463,8 @@ msgid "Check it to manually change the column count"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:297
-#, fuzzy
-#| msgid "Block low"
 msgid "Lock rows:"
-msgstr "Защита снизу"
+msgstr "Заблокированных строк:"
 
 #: engines/glk/dialogs.cpp:297
 msgid "Check it to manually change the row count"
@@ -9540,23 +9476,17 @@ msgid "Justify:"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:302
-#, fuzzy
-#| msgid "Enable short transitions"
 msgid "Enable text justification"
-msgstr "Включить короткие переходы"
+msgstr "Включить выравнивание текста"
 
 #. I18N: These is setting for type of text quote symbols
 #: engines/glk/dialogs.cpp:305
-#, fuzzy
-#| msgid "Graphics mode:"
 msgid "Typographic quotes:"
-msgstr "Граф. режим:"
+msgstr "Типографические кавычки:"
 
 #: engines/glk/dialogs.cpp:306
-#, fuzzy
-#| msgid "Color graphics"
 msgid "Choose typographic quotes"
-msgstr "Цветная графика"
+msgstr "Выберите типографические кавычки"
 
 #: engines/glk/dialogs.cpp:307
 msgctxt "quotes"
@@ -9565,8 +9495,6 @@ msgstr ""
 
 #. I18N: This is a setting for using normal typographic quotes, which are like in most books, with the opening quote higher than the closing one
 #: engines/glk/dialogs.cpp:309
-#, fuzzy
-#| msgid "Normal"
 msgctxt "quotes"
 msgid "Normal"
 msgstr "Обычные"
@@ -9611,17 +9539,13 @@ msgid "En+Em dashes"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:326
-#, fuzzy
-#| msgid "Preferences"
 msgid "User experience"
-msgstr "Предпочтения"
+msgstr "Пользовательский опыт"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:329
-#, fuzzy
-#| msgid "Space"
 msgid "Spaces:"
-msgstr "Пробел"
+msgstr "Пробелы:"
 
 #. I18N: This is a setting for type of spaces in the text
 #: engines/glk/dialogs.cpp:331
@@ -9639,20 +9563,16 @@ msgid "Expand single spaces"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:338
-#, fuzzy
-#| msgid "Graphics"
 msgid "Graphics:"
-msgstr "Графика"
+msgstr "Графика:"
 
 #: engines/glk/dialogs.cpp:338
 msgid "Turn graphics on/off"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:340
-#, fuzzy
-#| msgid "Window"
 msgid "Window margin"
-msgstr "Окно"
+msgstr "Поля окна"
 
 #: engines/glk/dialogs.cpp:341
 msgid "Horizontal margin for window"
@@ -9663,10 +9583,8 @@ msgid "Vertical margin for window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:344
-#, fuzzy
-#| msgid "Window"
 msgid "Window padding"
-msgstr "Окно"
+msgstr "Отступы окна"
 
 #: engines/glk/dialogs.cpp:345
 msgid "Horizontal padding for window"
@@ -9677,10 +9595,8 @@ msgid "Vertical padding for window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:348
-#, fuzzy
-#| msgid "Next action"
 msgid "Text margin"
-msgstr "Следующее действие"
+msgstr "Поля текста"
 
 #: engines/glk/dialogs.cpp:349
 msgid "Horizontal margin for text"
@@ -9692,9 +9608,8 @@ msgstr ""
 
 #. I18N: This is a setting for leading, which is the vertical distance between text rows
 #: engines/glk/dialogs.cpp:353
-#, fuzzy
 msgid "Leading:"
-msgstr "Загружаю игру..."
+msgstr "Межстрочный интервал:"
 
 #: engines/glk/dialogs.cpp:354
 msgid "Vertical distance between text rows. Valid inputs - 12, 16, 22 etc."
@@ -9744,10 +9659,8 @@ msgid "Alignment of the \"More...\" marker on the window"
 msgstr ""
 
 #: engines/glk/dialogs.cpp:375
-#, fuzzy
-#| msgid "SoundFont:"
 msgid "Font:"
-msgstr "SoundFont:"
+msgstr "Шрифт:"
 
 #: engines/glk/dialogs.cpp:375
 msgid "Font for the \"More...\" marker"
@@ -9790,12 +9703,12 @@ msgid "Save file created by different version."
 msgstr "Игра была сохранено в другой версии."
 
 #: engines/gob/inter_geisha.cpp:237 engines/gob/inter_playtoons.cpp:285
-#: engines/gob/inter_v2.cpp:1512 engines/tinsel/saveload.cpp:588
+#: engines/gob/inter_v2.cpp:1523 engines/tinsel/saveload.cpp:588
 msgid "Failed to load saved game from file."
 msgstr "Не удалось загрузить сохранённую игру из файла."
 
 #: engines/gob/inter_geisha.cpp:268 engines/gob/inter_playtoons.cpp:426
-#: engines/gob/inter_v2.cpp:1591 engines/tinsel/saveload.cpp:601
+#: engines/gob/inter_v2.cpp:1602 engines/tinsel/saveload.cpp:601
 msgid "Failed to save game to file."
 msgstr "Не удалось сохранить игру в файл."
 
@@ -10938,7 +10851,7 @@ msgstr ""
 "Если выбрано, то игра будет использовать цифровой трек во вступлении. Иначе "
 "будет проигрываться MIDI-музыка."
 
-#: engines/made/metaengine.cpp:63 engines/sci/detection_options.h:132
+#: engines/made/metaengine.cpp:63 engines/sci/detection_options.h:130
 msgid "Use Windows cursors"
 msgstr "Использовать курсоры Windows"
 
@@ -11059,10 +10972,8 @@ msgstr ""
 "Заменить цветной драгоценный камень полосками очков жизни и очков заклинаний."
 
 #: engines/mm/metaengine.cpp:183
-#, fuzzy
-#| msgid "Might and Magic 1"
 msgid "Might and Magic"
-msgstr "Might and Magic 1"
+msgstr "Might and Magic"
 
 #: engines/mm/mm1/metaengine.cpp:55
 msgid "View party member 1"
@@ -11173,10 +11084,8 @@ msgid "Might and Magic 1 - Minimal Keys"
 msgstr "Might and Magic 1 - Минимальные клавиши"
 
 #: engines/mm/mm1/metaengine.cpp:150
-#, fuzzy
-#| msgid "Might and Magic 1 - Menus"
 msgid "Might and Magic 1 - Main"
-msgstr "Might and Magic 1 - Меню"
+msgstr "Might and Magic 1 - Главная"
 
 #: engines/mm/mm1/metaengine.cpp:151
 msgid "Might and Magic 1 - Party"
@@ -11314,29 +11223,21 @@ msgstr ""
 "перемещаться по игре быстрее."
 
 #: engines/mohawk/dialogs.cpp:364
-#, fuzzy
-#| msgid "Disabled"
 msgctxt "riven-transition"
 msgid "Disabled"
 msgstr "Выключены"
 
 #: engines/mohawk/dialogs.cpp:365
-#, fuzzy
-#| msgid "Fastest"
 msgctxt "riven-transition"
 msgid "Fastest"
-msgstr "Быстрые"
+msgstr "Самые быстрые"
 
 #: engines/mohawk/dialogs.cpp:366
-#, fuzzy
-#| msgid "Normal"
 msgctxt "riven-transition"
 msgid "Normal"
 msgstr "Обычные"
 
 #: engines/mohawk/dialogs.cpp:367
-#, fuzzy
-#| msgid "Best"
 msgctxt "riven-transition"
 msgid "Best"
 msgstr "Лучшие"
@@ -12288,99 +12189,99 @@ msgid "Draw black lines over videos to increase their apparent sharpness"
 msgstr ""
 "Рисует чёрные линии поверх видео, увеличивая таким образом видимую чёткость"
 
-#: engines/sci/detection_options.h:70
+#: engines/sci/detection_options.h:69
 msgid "Use high-quality video scaling"
 msgstr "Использовать качественное масштабирование видео"
 
-#: engines/sci/detection_options.h:71
+#: engines/sci/detection_options.h:70
 msgid "Use linear interpolation when upscaling videos, where possible"
 msgstr ""
 "По возможности использует линейную интерполяцию при масштабировании видео"
 
-#: engines/sci/detection_options.h:83
+#: engines/sci/detection_options.h:81
 msgid "Use high-quality \"LarryScale\" cel scaling"
 msgstr "Использовать \"LarryScale\" алгоритм масштабировании"
 
-#: engines/sci/detection_options.h:84
+#: engines/sci/detection_options.h:82
 msgid "Use special cartoon scaler for drawing character sprites"
 msgstr ""
 "Использовать специальный \"мультяшный\" алгоритм масштабирования для "
 "отрисовки спрайтов персонажей"
 
-#: engines/sci/detection_options.h:119
+#: engines/sci/detection_options.h:117
 msgid "Use CD audio"
 msgstr "Использовать CD-аудио"
 
-#: engines/sci/detection_options.h:120
+#: engines/sci/detection_options.h:118
 msgid "Use CD audio instead of in-game audio, if available"
 msgstr ""
 "Использовать звуковые дорожки с CD вместо музыки из файлов игры (если "
 "доступно)"
 
-#: engines/sci/detection_options.h:133
+#: engines/sci/detection_options.h:131
 msgid ""
 "Use the Windows cursors (smaller and monochrome) instead of the DOS ones"
 msgstr ""
 "Использовать курсоры Windows (меньшие по размеру и одноцветные) вместо "
 "курсоров DOS"
 
-#: engines/sci/detection_options.h:145
+#: engines/sci/detection_options.h:143
 msgid "Use silver cursors"
 msgstr "Использовать серебряные курсоры"
 
-#: engines/sci/detection_options.h:146
+#: engines/sci/detection_options.h:144
 msgid ""
 "Use the alternate set of silver cursors instead of the normal golden ones"
 msgstr ""
 "Использовать альтернативный набор серебряных курсоров вместо обычных золотых"
 
-#: engines/sci/detection_options.h:158
+#: engines/sci/detection_options.h:156
 msgid "Enable content censoring"
 msgstr "Включить цензуру содержимого"
 
-#: engines/sci/detection_options.h:159
+#: engines/sci/detection_options.h:157
 msgid "Enable the game's built-in optional content censoring"
 msgstr "Включить встроенное необязательное цензурирование содержимого"
 
-#: engines/sci/detection_options.h:171
+#: engines/sci/detection_options.h:169
 msgid "Upscale videos"
 msgstr "Масштабировать видеоролики"
 
-#: engines/sci/detection_options.h:172
+#: engines/sci/detection_options.h:170
 msgid "Upscale videos to double their size"
 msgstr "Увеличивать масштаб видеороликов вдвое"
 
-#: engines/sci/detection_options.h:184
+#: engines/sci/detection_options.h:182
 msgid "Use RGB rendering"
 msgstr "Использовать RGB рендеринг"
 
-#: engines/sci/detection_options.h:185
+#: engines/sci/detection_options.h:183
 msgid "Use RGB rendering to improve screen transitions"
 msgstr "Использовать RGB рендеринг для улучшения переходов между экранами"
 
-#: engines/sci/detection_options.h:197
+#: engines/sci/detection_options.h:195
 msgid "Use per-resource modified palettes"
 msgstr "Использовать индивидуальные палитры ресурсов"
 
-#: engines/sci/detection_options.h:198
+#: engines/sci/detection_options.h:196
 msgid "Use custom per-resource palettes to improve visuals"
 msgstr ""
 "Использовать индивидуальные палитры для каждого ресурса для улучшения "
 "внешнего вида"
 
-#: engines/sci/detection_options.h:210
+#: engines/sci/detection_options.h:208
 msgid "Enable bearded musicians"
 msgstr "Включить бородатых музыкантов"
 
-#: engines/sci/detection_options.h:211
+#: engines/sci/detection_options.h:209
 msgid "Enable graphics that were disabled for legal reasons"
 msgstr "Включить графику, которая была заблокирована по юридическим причинам"
 
-#: engines/sci/detection_options.h:236
+#: engines/sci/detection_options.h:234
 msgid "Enable saving via the GMM"
 msgstr "Разрешить запись через GMM"
 
-#: engines/sci/detection_options.h:237
+#: engines/sci/detection_options.h:235
 msgid ""
 "Allows saving via the GMM. WARNING: saves created via the GMM may be "
 "corrupted and unusable. Use at your own risk!"
@@ -12389,11 +12290,11 @@ msgstr ""
 "через GMM, могут быть повреждены и непригодны для использования. Используйте "
 "на свой страх и риск!"
 
-#: engines/sci/detection_options.h:248
+#: engines/sci/detection_options.h:246
 msgid "Repair speech audio"
 msgstr "Исправить озвучку"
 
-#: engines/sci/detection_options.h:249
+#: engines/sci/detection_options.h:247
 msgid ""
 "Detect and attempt to repair overflows in DPCM8 audio, which cause "
 "noticeable pops and crackles."
@@ -12401,11 +12302,11 @@ msgstr ""
 "Пытаться исправить переполнения в аудиосигнале DPCM8, которые вызывают "
 "заметные щелчки и потрескивания."
 
-#: engines/sci/detection_options.h:273
+#: engines/sci/detection_options.h:271
 msgid "Roland D-110 / D-10 / D-20"
 msgstr "Roland D-110 / D-10 / D-20"
 
-#: engines/sci/detection_options.h:277
+#: engines/sci/detection_options.h:275
 msgid "Yamaha FB-01"
 msgstr "Yamaha FB-01"
 
@@ -12459,10 +12360,11 @@ msgid ""
 msgstr ""
 "Этот файл сохранения был создан другой версией игры, не могу загрузить его"
 
-#: engines/sci/graphics/video32.cpp:68
-#, c-format
-msgid ""
-"Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+#: engines/sci/graphics/video32.cpp:70
+#, fuzzy, c-format
+#| msgid ""
+#| "Cannot play back %dbpp video on a system with maximum color depth of 8bpp"
+msgid "Cannot play back %s video on a system with maximum color depth of 8bpp"
 msgstr ""
 "Не могу проигрывать %dbpp видео на системе с максимальной глубиной цвета 8bpp"
 
