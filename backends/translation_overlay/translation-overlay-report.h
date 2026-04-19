@@ -22,12 +22,67 @@
 #ifndef BACKENDS_TRANSLATION_OVERLAY_REPORT_H
 #define BACKENDS_TRANSLATION_OVERLAY_REPORT_H
 
+#include "backends/translation_overlay/translation-overlay-settings.h"
+
+#include "common/str.h"
+#include "common/hashmap.h"
+#include "common/fs.h"
+#include "common/path.h"
+#include "common/ptr.h"
+
+namespace Audio {
+class SeekableAudioStream;
+class AudioStream;
+}
+
 namespace TranslationOverlay {
 
 class Report {
 public:
+	void reset(const Common::Path& reportPath);
+
+	void missingActor(const Common::String &text, int actorId) const;
+	void missingLine(const Common::String &text, const Settings::ActorLines& actorLines) const;
+	void reportLine(const Common::String &text, const Settings::ActorLines &actorLines, const Settings::TranslationInfo &tInfo) const;
+
+	Audio::SeekableAudioStream *translateStream(int soundId, Audio::SeekableAudioStream *voice, Audio::AudioStream *original) const;
+	Audio::SeekableAudioStream *translateStream(const char *tag, Audio::SeekableAudioStream *voice, Audio::AudioStream *original) const;
+
 private:
-	bool _isEnabled{true};
+	const byte _separtor{';'};
+
+	typedef Common::HashMap<uint, uint> ReportedMap;
+
+	struct ReportEntry
+	{
+		enum Type {
+			missingActor,
+			missingLine,
+			line,
+		};
+
+		Type _type;
+		const Common::String *_text{nullptr};
+		int _actorId{0};
+		const Settings::ActorLines *_actorLines{nullptr};
+		const Settings::TranslationInfo *_translationInfo{nullptr};
+	};
+
+	Common::Path _reportPath;
+	Common::ScopedPtr<Common::SeekableWriteStream> _reportFilename;
+
+	mutable bool _writeHeader{true};
+	mutable ReportedMap _missingActorsReported;
+	mutable ReportedMap _missingLinesReported;
+	mutable ReportedMap _linesReported;
+
+	bool isEnabled() const;
+	void write(const ReportEntry &entry) const;
+	void write(const Common::String *str) const;
+	void write(const Common::String &str) const;
+	void write(const char *str) const;
+	void write(uint nbr) const;
+	void write(int nbr) const;
 };
 
 }

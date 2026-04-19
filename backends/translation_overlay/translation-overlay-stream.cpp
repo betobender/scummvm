@@ -40,13 +40,13 @@ void VoiceCache::setWavPath(const Common::Path &wavPath) {
 }
 
 void VoiceCache::registerVoice(const Common::String &id) {
-	Voice &voice = _voiceMap[id];
+	Voice &voice = _voiceMap[id.hash()];
 	voice._id = id;
 	voice.load(this);
 }
 
 const VoiceCache::Voice *VoiceCache::getVoice(const Common::String &id) const {
-	VoiceMap::const_iterator it = _voiceMap.find(id);
+	VoiceMap::const_iterator it = _voiceMap.find(id.hash());
 	if (it != _voiceMap.end()) {
 		return &(it->_value);
 	}
@@ -57,11 +57,11 @@ Common::Path VoiceCache::buildWavPath(const Common::String &id) const {
 	return _wavPath.appendComponent(id + _ext);
 }
 
-Audio::SeekableAudioStream* VoiceCache::getStream(const Common::String& id) const {
-	const TranslationOverlay::VoiceCache::Voice *voice = getVoice(id);
+Audio::SeekableAudioStream *VoiceCache::getStream(const Common::String &id) const {
+	const Voice *voice = getVoice(id);
 	if (voice != nullptr) {
 		if (voice->_astream != nullptr)
-			voice->_astream->rewind(); // we want to reset everytime we play it
+			voice->_astream->rewind();
 		return voice->_astream.get();
 	}
 	return nullptr;
@@ -81,7 +81,7 @@ void VoiceCache::dumpStats() const {
 #endif
 }
 
-void VoiceCache::Voice::load(VoiceCache* owner) {
+void VoiceCache::Voice::load(VoiceCache *owner) {
 	_path = owner->buildWavPath(_id);
 	Common::FSNode fsNodePathe(_path);
 	_exists = fsNodePathe.exists();

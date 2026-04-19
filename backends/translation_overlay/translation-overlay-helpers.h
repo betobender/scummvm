@@ -49,10 +49,6 @@ private:
 	Common::JSONValue *_json;
 };
 
-class ConfManHelper {
-public:
-};
-
 namespace TranslationOverlay {
 	// ---------------------------------------------------------------------------
 	// Latin-1 diacritic → ASCII base map (0xC0–0xFF)
@@ -76,12 +72,35 @@ namespace TranslationOverlay {
 		'o','u','u','u','u','y','?','y',
 	};
 
+	struct ScopedTimer {
+		uint32 _start;
+		Common::String _name;
+		ScopedTimer(const Common::String& name);
+		~ScopedTimer();
+	};
+
+	class InplaceStringBuffer {
+	public:
+		InplaceStringBuffer(uint size);
+		~InplaceStringBuffer();
+		void reset();
+		uint getSize() const;
+		char *getBuffer() const;
+		char operator[](uint p) const;
+		InplaceStringBuffer &operator+=(char c);
+	private:
+		char *_buffer;
+		uint _size;
+		uint _p;
+	};
+
 	bool isHexDigit(char c);
 	byte parseHexByte(const char *p);
 	Common::String stripDiacritics(const Common::U32String &u32);
 	Common::String cleanForKey(const byte *rawMsg);
 	Common::String stripCueTags(const Common::String &s);
 	void dumpAudioStreamToWAV(Audio::SeekableAudioStream *stream, const char *filename);
+	int literalCuesToBin(byte *dst, int dstSize, const Common::String& src);
 }
 
 #endif

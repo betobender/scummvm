@@ -22,6 +22,7 @@
 #ifndef BACKENDS_TRANSLATION_OVERLAY_PLUGIN_H
 #define BACKENDS_TRANSLATION_OVERLAY_PLUGIN_H
 
+#include "backends/translation_overlay/translation-overlay-report.h"
 #include "backends/translation_overlay/translation-overlay-settings.h"
 
 #include "audio/voiceplugin.h"
@@ -37,26 +38,16 @@ public:
 	TranslationOverlayPlugin();
 
 	const char *getName() const override { return "Translation overlay"; }
-
 	void loadConfig() override;
-
-	// -----------------------------------------------------------------------
-	// Integer-ID voice interface (general games)
-	// -----------------------------------------------------------------------
 	Audio::SeekableAudioStream *translateStream(int soundId, Audio::AudioStream *original = nullptr) const override;
-
-	// -----------------------------------------------------------------------
-	// Tag-based voice interface (SCUMM v7: The Dig, Curse of Monkey Island)
-	// -----------------------------------------------------------------------
 	Audio::SeekableAudioStream *translateStream(const char *tag, Audio::AudioStream *original = nullptr) const override;
-
 	int translateText(const byte *rawMsg, int actorId, byte *dst, int dstSize) const override;
 	int getLastSoundId() const override;
 
 private:
 	mutable int _cachedIndex = -1;
 	TranslationOverlay::Settings _settings;
-	void dumpOriginal(const Common::String &id, Audio::AudioStream *original) const;
+	TranslationOverlay::Report _processor;
 	Common::String getStemFromId(int soundId) const;
 };
 

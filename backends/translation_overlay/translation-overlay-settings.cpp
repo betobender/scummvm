@@ -59,9 +59,10 @@ void Settings::loadConfMan() {
 	if (isEnabled()) {
 		if (ConfMan.hasKey("translation_target_lang"))
 			_targetLang = ConfMan.get("translation_target_lang");
-
 		if (ConfMan.hasKey("translation_key_lang"))
 			_keyLang = ConfMan.get("translation_key_lang");
+		if (ConfMan.hasKey("translation_report"))
+			_reportPath = ConfMan.get("translation_report");
 	}
 
 	// WAV directory defaults to <dialogue.json directory>/wavs/.
@@ -150,10 +151,15 @@ void Settings::loadDialogue() {
 
 			int actorId;
 			Common::String actorName;
+			Common::String part;
 
+			// Mandatory data
 			if (!entry.getValue("actor_id", actorId) ||
 				!entry.getValue("actor", actorName))
 				continue;
+
+			// Optinal data
+			entry.getValue("part", part);
 
 			JSONHelper langs = entry.getChild("languages");
 			if (!langs.isValid())
@@ -183,10 +189,12 @@ void Settings::loadDialogue() {
 
 			// Build lookup key from en-US text (strip inline tags, then clean bytecode).
 			Common::String forKey = stripCueTags(enText->asString());
-			Common::String key = cleanForKey(
-				reinterpret_cast<const byte *>(forKey.c_str()));
+			Common::String key = cleanForKey(reinterpret_cast<const byte *>(forKey.c_str()));
+
 			if (key.empty())
 				continue;
+
+			uint keyHash = key.hash();
 
 			// Get or create the actor bucket.
 			if (!_linesByActor.contains(actorId)) {
@@ -195,7 +203,7 @@ void Settings::loadDialogue() {
 
 			ActorLines *actorLines = &_linesByActor[actorId];
 
-			if (actorLines->_lines.contains(key)) {
+			if (actorLines->_lines.contains(keyHash)) {
 				warning("TranslationOverlayPlugin: duplicate key '%s', keeping first", key.c_str());
 				continue;
 			}
@@ -244,8 +252,8 @@ void Settings::loadDialogue() {
 				break;
 			}
 
-			actorLines->_lines[key] = TranslationInfo{stored, entry.getKey(), _allLines.size()};
-			_allLines.push_back(&actorLines->_lines[key]);
+			actorLines->_lines[keyHash] = TranslationInfo{stored, entry.getKey(), part, _allLines.size()};
+			_allLines.push_back(&actorLines->_lines[keyHash]);
 
 			++loaded;
 		}
@@ -282,6 +290,10 @@ const VoiceCache &Settings::getVoiceCache() const {
 
 const Settings::LinesArray &Settings::getAllLines() const {
 	return _allLines;
+}
+
+const Common::Path& Settings::getReportPath() const {
+	return _reportPath;
 }
 
 } // namespace TranslationOverlay

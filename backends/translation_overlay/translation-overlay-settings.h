@@ -26,6 +26,7 @@
 
 #include "common/array.h"
 #include "common/hash-str.h"
+#include "common/path.h"
 
 namespace TranslationOverlay {
 
@@ -42,12 +43,11 @@ public:
 	struct TranslationInfo {
 		Common::String _translatedText;
 		Common::String _entryId;
+		Common::String _part;
 		unsigned int _ptrIndex;
 	};
 
-	typedef Common::HashMap<Common::String, TranslationInfo,
-	        Common::CaseSensitiveString_Hash,
-	        Common::CaseSensitiveString_EqualTo> LineMap;
+	typedef Common::HashMap<uint, TranslationInfo> LineMap;
 
 	typedef Common::HashMap<Common::String, TextEncoding,
 			Common::CaseSensitiveString_Hash,
@@ -67,9 +67,11 @@ public:
 	const LinesByActorMap &getLinesByActor() const;
 	const VoiceCache &getVoiceCache() const;
 	const LinesArray &getAllLines() const;
+	const Common::Path& getReportPath() const;
 
 private:
 	Common::Path _overlayPath;
+	Common::Path _reportPath;
 	Common::String _targetLang;
 	Common::String _keyLang;
 	TextEncoding _encoding{kAsciiStrip};

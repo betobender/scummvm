@@ -22,9 +22,11 @@
 #include "backends/translation_overlay/translation-overlay-helpers.h"
 
 #include "common/array.h"
+#include "common/debug.h"
 #include "common/fs.h"
 #include "common/formats/json.h"
 #include "common/ptr.h"
+#include "common/system.h"
 
 #include "audio/audiostream.h"
 
@@ -87,7 +89,8 @@ byte parseHexByte(const char *p) {
 }
 
 Common::String stripDiacritics(const Common::U32String &u32) {
-	Common::String result;
+	InplaceStringBuffer result(u32.size());
+
 	for (uint i = 0; i < u32.size(); ++i) {
 		uint32 cp = (uint32)u32[i];
 		if (cp < 0x80) {
@@ -96,11 +99,12 @@ Common::String stripDiacritics(const Common::U32String &u32) {
 			result += _latin1BaseMap[cp - 0xC0];
 		}
 	}
-	return result;
+	return result.getBuffer();
 }
 
 Common::String cleanForKey(const byte *rawMsg) {
-	Common::String result;
+	InplaceStringBuffer result(512);
+
 	const byte *p = rawMsg;
 
 	while (*p) {
@@ -122,11 +126,12 @@ Common::String cleanForKey(const byte *rawMsg) {
 	}
 
 	// Collapse runs of spaces (but not '^').
-	Common::String collapsed;
+	InplaceStringBuffer collapsed(result.getSize());
+
 	bool prevSpace = false;
-	for (uint i = 0; i < result.size(); ++i) {
+	for (uint i = 0; i < result.getSize(); ++i) {
 		if (result[i] == ' ') {
-			if (!prevSpace && !collapsed.empty())
+			if (!prevSpace && collapsed.getSize() > 0)
 				collapsed += ' ';
 			prevSpace = true;
 		} else {
@@ -134,14 +139,15 @@ Common::String cleanForKey(const byte *rawMsg) {
 			prevSpace = false;
 		}
 	}
-	while (!collapsed.empty() && collapsed.lastChar() == ' ')
-		collapsed.deleteLastChar();
 
-	return collapsed;
+	Common::String trimmed = collapsed.getBuffer();
+	trimmed.trim();
+	return trimmed;
 }
 
 Common::String stripCueTags(const Common::String &s) {
-	Common::String out;
+	InplaceStringBuffer out(s.size());
+
 	const char *p = s.c_str();
 	while (*p) {
 		if (p[0] == '<' && p[1] == 'F' && p[2] == 'F' && p[3] == ':') {
@@ -153,7 +159,7 @@ Common::String stripCueTags(const Common::String &s) {
 			out += *p++;
 		}
 	}
-	return out;
+	return out.getBuffer();
 }
 
 
@@ -198,5 +204,103 @@ void dumpAudioStreamToWAV(Audio::SeekableAudioStream *stream, const char *filena
 	out->writeUint32LE(dataSize);
 	out->write(samples.data(), dataSize);
 }
+
+int literalCuesToBin(byte *dst, int dstSize, const Common::String& src) {
+	byte *out = dst;
+	const byte *end = dst + dstSize - 1; // reserve 1 byte for null terminator
+	const char *p = src.c_str();
+
+	while (*p && out < end) {
+		if (p[0] == '<' && p[1] == 'F' && p[2] == 'F' && p[3] == ':') {
+			p += 4; // skip "<FF:"
+
+			// Opcode byte (2 hex chars)
+			if (!TranslationOverlay::isHexDigit(p[0]) || !TranslationOverlay::isHexDigit(p[1]))
+				continue;
+			byte op = TranslationOverlay::parseHexByte(p);
+			p += 2;
+
+			// Optional first param byte
+			byte pb1 = 0, pb2 = 0;
+			bool hasP1 = false, hasP2 = false;
+			if (p[0] == ':' && TranslationOverlay::isHexDigit(p[1]) && TranslationOverlay::isHexDigit(p[2])) {
+				p++;
+				pb1 = TranslationOverlay::parseHexByte(p);
+				p += 2;
+				hasP1 = true;
+			}
+			// Optional second param byte
+			if (p[0] == ':' && TranslationOverlay::isHexDigit(p[1]) && TranslationOverlay::isHexDigit(p[2])) {
+				p++;
+				pb2 = TranslationOverlay::parseHexByte(p);
+				p += 2;
+				hasP2 = true;
+			}
+			if (*p == '>')
+				p++;
+
+			// Write the decoded opcode sequence
+			if (out < end)
+				*out++ = 0xFF;
+			if (out < end)
+				*out++ = op;
+			if (hasP1 && out < end)
+				*out++ = pb1;
+			if (hasP2 && out < end)
+				*out++ = pb2;
+		} else {
+			*out++ = (byte)*p++;
+		}
+	}
+
+	*out = 0;
+	return (int)(out - dst);
+}
+
+ScopedTimer::ScopedTimer(const Common::String &name)
+	: _start(g_system->getMillis()), _name(name) {}
+
+ScopedTimer::~ScopedTimer() {
+	uint32 elapsed = g_system->getMillis() - _start;
+	debug(2, "[ScopedTimer] %s took %u ms", _name.c_str(), elapsed);
+}
+
+InplaceStringBuffer::InplaceStringBuffer(uint size) : _size(size + 1), _p(0) {
+	_buffer = new char[_size];
+	reset();
+}
+
+InplaceStringBuffer::~InplaceStringBuffer() {
+	delete (_buffer);
+}
+
+void InplaceStringBuffer::reset() {
+	_p = 0;
+	_buffer[_p] = '\0';
+}
+
+uint InplaceStringBuffer::getSize() const {
+	return _p;
+}
+
+char *InplaceStringBuffer::getBuffer() const {
+	return _buffer;
+}
+
+char InplaceStringBuffer::operator[](uint p) const {
+	return _buffer[p];
+}
+
+InplaceStringBuffer& InplaceStringBuffer::operator+=(const char c) {
+	if (_p < _size - 1) {
+		_buffer[_p++] = c;
+		_buffer[_p] = '\0';
+	} else {
+		warning("InplaceStringBuffer::Max size reached %u", _size);
+	}
+	return *this;
+}
+
+
 
 } // namespace TranslationOverlay

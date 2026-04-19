@@ -42,12 +42,10 @@ public:
 		bool _exists{false};
 		bool _cached{false};
 
-		void load(VoiceCache* owner);
+		void load(VoiceCache *owner);
 	};
 
-	typedef Common::HashMap<Common::String, Voice,
-			Common::CaseSensitiveString_Hash,
-			Common::CaseSensitiveString_EqualTo> VoiceMap;
+	typedef Common::HashMap<uint, Voice> VoiceMap;
 
 	void reset();
 	void setWavPath(const Common::Path &wavPath);

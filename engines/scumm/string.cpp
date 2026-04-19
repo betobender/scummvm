@@ -1596,11 +1596,25 @@ int ScummEngine::convertMessageToString(const byte *msg, byte *dst, int dstSize)
 	} else if (TranslationMan.isActive()) {
 		// SCUMM v6 text substitution via TranslationOverlayPlugin: replaces English
 		// dialogue from the game scripts with translated text from dialogue.json.
-		int written = TranslationMan.translateText(
-		    msg, _actorToPrintStrFor, dst, (int)(end - dst));
+		// rbender: move the logic into TranslationMan
+		int written = TranslationMan.translateText(msg, _actorToPrintStrFor, dst, (int)(end - dst));
 		if (written >= 0) {
 			dst += written;
 			*dst = 0;
+
+			#if 0
+			if (Audio::SeekableAudioStream *stream = TranslationMan.translateStream(TranslationMan.getLastSoundId())) {
+				//_sound->stopTalkSound();
+				//_imuseDigital->stopSound(kTalkSoundID);
+				if (stream) {
+					_mixer->playStream(Audio::Mixer::kSpeechSoundType, _sound->_talkChannelHandle, stream);
+					_sound->talkSound(0, 0, DIGI_SND_MODE_TALKIE);
+					// return;
+				}
+			}
+			#endif
+
+
 			return dstSize - (end - dst);
 		}
 		src = msg;
