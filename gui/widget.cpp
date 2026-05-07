@@ -99,7 +99,8 @@ void Widget::draw() {
 	if (!isVisible() || !_boss->isVisible())
 		return;
 
-	if (_needsRedraw) {
+	bool needsRedraw = _needsRedraw;
+	if (needsRedraw) {
 		int oldX = _x, oldY = _y;
 
 		// Account for our relative position in the dialog
@@ -108,14 +109,11 @@ void Widget::draw() {
 
 		Common::Rect activeRect = g_gui.theme()->getClipRect();
 		Common::Rect clip = _boss->getClipRect().findIntersectingRect(activeRect);
-		oldClip = g_gui.theme()->swapClipRect(clip);
-
 		if (g_gui.useRTL()) {
 			_x = g_system->getOverlayWidth() - _x - _w;
-
 			clip.moveTo(_x, clip.top);
-			g_gui.theme()->swapClipRect(clip);
 		}
+		oldClip = g_gui.theme()->swapClipRect(clip);
 
 		// Draw border
 		if (_flags & WIDGET_BORDER) {
@@ -151,7 +149,7 @@ void Widget::draw() {
 		w->draw();
 		w = w->_next;
 	}
-	if (!oldClip.isEmpty()) {
+	if (needsRedraw) {
 		g_gui.theme()->swapClipRect(oldClip);
 	}
 }
@@ -1111,6 +1109,12 @@ void OptionsContainerWidget::reflowLayout() {
 		w = w->next();
 	}
 	_h = maxY - minY;
+}
+
+Common::Rect OptionsContainerWidget::getClipRect() const {
+	// Use boss clipping rectangle to avoid drawing issues on checkboxes
+	// which stick out of their rectangle due to their bevel.
+	return _boss->getClipRect();
 }
 
 bool OptionsContainerWidget::containsWidget(Widget *widget) const {

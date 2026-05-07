@@ -173,6 +173,9 @@ ColonyEngine::ColonyEngine(OSystem *syst, const ADGameDescription *gd) : Engine(
 	_rotateLeft = false;
 	_rotateRight = false;
 	_sprint = false;
+	_moveAccumX = 0.0f;
+	_moveAccumY = 0.0f;
+	_rotAccum = 0.0f;
 	_wm = nullptr;
 	_macMenu = nullptr;
 	_menuSurface = nullptr;
@@ -276,6 +279,10 @@ ColonyEngine::~ColonyEngine() {
 		_pictCompass->free();
 		delete _pictCompass;
 	}
+	if (_animPatternSurface) {
+		_animPatternSurface->free();
+		delete _animPatternSurface;
+	}
 	delete _frameLimiter;
 	delete _gfx;
 	delete _sound;
@@ -285,6 +292,26 @@ ColonyEngine::~ColonyEngine() {
 	delete _resMan;
 	delete _menuSurface;
 	delete _wm;
+}
+
+Common::Point ColonyEngine::eventMouseToLogical(const Common::Point &p) const {
+	const int sysW = _system->getWidth();
+	const int sysH = _system->getHeight();
+	if (sysW <= 0 || sysH <= 0 || (sysW == _width && sysH == _height))
+		return p;
+	return Common::Point((int)((int64)p.x * _width / sysW),
+		(int)((int64)p.y * _height / sysH));
+}
+
+void ColonyEngine::warpMouseLogical(int x, int y) {
+	const int sysW = _system->getWidth();
+	const int sysH = _system->getHeight();
+	if (sysW <= 0 || sysH <= 0 || (sysW == _width && sysH == _height)) {
+		_system->warpMouse(x, y);
+		return;
+	}
+	_system->warpMouse((int)((int64)x * sysW / _width),
+		(int)((int64)y * sysH / _height));
 }
 
 void ColonyEngine::pauseEngineIntern(bool pause) {
@@ -453,7 +480,7 @@ void ColonyEngine::syncMacMenuChecks() {
 
 void ColonyEngine::updateMouseCapture(bool recenter) {
 	_system->lockMouse(_mouseLocked);
-	_system->showMouse(!_mouseLocked);
+	CursorMan.showMouse(!_mouseLocked);
 
 	int cursorMode = 0;
 
@@ -487,7 +514,7 @@ void ColonyEngine::updateMouseCapture(bool recenter) {
 
 	if (_mouseLocked && recenter) {
 		_mousePos = Common::Point(_centerX, _centerY);
-		_system->warpMouse(_centerX, _centerY);
+		warpMouseLogical(_centerX, _centerY);
 		_system->getEventManager()->purgeMouseEvents();
 	}
 }
@@ -511,7 +538,6 @@ void ColonyEngine::handleMenuAction(int action) {
 		break;
 	case kMenuActionOpen:
 		_system->lockMouse(false);
-		_system->showMouse(true);
 		CursorMan.setDefaultArrowCursor();
 		CursorMan.showMouse(true);
 		loadGameDialog();
@@ -520,7 +546,6 @@ void ColonyEngine::handleMenuAction(int action) {
 	case kMenuActionSave:
 	case kMenuActionSaveAs:
 		_system->lockMouse(false);
-		_system->showMouse(true);
 		CursorMan.setDefaultArrowCursor();
 		CursorMan.showMouse(true);
 		saveGameDialog();
@@ -566,7 +591,7 @@ void ColonyEngine::initMacMenus() {
 	Graphics::PixelFormat rgba(4, 8, 8, 8, 8, 24, 16, 8, 0);
 	_menuSurface = new Graphics::ManagedSurface(_width, _height, rgba);
 
-	_wm = new Graphics::MacWindowManager(Graphics::kWMModeNoDesktop | Graphics::kWMNoScummVMWallpaper | Graphics::kWMMode32bpp | Graphics::kWMModeNoSystemRedraw);
+	_wm = new Graphics::MacWindowManager(Graphics::kWMModeNoDesktop | Graphics::kWMNoScummVMWallpaper | Graphics::kWMModeNoSystemRedraw, nullptr, Common::UNK_LANG, rgba);
 
 	// Override WM color values for 32bpp RGBA rendering.
 	// The defaults are palette indices (0-6) which are meaningless in 32bpp mode.
@@ -873,14 +898,29 @@ Common::Error ColonyEngine::run() {
 
 		Common::Event event;
 		while (_system->getEventManager()->pollEvent(event)) {
-			// Let MacWindowManager handle menu events first
+			// Let MacWindowManager handle menu events first. The menu bar is
+			// drawn into _menuSurface (engine logical coords, _width×_height
+			// per colony.cpp:570), so its hit-testing rects are in logical
+			// space. With kSupportsArbitraryResolutions, event.mouse arrives
+			// in window pixels — pass a coord-scaled copy so the WM resolves
+			// menu clicks correctly. The original event is preserved for the
+			// engine's own handlers downstream.
 			if (_wm) {
 				bool wasMenuActive = _wm->isMenuActive();
-				if (_wm->processEvent(event)) {
+				Common::Event wmEvent = event;
+				if (event.type == Common::EVENT_MOUSEMOVE
+						|| event.type == Common::EVENT_LBUTTONDOWN
+						|| event.type == Common::EVENT_LBUTTONUP
+						|| event.type == Common::EVENT_RBUTTONDOWN
+						|| event.type == Common::EVENT_RBUTTONUP
+						|| event.type == Common::EVENT_MBUTTONDOWN
+						|| event.type == Common::EVENT_MBUTTONUP) {
+					wmEvent.mouse = eventMouseToLogical(event.mouse);
+				}
+				if (_wm->processEvent(wmEvent)) {
 					// WM consumed the event (menu interaction)
 					if (!wasMenuActive && _wm->isMenuActive()) {
 						_system->lockMouse(false);
-						_system->showMouse(true);
 						CursorMan.setDefaultArrowCursor();
 						CursorMan.showMouse(true);
 					}
@@ -928,6 +968,9 @@ Common::Error ColonyEngine::run() {
 				case kActionLookBehind:
 					_me.look = _me.ang + 128;
 					break;
+				case kActionFaceForward:
+					_me.lookY = 0;
+					break;
 				case kActionToggleDashboard:
 					_showDashBoard = !_showDashBoard;
 					break;
@@ -961,7 +1004,6 @@ Common::Error ColonyEngine::run() {
 					break;
 				case kActionEscape:
 					_system->lockMouse(false);
-					_system->showMouse(true);
 					CursorMan.setDefaultArrowCursor();
 					CursorMan.showMouse(true);
 					openMainMenuDialog();
@@ -1018,8 +1060,10 @@ Common::Error ColonyEngine::run() {
 			} else if (event.type == Common::EVENT_LBUTTONDOWN && (_mouseLocked || _cursorShoot)) {
 				cShoot();
 			} else if (event.type == Common::EVENT_MOUSEMOVE) {
-				_mousePos = event.mouse;
+				_mousePos = eventMouseToLogical(event.mouse);
 				if (_mouseLocked) {
+					// relMouse stays in window-pixel deltas regardless of
+					// resolution mode — keep raw for mouselook feel.
 					mouseDX += event.relMouse.x;
 					mouseDY += event.relMouse.y;
 					mouseMoved = true;
@@ -1039,63 +1083,78 @@ Common::Error ColonyEngine::run() {
 			}
 			// Warp back to center and purge remaining mouse events
 			// to prevent the warp from generating phantom deltas (Freescape pattern)
-			_system->warpMouse(_centerX, _centerY);
+			warpMouseLogical(_centerX, _centerY);
 			_system->getEventManager()->purgeMouseEvents();
 			mouseMoved = false;
 			mouseDX = mouseDY = 0;
 		}
 
-		// Apply continuous movement/rotation from held keys,
-		// throttled to ~15 ticks/sec to match original key-repeat feel
-		if (now - lastMoveTick >= 66) {
+		// Smooth, deltaTime-based movement (Freescape-style). Top speed
+		// matches the previous 15Hz tick: units/sec = 120 * (1 << spd).
+		// Sprint (shift) bumps the speed level by 1; speed keys 1-5 select
+		// the base level. Diagonals are normalized so combined input is
+		// not faster than single-axis movement.
+		{
+			float dt = (now - lastMoveTick) / 1000.0f;
 			lastMoveTick = now;
-			const int spd = _sprint ? _speedShift + 1 : _speedShift;
-			const int moveX = (_cost[_me.look] * (1 << spd)) >> 4;
-			const int moveY = (_sint[_me.look] * (1 << spd)) >> 4;
-			const int rotSpeed = 1 << (_speedShift - 1);
+			if (dt > 0.1f)
+				dt = 0.1f; // clamp for first frame / pause-resume
 
-			if (_gameMode == kModeBattle) {
-				if (_moveForward)
-					battleCommand(_me.xloc + moveX, _me.yloc + moveY);
-				if (_moveBackward)
-					battleCommand(_me.xloc - moveX, _me.yloc - moveY);
-				if (_strafeLeft) {
-					uint8 strafeAngle = (uint8)((int)_me.look + 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					battleCommand(_me.xloc + sx, _me.yloc + sy);
-				}
-				if (_strafeRight) {
-					uint8 strafeAngle = (uint8)((int)_me.look - 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					battleCommand(_me.xloc + sx, _me.yloc + sy);
+			const int spd = CLIP(_sprint ? _speedShift + 1 : _speedShift, 1, 6);
+			const float speed = 120.0f * (float)(1 << spd); // world units/sec
+
+			float dirX = 0.0f, dirY = 0.0f;
+			if (_moveForward) {
+				dirX += _cost[_me.look];
+				dirY += _sint[_me.look];
+			}
+			if (_moveBackward) {
+				dirX -= _cost[_me.look];
+				dirY -= _sint[_me.look];
+			}
+			if (_strafeLeft) {
+				uint8 a = (uint8)((int)_me.look + 64);
+				dirX += _cost[a];
+				dirY += _sint[a];
+			}
+			if (_strafeRight) {
+				uint8 a = (uint8)((int)_me.look - 64);
+				dirX += _cost[a];
+				dirY += _sint[a];
+			}
+
+			if (dirX != 0.0f || dirY != 0.0f) {
+				const float len = sqrtf(dirX * dirX + dirY * dirY);
+				const float ux = dirX / len;
+				const float uy = dirY / len;
+				_moveAccumX += ux * speed * dt;
+				_moveAccumY += uy * speed * dt;
+				const int ix = (int)_moveAccumX;
+				const int iy = (int)_moveAccumY;
+				_moveAccumX -= ix;
+				_moveAccumY -= iy;
+				if (ix != 0 || iy != 0) {
+					if (_gameMode == kModeBattle)
+						battleCommand(_me.xloc + ix, _me.yloc + iy);
+					else
+						cCommand(_me.xloc + ix, _me.yloc + iy, true);
 				}
 			} else {
-				if (_moveForward)
-					cCommand(_me.xloc + moveX, _me.yloc + moveY, true);
-				if (_moveBackward)
-					cCommand(_me.xloc - moveX, _me.yloc - moveY, true);
-				if (_strafeLeft) {
-					uint8 strafeAngle = (uint8)((int)_me.look + 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					cCommand(_me.xloc + sx, _me.yloc + sy, true);
-				}
-				if (_strafeRight) {
-					uint8 strafeAngle = (uint8)((int)_me.look - 64);
-					int sx = (_cost[strafeAngle] * (1 << spd)) >> 4;
-					int sy = (_sint[strafeAngle] * (1 << spd)) >> 4;
-					cCommand(_me.xloc + sx, _me.yloc + sy, true);
-				}
+				_moveAccumX = 0.0f;
+				_moveAccumY = 0.0f;
 			}
-			if (_rotateLeft) {
-				_me.ang += rotSpeed;
-				_me.look += rotSpeed;
-			}
-			if (_rotateRight) {
-				_me.ang -= rotSpeed;
-				_me.look -= rotSpeed;
+
+			if (_rotateLeft || _rotateRight) {
+				const float rotSpeed = (float)(1 << (_speedShift - 1)) * 15.0f;
+				_rotAccum += (_rotateLeft ? rotSpeed : -rotSpeed) * dt;
+				const int rint = (int)_rotAccum;
+				_rotAccum -= rint;
+				if (rint != 0) {
+					_me.ang = (uint8)((int)_me.ang + rint);
+					_me.look = (uint8)((int)_me.look + rint);
+				}
+			} else {
+				_rotAccum = 0.0f;
 			}
 		}
 
@@ -1143,7 +1202,7 @@ bool ColonyEngine::checkSkipRequested() {
 		case Common::EVENT_RETURN_TO_LAUNCHER:
 			return true;
 		case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
-			if (event.customType == kActionSkipIntro)
+			if (event.customType == kActionEscape)
 				return true;
 			break;
 		case Common::EVENT_SCREEN_CHANGED:
@@ -1175,7 +1234,7 @@ bool ColonyEngine::waitForInput() {
 			case Common::EVENT_RETURN_TO_LAUNCHER:
 				return false;
 			case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
-				if (event.customType == kActionSkipIntro)
+				if (event.customType == kActionEscape)
 					return true;
 				return false;
 			case Common::EVENT_KEYDOWN:

@@ -515,6 +515,13 @@ AGOSEngine::AGOSEngine(OSystem *system, const AGOSGameDescription *gd)
 
 	memset(_currentPalette, 0, sizeof(_currentPalette));
 	memset(_displayPalette, 0, sizeof(_displayPalette));
+	memset(_pnPaletteBanks, 0, sizeof(_pnPaletteBanks));
+	memset(_pnFadeCurrent, 0, sizeof(_pnFadeCurrent));
+	memset(_pnHavePaletteBank, 0, sizeof(_pnHavePaletteBank));
+	_pnDayNightControllerSelectorMask = 0xFFFF;
+	_pnDayNightControllerLastStage = 0xFF;
+	_pnLastClockMinutes = -1;
+	_pnDayNightControllerTickCounter = 0x00C8;
 
 	memset(_videoBuf1, 0, sizeof(_videoBuf1));
 	memset(_videoWindows, 0, sizeof(_videoWindows));
@@ -637,8 +644,8 @@ Common::Error AGOSEngine::init() {
 
 	_midi = new MidiPlayer(this);
 
-	if ((getGameType() == GType_SIMON2 && getPlatform() == Common::kPlatformWindows) || 
-			(getGameType() == GType_SIMON2 && getPlatform() == Common::kPlatformAmiga) ||
+	if ((getGameType() == GType_SIMON2 && getPlatform() == Common::kPlatformWindows) ||
+			(getGameType() == GType_SIMON2 && (getPlatform() == Common::kPlatformAmiga || isSimon2MacAmiga())) ||
 			(getGameType() == GType_SIMON1 && getPlatform() == Common::kPlatformWindows) ||
 			((getFeatures() & GF_TALKIE) && getPlatform() == Common::kPlatformAcorn) ||
 			(getPlatform() == Common::kPlatformDOS && getGameType() != GType_PN && getGameType() != GType_FF) ||

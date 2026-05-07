@@ -28,6 +28,7 @@
 
 #include "gui/gui-manager.h"
 #include "gui/widgets/grid.h"
+#include "gui/animation/FluidScroll.h"
 
 #include "gui/ThemeEval.h"
 
@@ -91,8 +92,8 @@ void GridItemWidget::drawWidget() {
 	// Check if this entry is in the selected entries list
 	bool isSelected = _grid->_selectedItems[_activeEntry->entryID];
 
-	// Draw selection highlight if this entry is selected or hovered
-	if (isSelected || _isHighlighted) {
+	// Draw selection highlight if this entry is selected or hovered (not while dragging)
+	if (isSelected || (_isHighlighted && !_grid->_isMouseDown)) {
 		Common::Rect r(_x - kMarginX, _y - kMarginY,
 					   _x + _w + kMarginX, _y + _h + kMarginY);
 		// Draw a highlighted BG on hover
@@ -209,6 +210,50 @@ void GridItemWidget::handleMouseMoved(int x, int y, int button) {
 	if (!_isHighlighted) {
 		handleMouseEntered(button);
 	}
+	_grid->handleMouseMoved(x + _x, y + _y, button);
+}
+
+void GridItemWidget::doSelection() {
+	if (_activeEntry->isHeader) {
+		_grid->_selectedEntry = nullptr;
+		_grid->toggleGroup(_activeEntry->entryID);
+	} else if (_isHighlighted && isVisible()) {
+		_grid->_selectedEntry = _activeEntry;
+
+		if (!_grid->isMultiSelectEnabled()) {
+			_grid->clearSelection();
+			_grid->markSelectedItem(_activeEntry->entryID, true);
+			_grid->_lastSelectedEntryID = _activeEntry->entryID;
+			sendCommand(kItemClicked, _activeEntry->entryID);
+			return;
+		}
+
+		int32 keyState = g_system->getEventManager()->getModifierState();
+		bool ctrlPressed = (keyState & Common::KBD_CTRL) != 0;
+		bool shiftPressed = (keyState & Common::KBD_SHIFT) != 0;
+
+		if (ctrlPressed) {
+			if (_grid->isItemSelected(_activeEntry->entryID)) {
+				_grid->markSelectedItem(_activeEntry->entryID, false);
+			} else {
+				_grid->markSelectedItem(_activeEntry->entryID, true);
+				_grid->_lastSelectedEntryID = _activeEntry->entryID;
+			}
+		} else if (shiftPressed && _grid->_lastSelectedEntryID >= 0) {
+			int startID = _grid->getVisualPos(_grid->_lastSelectedEntryID);
+			int endID = _grid->getVisualPos(_activeEntry->entryID);
+			if (startID >= 0 && endID >= 0) {
+				_grid->selectVisualRange(startID, endID);
+			}
+			_grid->_lastSelectedEntryID = _activeEntry->entryID;
+		} else {
+			_grid->clearSelection();
+			_grid->markSelectedItem(_activeEntry->entryID, true);
+			_grid->_lastSelectedEntryID = _activeEntry->entryID;
+		}
+
+		sendCommand(kItemClicked, _activeEntry->entryID);
+	}
 }
 
 void GridWidget::toggleGroup(int groupID) {
@@ -257,60 +302,17 @@ void GridWidget::saveClosedGroups(const Common::U32String &groupName) {
 }
 
 void GridItemWidget::handleMouseDown(int x, int y, int button, int clickCount) {
-	if (_activeEntry->isHeader) {
-		_grid->_selectedEntry = nullptr;
-		_grid->toggleGroup(_activeEntry->entryID);
-	} else if (_isHighlighted && isVisible()) {
-		_grid->_selectedEntry = _activeEntry;
+	_grid->handleMouseDown(x + _x, y + _y, button, clickCount);
+}
 
-		// If multi-select is not enabled, use simple single-selection
-		if (!_grid->isMultiSelectEnabled()) {
-			_grid->clearSelection();
-			_grid->markSelectedItem(_activeEntry->entryID, true);
-			_grid->_lastSelectedEntryID = _activeEntry->entryID;
-			sendCommand(kItemClicked, _activeEntry->entryID);
-			return;
-		}
-
-		// Get the current keyboard state
-		int32 keyState = g_system->getEventManager()->getModifierState();
-		bool ctrlPressed = (keyState & Common::KBD_CTRL) != 0;
-		bool shiftPressed = (keyState & Common::KBD_SHIFT) != 0;
-
-		if (ctrlPressed) {
-			// Ctrl+Click: Toggle selection of this item
-			if (_grid->isItemSelected(_activeEntry->entryID)) {
-				_grid->markSelectedItem(_activeEntry->entryID, false);
-			} else {
-				_grid->markSelectedItem(_activeEntry->entryID, true);
-				_grid->_lastSelectedEntryID = _activeEntry->entryID;
-			}
-		} else if (shiftPressed && _grid->_lastSelectedEntryID >= 0) {
-			// Shift+Click: Select range from last selected to current item
-			// Must select based on visual order, not by entryID range
-			int startID = _grid->getVisualPos(_grid->_lastSelectedEntryID);
-			int endID = _grid->getVisualPos(_activeEntry->entryID);
-
-			// If we found both positions, select all items between them (visually)
-			if (startID >= 0 && endID >= 0) {
-				_grid->selectVisualRange(startID, endID);
-			}
-			_grid->_lastSelectedEntryID = _activeEntry->entryID;
-		} else {
-			// Regular click: Select only this item
-			_grid->clearSelection();
-			_grid->markSelectedItem(_activeEntry->entryID, true);
-			_grid->_lastSelectedEntryID = _activeEntry->entryID;
-		}
-
-		sendCommand(kItemClicked, _activeEntry->entryID);
-	}
+void GridItemWidget::handleMouseUp(int x, int y, int button, int clickCount) {
+	_grid->handleMouseUp(x + _x, y + _y, button, clickCount);
 }
 
 #pragma mark -
 
 GridItemTray::GridItemTray(GuiObject *boss, int x, int y, int w, int h, int entryID, GridWidget *grid)
-	: Dialog(x, y, w, h), CommandSender(boss) {
+	: Dialog(x, y, w, h), CommandSender(boss), _mouseOutside(false) {
 
 	_entryID = entryID;
 	_boss = boss;
@@ -386,12 +388,23 @@ void GridItemTray::handleMouseWheel(int x, int y, int direction) {
 	close();
 }
 
+void GridItemTray::receivedFocus(int x, int y) {
+	// Don't call our handleMouseMoved when receiving focus
+	// to avoid spurious closing if the cursor is outside of the tray
+	if (x >= 0 && y >= 0) {
+		Dialog::handleMouseMoved(x, y, 0);
+		_mouseOutside = ((x < 0 || x > _w) || (y > _h || y < -(_grid->_gridItemHeight)));
+	}
+}
+
 void GridItemTray::handleMouseMoved(int x, int y, int button) {
 	Dialog::handleMouseMoved(x, y, button);
-	if ((x < 0 || x > _w) || (y > _h || y < -(_grid->_gridItemHeight))) {
+	bool mouseOutside = (x < 0 || x > _w) || (y > _h || y < -(_grid->_gridItemHeight));
+	if (mouseOutside && !_mouseOutside) {
 		// Close on going outside
 		close();
 	}
+	_mouseOutside = mouseOutside;
 }
 
 #pragma mark -
@@ -489,7 +502,7 @@ GridWidget::GridWidget(GuiObject *boss, const Common::String &name)
 
 	_scrollBar = new ScrollBarWidget(this, _w - _scrollBarWidth, _y, _scrollBarWidth, _y + _h);
 	_scrollBar->setTarget(this);
-	_scrollPos = 0;
+	_scrollPos = 0.0f;
 	_scrollSpeed = 1;
 	_firstVisibleItem = 0;
 	_lastVisibleItem = 0;
@@ -514,8 +527,18 @@ GridWidget::GridWidget(GuiObject *boss, const Common::String &name)
 	_selectedItems.clear();
 	_lastSelectedEntryID = -1;
 
+	_isMouseDown = false;
+	_isDragging = false;
+	_selectionPending = false;
+	_dragStartY = 0;
+	_dragLastY = 0;
+
+	_fluidScroller = new FluidScroller();
+
 	_filterMatcher = GridWidgetDefaultMatcher;
 	_filterMatcherArg = nullptr;
+
+	setFlags(getFlags() | WIDGET_TRACK_MOUSE | WIDGET_WANT_TICKLE | WIDGET_RETAIN_FOCUS);
 }
 
 GridWidget::~GridWidget() {
@@ -532,6 +555,7 @@ GridWidget::~GridWidget() {
 	_platformIconsAlpha.clear();
 	_languageIconsAlpha.clear();
 	_extraIconsAlpha.clear();
+	delete _fluidScroller;
 }
 
 Common::SharedPtr<Graphics::ManagedSurface> GridWidget::filenameToSurface(const Common::String &name) {
@@ -724,7 +748,7 @@ bool GridWidget::calcVisibleEntries() {
 	bool needsReload = false;
 
 	int nFirstVisibleItem = 0, nLastVisibleItem = 0;
-	int temp = lastItemBeforeY(_sortedEntryList, _scrollPos);
+	int temp = lastItemBeforeY(_sortedEntryList, (int)_scrollPos);
 	nFirstVisibleItem = temp;
 	// We want the leftmost item from the topmost visible row, so we traverse backwards
 	while ((nFirstVisibleItem >= 0) &&
@@ -734,7 +758,7 @@ bool GridWidget::calcVisibleEntries() {
 	nFirstVisibleItem++;
 	nFirstVisibleItem = (nFirstVisibleItem < 0) ? 0 : nFirstVisibleItem;
 
-	nLastVisibleItem = lastItemBeforeY(_sortedEntryList, _scrollPos + _scrollWindowHeight);
+	nLastVisibleItem = lastItemBeforeY(_sortedEntryList, (int)_scrollPos + _scrollWindowHeight);
 	nLastVisibleItem = (nLastVisibleItem < 0) ? 0 : nLastVisibleItem;
 
 	if ((nFirstVisibleItem != _firstVisibleItem) || (nLastVisibleItem != _lastVisibleItem) || (_isGridInvalid)) {
@@ -867,16 +891,16 @@ void GridWidget::move(int x, int y) {
 // Scroll to entry id. Optional parameter to decide if the entry should be forced to be on the top, or merely
 // scrolled into view.
 void GridWidget::scrollToEntry(int id, bool forceToTop) {
-	int newScrollPos = _scrollPos;
+	float newScrollPos = _scrollPos;
 	for (uint i = 0; i < _sortedEntryList.size(); ++i) {
 		if ((!_sortedEntryList[i]->isHeader) && (_sortedEntryList[i]->entryID == id)) {
 			if (forceToTop) {
 				newScrollPos = _sortedEntryList[i]->y + _scrollWindowPaddingY + _gridYSpacing;
 			} else {
-				if (_sortedEntryList[i]->y < _scrollPos) {
+				if (_sortedEntryList[i]->y < (int)_scrollPos) {
 					// Item is above the visible view
 					newScrollPos = _sortedEntryList[i]->y - _scrollWindowPaddingY - _gridYSpacing;
-				} else if (_sortedEntryList[i]->y > _scrollPos + _scrollWindowHeight - _gridItemHeight - _trayHeight) {
+				} else if (_sortedEntryList[i]->y > (int)_scrollPos + _scrollWindowHeight - _gridItemHeight - _trayHeight) {
 					// Item is below the visible view
 					newScrollPos = _sortedEntryList[i]->y - _scrollWindowHeight + _gridItemHeight + _trayHeight;
 				} else {
@@ -888,6 +912,8 @@ void GridWidget::scrollToEntry(int id, bool forceToTop) {
 		}
 	}
 	handleCommand(this, kSetPositionCmd, newScrollPos);
+	_scrollPos = newScrollPos;
+	applyScrollPos();
 }
 
 void GridWidget::updateGrid() {
@@ -922,7 +948,7 @@ void GridWidget::assignEntriesToItems() {
 			item->setVisible(true);
 			GridItemInfo *entry = _visibleEntryList[k];
 			item->setActiveEntry(*entry);
-			item->setPos(entry->x, entry->y - _scrollPos);
+			item->setPos(entry->x, entry->y - (int)_scrollPos);
 			item->setSize(entry->w, entry->h);
 			item->update();
 		}
@@ -997,8 +1023,73 @@ void GridWidget::selectVisualRange(int startPos, int endPos) {
 }
 
 void GridWidget::handleMouseWheel(int x, int y, int direction) {
-	_scrollBar->handleMouseWheel(x, y, direction);
-	_scrollPos = _scrollBar->_currentPos;
+	_fluidScroller->handleMouseWheel(direction);
+}
+
+void GridWidget::handleMouseDown(int x, int y, int button, int clickCount) {
+	if (button == 1) {
+		_isMouseDown = true;
+		_mouseDownTime = g_system->getMillis();
+		_isDragging = false;
+		_dragStartY = y;
+		_dragLastY = y;
+	}
+	_selectionPending = true;
+	_fluidScroller->stopAnimation();
+}
+
+void GridWidget::handleMouseUp(int x, int y, int button, int clickCount) {
+	bool wasPending = _selectionPending;
+	bool wasDragging = _isDragging;
+
+	_isMouseDown = false;
+	_isDragging = false;
+	_selectionPending = false;
+
+	if (wasPending && !wasDragging) {
+		// Find which item was clicked and select it
+		Widget *w = findWidget(x, y);
+		if (w && w != this && w->getType() == kContainerWidget)
+			((GridItemWidget *)w)->doSelection();
+	}
+
+	if (wasDragging)
+		_fluidScroller->startFling();
+}
+
+void GridWidget::handleMouseMoved(int x, int y, int button) {
+	if (!_isMouseDown)
+		return;
+
+	if (!_isDragging && ABS(y - _dragStartY) > kDragThreshold) {
+		_isDragging = true;
+		_selectionPending = false;
+	}
+
+	if (_isDragging) {
+		int deltaY = _dragLastY - y;
+		_dragLastY = y;
+
+		if (deltaY != 0) {
+			_fluidScroller->feedDrag(g_system->getMillis(), deltaY);
+			_scrollPos = _fluidScroller->getVisualPosition();
+			applyScrollPos();
+		}
+	}
+}
+
+void GridWidget::applyScrollPos() {
+	if (calcVisibleEntries())
+		reloadThumbnails();
+
+	assignEntriesToItems();
+	scrollBarRecalc();	
+	g_gui.scheduleTopDialogRedraw();
+}
+
+void GridWidget::handleTickle() {
+	if (_fluidScroller->update(g_system->getMillis(), _scrollPos))
+		applyScrollPos();
 }
 
 bool GridWidget::handleKeyDown(Common::KeyState state) {
@@ -1013,16 +1104,12 @@ void GridWidget::handleCommand(CommandSender *sender, uint32 cmd, uint32 data) {
 	// Work in progress
 	switch (cmd) {
 	case kSetPositionCmd:
-		if (_scrollPos != (int)data) {
+		if ((int)_scrollPos != (int)data) {
 			_scrollPos = data;
+			_fluidScroller->stopAnimation();
+			_scrollPos = _fluidScroller->setPosition(_scrollPos, false);
 
-			if (calcVisibleEntries()) {
-				reloadThumbnails();
-			}
-
-			assignEntriesToItems();
-			scrollBarRecalc();
-			markAsDirty();
+			applyScrollPos();
 
 			((GUI::Dialog *)_boss)->setFocusWidget(this);
 		}
@@ -1189,12 +1276,14 @@ void GridWidget::reflowLayout() {
 		scrollToEntry(_selectedEntry->entryID, false);
 	}
 	scrollBarRecalc();
+	int maxScroll = MAX(0, _scrollBar->_numEntries - _scrollBar->_entriesPerPage);
+	_fluidScroller->setBounds((float)maxScroll, _scrollBar->_entriesPerPage, (float)_scrollBar->_singleStep);
 	markAsDirty();
 }
 
 void GridWidget::openTrayAtSelected() {
 	if (_selectedEntry) {
-		GridItemTray *tray = new GridItemTray(this, _x + _selectedEntry->x - _gridXSpacing / 3, _y + _selectedEntry->y + _selectedEntry->h - _scrollPos,
+		GridItemTray *tray = new GridItemTray(this, _x + _selectedEntry->x - _gridXSpacing / 3, _y + _selectedEntry->y + _selectedEntry->h - (int)_scrollPos,
 								_gridItemWidth + 2 * (_gridXSpacing / 3), _trayHeight, _selectedEntry->entryID, this);
 		tray->enableLoadButton(_selectedEntry->canLoadGame);
 
@@ -1206,12 +1295,14 @@ void GridWidget::openTrayAtSelected() {
 void GridWidget::scrollBarRecalc() {
 	_scrollBar->_numEntries = _innerHeight;
 	_scrollBar->_entriesPerPage = _scrollWindowHeight - 2 * _scrollWindowPaddingY;
-	_scrollBar->_currentPos = _scrollPos;
+	int maxScroll = MAX(0, _scrollBar->_numEntries - _scrollBar->_entriesPerPage);
+	_scrollBar->_currentPos = CLIP<int>((int)_scrollPos, 0, maxScroll);
 	_scrollBar->_singleStep = kLineHeight;
 
-	_scrollBar->checkBounds(_scrollBar->_currentPos);
-	_scrollPos = _scrollBar->_currentPos;
 	_scrollBar->recalc();
+
+	maxScroll = MAX(0, _scrollBar->_numEntries - _scrollBar->_entriesPerPage);
+	_fluidScroller->setBounds((float)maxScroll, _scrollBar->_entriesPerPage, (float)_scrollBar->_singleStep);
 }
 
 void GridWidget::setFilter(const Common::U32String &filter) {
@@ -1224,7 +1315,7 @@ void GridWidget::setFilter(const Common::U32String &filter) {
 	_filter = filt;
 
 	// Reset the scrollbar and deselect everything if filter has changed
-	_scrollPos = 0;
+	_scrollPos = 0.f;
 	_selectedEntry = nullptr;
 
 	sortGroups();

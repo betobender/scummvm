@@ -141,9 +141,9 @@ void MultiBuildPuzzle::readData(Common::SeekableReadStream &stream) {
 	}
 
 	// 0x59b: three SoundDescriptions (0x31 bytes each)
-	_sounds[0].readNormal(stream);
-	_sounds[1].readNormal(stream);
-	_sounds[2].readNormal(stream);
+	_rotationSound.readNormal(stream);
+	_pickupSound.readNormal(stream);
+	_dropSound.readNormal(stream);
 
 	// 0x62e: 6 unknown bytes
 	stream.skip(6);
@@ -178,9 +178,9 @@ void MultiBuildPuzzle::execute() {
 	case kBegin:
 		init();
 		registerGraphics();
-		g_nancy->_sound->loadSound(_sounds[0]);
-		g_nancy->_sound->loadSound(_sounds[1]);
-		g_nancy->_sound->loadSound(_sounds[2]);
+		g_nancy->_sound->loadSound(_rotationSound);
+		g_nancy->_sound->loadSound(_pickupSound);
+		g_nancy->_sound->loadSound(_dropSound);
 		g_nancy->_sound->loadSound(_solveSound);
 		_state = kRun;
 		// fall through
@@ -218,9 +218,9 @@ void MultiBuildPuzzle::execute() {
 		break;
 
 	case kActionTrigger:
-		g_nancy->_sound->stopSound(_sounds[0]);
-		g_nancy->_sound->stopSound(_sounds[1]);
-		g_nancy->_sound->stopSound(_sounds[2]);
+		g_nancy->_sound->stopSound(_rotationSound);
+		g_nancy->_sound->stopSound(_pickupSound);
+		g_nancy->_sound->stopSound(_dropSound);
 		g_nancy->_sound->stopSound(_solveSound);
 		if (_isCancelled) {
 			// Change to cancel scene unconditionally, but only set the cancel flag if
@@ -242,6 +242,31 @@ void MultiBuildPuzzle::execute() {
 		finishExecution();
 		break;
 	}
+}
+
+bool MultiBuildPuzzle::isValidDrop() const {
+	const Piece &pp = _pieces[_pickedUpPiece];
+
+	// Geometric checks apply only to non-closeup puzzles with a win condition (e.g. books).
+	// Sand castle (no closeup image, _requiredPieces=0) allows free stacking.
+	// Sandwich puzzle (has closeup image) allows free-form placement.
+	if (!_hasCloseupImage && _requiredPieces > 0) {
+		// Boundary check: drop center must be inside the target zone
+		Common::Point dropCenter((pp.gameRect.left + pp.gameRect.right) / 2,
+								 (pp.gameRect.top + pp.gameRect.bottom) / 2);
+		if (!_targetZone.isEmpty() && !_targetZone.contains(dropCenter))
+			return false;
+
+		// Overlap check: piece must not overlap any already-placed piece
+		for (uint i = 0; i < _pieces.size(); ++i) {
+			if ((int)i != _pickedUpPiece && _pieces[i].isPlaced &&
+				pp.gameRect.intersects(_pieces[i].gameRect)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 void MultiBuildPuzzle::handleInput(NancyInput &input) {
@@ -268,15 +293,16 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 		pp.gameRect.right  = newLeft + _pickedUpWidth;
 		pp.gameRect.bottom = newTop  + _pickedUpHeight;
 		updatePieceRender(_pickedUpPiece);
+		bool validDrop = isValidDrop();
 
-		g_nancy->_cursor->setCursorType(CursorManager::kCustom1);
+		g_nancy->_cursor->setCursorType(validDrop ? CursorManager::kCustom1 : CursorManager::kNormal);
 
 		// Right click: rotate the carried piece
 		if ((input.input & NancyInput::kRightMouseButtonUp) && pp.hasSurface[1]) {
 			pp.curRotation = (pp.curRotation + 1) % 4;
 			_pickedUpWidth  = pp.rotateSurfaces[pp.curRotation].w;
 			_pickedUpHeight = pp.rotateSurfaces[pp.curRotation].h;
-			g_nancy->_sound->playSound(_sounds[0]);
+			g_nancy->_sound->playSound(_rotationSound);
 			updatePieceRender(_pickedUpPiece);
 			return;
 		}
@@ -286,30 +312,6 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 		// the piece overlaps an already-placed piece; piece returns to shelf on rejection.
 		// For closeup puzzles: no geometric checks — free-form placement.
 		if (input.input & NancyInput::kLeftMouseButtonUp) {
-			bool validDrop = true;
-
-			// Geometric checks apply only to non-closeup puzzles with a win condition (e.g. books).
-			// Sand castle (no closeup image, _requiredPieces=0) allows free stacking.
-			// Sandwich puzzle (has closeup image) allows free-form placement.
-			if (!_hasCloseupImage && _requiredPieces > 0) {
-				// Boundary check: drop center must be inside the target zone
-				Common::Point dropCenter((pp.gameRect.left + pp.gameRect.right) / 2,
-				                        (pp.gameRect.top  + pp.gameRect.bottom) / 2);
-				if (!_targetZone.isEmpty() && !_targetZone.contains(dropCenter))
-					validDrop = false;
-
-				// Overlap check: piece must not overlap any already-placed piece
-				if (validDrop) {
-					for (uint i = 0; i < _pieces.size(); ++i) {
-						if ((int)i != _pickedUpPiece && _pieces[i].isPlaced &&
-						        pp.gameRect.intersects(_pieces[i].gameRect)) {
-							validDrop = false;
-							break;
-						}
-					}
-				}
-			}
-
 			// Clear drag state BEFORE updatePieceRender so the correct visual is chosen:
 			// - valid drop:   isPlaced=true,  isDragging=false -> shows rotation surface at drop pos
 			// - invalid drop: isPlaced=false, isDragging=false -> shows shelf srcRect at homeRect
@@ -319,7 +321,7 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 
 			if (validDrop) {
 				pp.isPlaced = true;
-				g_nancy->_sound->playSound(_sounds[1]);
+				g_nancy->_sound->playSound(_dropSound);
 			} else {
 				// Return piece to its shelf position
 				pp.gameRect = pp.homeRect;
@@ -355,6 +357,7 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 			pp.gameRect = Common::Rect(newLeft, newTop,
 			                          newLeft + _pickedUpWidth, newTop + _pickedUpHeight);
 			updatePieceRender(sel);
+			g_nancy->_sound->playSound(_pickupSound);
 		}
 		return;
 	}
@@ -370,7 +373,7 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 	}
 
 	if (topmost != -1) {
-		g_nancy->_cursor->setCursorType(CursorManager::kHotspot);
+		g_nancy->_cursor->setCursorType(CursorManager::kCustom1);
 
 		if (input.input & NancyInput::kLeftMouseButtonUp) {
 			Piece &pp = _pieces[topmost];
@@ -378,7 +381,6 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 			pp.curRotation = 0;
 			pp.setZ((uint16)(_z + (int)_pieces.size() * 2));
 			pp.registerGraphics();
-			g_nancy->_sound->playSound(_sounds[0]);
 
 			if (_hasCloseupImage && !pp.cuSrcRect.isEmpty()) {
 				// First click shows close-up view, centered in the viewport.
@@ -394,6 +396,7 @@ void MultiBuildPuzzle::handleInput(NancyInput &input) {
 				_pickedUpPiece = topmost;
 				_pickedUpWidth  = pp.rotateSurfaces[0].w;
 				_pickedUpHeight = pp.rotateSurfaces[0].h;
+				g_nancy->_sound->playSound(_pickupSound);
 			}
 			updatePieceRender(topmost);
 		}

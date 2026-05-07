@@ -282,7 +282,7 @@ ImGuiImage getImageID(CastMember *castMember) {
 
 	bmpMember->load();
 	Picture *pic = bmpMember->_picture;
-	if (!pic)
+	if (!pic || !pic->_surface.getPixels())
 		return {};
 
 	ImTextureID textureID = (ImTextureID)(intptr_t)g_system->getImGuiTexture(pic->_surface, pic->_palette, pic->_paletteColors);
@@ -421,9 +421,13 @@ ImGuiImage getTextID(CastMember *castMember) {
 	// Make a temporary channel to blit the shape from
 	Channel *channel = new Channel(nullptr, sprite);
 
-	Graphics::MacText *widget = (Graphics::MacText *)castMember->createWidget(bbox, channel, kTextSprite);
+	Graphics::MacWidget *widget = castMember->createWidget(bbox, channel, kTextSprite);
 	Graphics::Surface surface;
-	surface.copyFrom(*widget->getRawSurface());
+
+	if (!widget || !widget->getSurface() || !widget->getSurface()->getPixels())
+      return {};
+
+	surface.copyFrom(*widget->getSurface());
 
 	if (debugChannelSet(8, kDebugImages)) {
 		Common::String prepend = "text";
@@ -750,6 +754,14 @@ void setTheme(int themeIndex) {
 	}
 }
 
+// helper to draw Image Viewer
+void openImageViewer(ImGuiImage image, const Common::String &text, const Common::String &title) {
+	_state->_imageViewerState.image = image;
+    _state->_imageViewerState.text = text;
+    _state->_imageViewerState.title = title;
+    _state->_w.imageViewer = true;
+}
+
 static void showSettings() {
 	if (!_state->_w.settings)
 		return;
@@ -909,6 +921,7 @@ void onImGuiRender() {
 	showChannels();
 	showCast();
 	showCastDetails();
+	showImageViewer();
 	showFuncList();
 	showScore();
 	showSearchBar();

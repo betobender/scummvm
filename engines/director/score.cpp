@@ -138,37 +138,9 @@ bool Score::processImmediateFrameScript(Common::String s, int id) {
 	return false;
 }
 
-bool Score::processFrozenPlayScript() {
-	// Unfreeze the play script if the special flag is set
-	if (g_lingo->_playDone) {
-		g_lingo->_playDone = false;
-		if (_window->thawLingoPlayState()) {
-			Symbol currentScript;
-			LingoState *state = _window->getLingoState();
-			if (state && !state->callstack.empty())
-				currentScript = state->callstack.front()->sp;
-			g_lingo->switchStateFromWindow();
-			bool completed = g_lingo->execute();
-			if (!completed) {
-				debugC(3, kDebugLingoExec, "Score::processFrozenPlayScript(): State froze again mid-thaw, interrupting");
-				return false;
-			} else if (currentScript == g_lingo->_currentInputEvent) {
-				// script that just completed was the current input event, clear the flag
-				debugC(3, kDebugEvents, "Score::processFrozenPlayScript(): Input event completed");
-				g_lingo->_currentInputEvent = Symbol();
-			}
-		}
-	}
-	return true;
-}
-
-
 bool Score::processFrozenScripts(bool recursion, int count) {
 	if (!_haveInteractivity)
 		return true;
-
-	if (!processFrozenPlayScript())
-		return false;
 
 	// Unfreeze any in-progress scripts and attempt to run them
 	// to completion.
@@ -485,6 +457,7 @@ void Score::updateCurrentFrame() {
 
 	if (nextFrameNumberToLoad >= getFramesNum()) {
 		Window *window = _vm->getCurrentWindow();
+		// reached the end of the movie
 		if (!window->_movieStack.empty()) {
 			MovieReference ref = window->_movieStack.back();
 			window->_movieStack.pop_back();
@@ -493,6 +466,9 @@ void Score::updateCurrentFrame() {
 				window->setNextMovie(ref.movie);
 				window->_nextMovie.frameI = ref.frameI;
 				return;
+			}
+			if (window->getLingoPlayState()) {
+				window->requeueLingoPlayState();
 			}
 			nextFrameNumberToLoad = ref.frameI;
 		} else {
@@ -930,21 +906,14 @@ void Score::incrementFilmLoops() {
 		if (it->_sprite->_cast && (it->_sprite->_cast->_type == kCastFilmLoop || it->_sprite->_cast->_type == kCastMovie)) {
 			FilmLoopCastMember *fl = ((FilmLoopCastMember *)it->_sprite->_cast);
 			if (!fl->_score->_scoreCache.empty()) {
-				// increment the film loop counter
 				if (fl->_looping) {
-					if (fl->_score->_curFrameNumber + 1 > fl->_score->getFramesNum())
-						fl->_score->setCurrentFrame(1);
-
-					fl->_score->step();
-				} else {
-					if (fl->_score->_curFrameNumber < fl->_score->getFramesNum() - 1)
-						fl->_score->step();
-					else
-						fl->_score->stopPlay();
+					it->_filmLoopFrame += 1;
+					it->_filmLoopFrame %= fl->_score->_scoreCache.size();
+				} else if (it->_filmLoopFrame < (fl->_score->_scoreCache.size() - 1)) {
+					it->_filmLoopFrame += 1;
 				}
-
 			} else {
-				warning("Score::updateFilmLoops(): invalid film loop in castId %s", it->_sprite->_castId.asString().c_str());
+				warning("Score::incrementFilmLoops(): invalid film loop in castId %s", it->_sprite->_castId.asString().c_str());
 			}
 		}
 	}

@@ -47,9 +47,11 @@ public:
 	void execute() override;
 	void handleInput(NancyInput &input) override;
 
+	bool isViewportRelative() const override { return true; }
+
 protected:
 	Common::String getRecordTypeName() const override { return "MultiBuildPuzzle"; }
-	bool isViewportRelative() const override { return true; }
+	bool isValidDrop() const;
 
 	// A single puzzle piece. Each piece is its own RenderObject.
 	// Unplaced: _drawSurface shows srcRect from primary image.
@@ -77,7 +79,6 @@ protected:
 
 		void setZ(uint16 z) { _z = z; _needsRedraw = true; }
 
-	protected:
 		bool isViewportRelative() const override { return true; }
 	};
 
@@ -96,7 +97,9 @@ protected:
 	// so the shelf always shows the source ingredient regardless of where the active piece is.
 	Common::Array<Piece> _shelfSlots;
 
-	SoundDescription _sounds[3];  // [0]=pickup/move, [1]=placement, [2]=extra
+	SoundDescription _rotationSound;
+	SoundDescription _pickupSound;
+	SoundDescription _dropSound;
 
 	SceneChangeWithFlag _solveScene;
 	SoundDescription _solveSound;

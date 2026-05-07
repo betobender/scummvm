@@ -31,6 +31,12 @@
 #include "director/castmember/richtext.h"
 #include "director/castmember/shape.h"
 #include "director/castmember/bitmap.h"
+#include "director/sprite.h"
+#include "director/castmember/filmloop.h"
+#include "director/castmember/sound.h"
+#include "director/frame.h"
+#include "director/score.h"
+#include "director/sound.h"
 
 #include "director/types.h"
 
@@ -147,9 +153,183 @@ void drawBitmapCMprops(BitmapCastMember *member) {
 	}
 }
 
+void showImageViewer() {
+	if (!_state->_w.imageViewer)
+		return;
+
+	auto state = &_state->_imageViewerState;
+
+	ImGuiImage imgID = state->image;
+	const Common::String &text = state->text;
+	Common::String title = state->title;
+
+	if (!imgID.id) {
+		_state->_w.imageViewer = false;
+		return;
+	}
+
+	// Recompute cache ig required
+	if (text != state->cachedRaw) {
+		state->cachedRaw = text;
+		state->cachedNormalized = text;
+		state->cachedNormalized.replace('\r', '\n');
+
+		size_t needed = state->cachedNormalized.size() + 1;
+
+		if (needed > state->bufferSize) {
+			free(state->buffer);
+			state->buffer = (char *)malloc(needed);
+			state->bufferSize = needed;
+		}
+
+		memcpy(state->buffer, state->cachedNormalized.c_str(), needed);
+	}
+
+	static float zoom = 1.0f;
+	static bool fitToWindow = true;
+	static ImVec2 offset(0.0f, 0.0f);
+
+	const char *windowTitle = title.empty() ? "Image Viewer" : title.c_str();
+
+	if (ImGui::Begin(windowTitle, &_state->_w.imageViewer,
+		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+
+		// Toolbar
+		if (ImGui::Button("Fit")) {
+			fitToWindow = true;
+			offset = ImVec2(0.0f, 0.0f);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("-")) {
+			zoom = MAX(0.1f, zoom - 0.1f);
+			fitToWindow = false;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("+")) {
+			zoom = MIN(10.0f, zoom + 0.1f);
+			fitToWindow = false;
+		}
+		ImGui::SameLine();
+		ImGui::Text("| %d x %d |", imgID.width, imgID.height);
+
+		if (!state->cachedNormalized.empty()) {
+			ImGui::SameLine();
+			if (ImGui::Button("Copy text"))
+				ImGui::SetClipboardText(state->cachedNormalized.c_str());
+		}
+
+		ImGui::Separator();
+
+		// Tabs
+		if (ImGui::BeginTabBar("##imageViewerTabs")) {
+
+			// view tab
+			if (ImGui::BeginTabItem("View")) {
+
+				ImVec2 canvasSize = ImGui::GetContentRegionAvail();
+
+				ImGui::BeginChild("##imageCanvas", canvasSize, false,
+					ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+				ImVec2 size = { imgID.width * zoom, imgID.height * zoom };
+
+				if (fitToWindow && imgID.width > 0 && imgID.height > 0) {
+					float scaleX = canvasSize.x / (float)imgID.width;
+					float scaleY = canvasSize.y / (float)imgID.height;
+					zoom = MIN(scaleX, scaleY);
+					size = { imgID.width * zoom, imgID.height * zoom };
+				}
+
+				ImVec2 pos = ImGui::GetCursorPos();
+				ImVec2 imgPos = pos + ImVec2(
+					offset.x + (canvasSize.x - size.x) * 0.5f,
+					offset.y + (canvasSize.y - size.y) * 0.5f
+				);
+
+				ImGui::SetCursorPos(imgPos);
+
+				ImGui::GetWindowDrawList()->AddRect(
+					ImGui::GetCursorScreenPos(),
+					ImGui::GetCursorScreenPos() + size,
+					0xFFFFFFFF
+				);
+
+				ImGui::Image(imgID.id, size);
+
+				ImGui::SetCursorPos(pos);
+				ImGui::InvisibleButton("##canvas", canvasSize);
+
+				if (ImGui::IsItemHovered()) {
+					ImGuiIO &io = ImGui::GetIO();
+					float speed = 30.0f;
+
+					// Ctrl + wheel -> zoom
+					if (io.KeyCtrl && io.MouseWheel != 0.0f) {
+						zoom = CLIP(zoom + io.MouseWheel * 0.1f, 0.1f, 10.0f);
+						fitToWindow = false;
+					} else {
+						// Vertical scroll -> vertical pan
+						if (io.MouseWheel != 0.0f && !io.KeyShift) {
+							offset.y += io.MouseWheel * speed;
+							fitToWindow = false;
+						}
+
+						// Horizontal scroll -> Shift + wheel
+						if (io.KeyShift && io.MouseWheel != 0.0f) {
+							offset.x += io.MouseWheel * speed;
+							fitToWindow = false;
+						}
+
+						// Trackpad / horizontal wheel
+						if (io.MouseWheelH != 0.0f) {
+							offset.x += io.MouseWheelH * speed;
+							fitToWindow = false;
+						}
+					}
+				}
+
+				if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+					offset.x += ImGui::GetIO().MouseDelta.x;
+					offset.y += ImGui::GetIO().MouseDelta.y;
+					fitToWindow = false;
+				}
+
+				ImGui::EndChild();
+				ImGui::EndTabItem();
+			}
+
+			// text tab
+			if (!state->cachedNormalized.empty() && ImGui::BeginTabItem("Text")) {
+
+				ImGui::BeginChild("##textPanel", ImGui::GetContentRegionAvail(), false,
+					ImGuiWindowFlags_HorizontalScrollbar);
+
+				ImGui::InputTextMultiline(
+					"##text",
+					state->buffer,
+					state->bufferSize,
+					ImGui::GetContentRegionAvail(),
+					ImGuiInputTextFlags_ReadOnly
+				);
+
+				ImGui::EndChild();
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}
+	}
+
+	ImGui::End();
+}
+
 void drawTextCMprops(TextCastMember *member) {
 	assert(member != nullptr);
 	if (ImGui::BeginTabItem("Text")) {
+
+		if (ImGui::Button("View")) {
+			openImageViewer(getTextID(member), member->getText());
+		}
 
 		if (ImGui::CollapsingHeader("Text Properties")) {
 			if (ImGui::BeginTable("##TextProperties", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders)) {
@@ -498,6 +678,319 @@ void drawCastProps(Cast *cast) {
 	}
 }
 
+void drawFilmLoopCMprops(FilmLoopCastMember *member) {
+	assert(member != nullptr);
+	if (ImGui::BeginTabItem("Film Loop")) {
+		if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::BeginTable("##FilmLoopProps", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders)) {
+				showPropertyBool("looping", member->_looping);
+				showPropertyBool("enableSound", member->_enableSound);
+				showPropertyBool("crop", member->_crop);
+				showPropertyBool("center", member->_center);
+				if (member->_score)
+					showProperty("frameCount", "%d", (int)member->_score->_scoreCache.size());
+				ImGui::EndTable();
+			}
+		}
+
+		Score *score = member->_score;
+		if (!score || score->_scoreCache.empty()) {
+			ImGui::TextDisabled("No frames loaded");
+			ImGui::EndTabItem();
+			return;
+		}
+
+		int numFrames = (int)score->_scoreCache.size();
+
+		// find highest active channel
+		int maxChannel = 0;
+		for (int f = 0; f < numFrames; f++) {
+			Frame *frame = score->_scoreCache[f];
+			if (!frame) continue;
+			for (int ch = 1; ch < (int)frame->_sprites.size(); ch++) {
+				if (frame->_sprites[ch] && frame->_sprites[ch]->_castId.member != 0)
+					maxChannel = MAX(maxChannel, ch);
+			}
+		}
+
+		if (maxChannel == 0) {
+			ImGui::TextDisabled("No sprite data");
+			ImGui::EndTabItem();
+			return;
+		}
+
+		// Initialize current frame for this member if needed
+		auto &filmLoopFrames = _state->_castDetails._filmLoopCurrentFrame;
+		if (!filmLoopFrames.contains(member))
+			filmLoopFrames[member] = 0;
+		int &currentFrame = filmLoopFrames[member];
+
+		const float cellW = 30.0f;
+		const float cellH = 18.0f;
+		const float labelW = 24.0f;
+		const float rulerH = 16.0f;
+		float gridW = labelW + numFrames * cellW;
+		float gridH = rulerH + maxChannel * cellH;
+
+		ImGui::Spacing();
+		ImGui::Text("Score");
+		ImGui::Separator();
+
+		// Frame navigation controls
+		if (ImGui::Button("|<")) currentFrame = 0;
+		ImGui::SameLine();
+		if (ImGui::Button("<") && currentFrame > 0) currentFrame--;
+		ImGui::SameLine();
+		ImGui::Text("Frame %d / %d", currentFrame + 1, numFrames);
+		ImGui::SameLine();
+		if (ImGui::Button(">") && currentFrame < numFrames - 1) currentFrame++;
+		ImGui::SameLine();
+		if (ImGui::Button(">|")) currentFrame = numFrames - 1;
+
+		// Frame preview, show thumbnails of all active sprites in the current frame
+		Frame *previewFrame = score->_scoreCache[currentFrame];
+		Cast *cast = member->getCast();
+		if (previewFrame && cast) {
+			const float thumbSize = 48.0f;
+			bool anySprite = false;
+			for (int ch = 1; ch <= maxChannel; ch++) {
+				if (ch >= (int)previewFrame->_sprites.size()) break;
+				Sprite *sp = previewFrame->_sprites[ch];
+				if (!sp || sp->_castId.member == 0) continue;
+
+				CastMember *cm = cast->getCastMember(sp->_castId.member, true);
+				if (!cm) continue;
+
+				if (!anySprite) {
+					ImGui::Separator();
+					ImGui::Text("Frame preview");
+					anySprite = true;
+				}
+
+				ImGuiImage imgID = getImageID(cm);
+				ImGui::BeginGroup();
+				if (imgID.id) {
+					showImage(imgID, cm->getName().c_str(), thumbSize);
+				} else {
+					// No image -> draw a placeholder box
+					ImVec2 pos = ImGui::GetCursorScreenPos();
+					ImGui::GetWindowDrawList()->AddRect(pos, ImVec2(pos.x + thumbSize, pos.y + thumbSize), _state->theme->borderColor);
+					ImGui::Dummy(ImVec2(thumbSize, thumbSize));
+				}
+				ImGui::Text("ch%d", ch);
+				ImGui::EndGroup();
+				ImGui::SameLine();
+			}
+			if (anySprite)
+				ImGui::NewLine();
+		}
+		ImGui::Separator();
+
+		// Scrollable child region
+		float scrollbarH = ImGui::GetStyle().ScrollbarSize;
+		ImGui::BeginChild("##FilmLoopScoreChild", ImVec2(0, MIN(gridH + scrollbarH + 4.0f, 200.0f)), false, ImGuiWindowFlags_HorizontalScrollbar);
+
+		ImDrawList *dl = ImGui::GetWindowDrawList();
+		ImVec2 origin = ImGui::GetCursorScreenPos();
+
+		// Ruler
+		for (int f = 0; f < numFrames; f++) {
+			float x = origin.x + labelW + f * cellW;
+			float y = origin.y;
+			ImVec2 rMin = ImVec2(x, y);
+			ImVec2 rMax = ImVec2(x + cellW, y + rulerH);
+			ImU32 rulerCol = ((f + 1) % 5 == 0) ? _state->theme->tableDarkColor : _state->theme->tableLightColor;
+			dl->AddRectFilled(rMin, rMax, rulerCol);
+			addThinRect(dl, rMin, rMax, _state->theme->borderColor);
+			Common::String label = Common::String::format("%d", f + 1);
+			ImVec2 textSz = ImGui::CalcTextSize(label.c_str());
+			dl->AddText(ImVec2(x + (cellW - textSz.x) * 0.5f, y + (rulerH - textSz.y) * 0.5f), _state->theme->gridTextColor, label.c_str());
+		}
+
+		// Playhead
+		{
+			float px = origin.x + labelW + currentFrame * cellW;
+			dl->AddLine(ImVec2(px, origin.y), ImVec2(px, origin.y + gridH), _state->theme->playhead_color, 2.0f);
+			dl->AddTriangleFilled(
+				ImVec2(px - 5.0f, origin.y),
+				ImVec2(px + 5.0f, origin.y),
+				ImVec2(px, origin.y + 8.0f),
+				_state->theme->playhead_color);
+		}
+
+		// Channel rows
+		for (int ch = 1; ch <= maxChannel; ch++) {
+			float y = origin.y + rulerH + (ch - 1) * cellH;
+
+			// label cells
+			ImVec2 lblMin = ImVec2(origin.x, y);
+			ImVec2 lblMax = ImVec2(origin.x + labelW, y + cellH);
+			dl->AddRectFilled(lblMin, lblMax, _state->theme->tableDarkColor);
+			addThinRect(dl, lblMin, lblMax, _state->theme->borderColor);
+			Common::String chLabel = Common::String::format("%d", ch);
+			ImVec2 chSz = ImGui::CalcTextSize(chLabel.c_str());
+			dl->AddText(ImVec2(origin.x + (labelW - chSz.x) * 0.5f, y + (cellH - chSz.y) * 0.5f), _state->theme->gridTextColor, chLabel.c_str());
+
+			// Pass 1: cell backgrounds
+			for (int f = 0; f < numFrames; f++) {
+				float x = origin.x + labelW + f * cellW;
+				ImVec2 cMin = ImVec2(x, y);
+				ImVec2 cMax = ImVec2(x + cellW, y + cellH);
+				ImU32 col = ((f + 1) % 5 == 0) ? _state->theme->tableDarkColor : _state->theme->tableLightColor;
+				dl->AddRectFilled(cMin, cMax, col);
+				addThinRect(dl, cMin, cMax, _state->theme->borderColor);
+			}
+
+			// Pass 2: span bars
+			int f = 0;
+			while (f < numFrames) {
+				Frame *frame = score->_scoreCache[f];
+				if (!frame || ch >= (int)frame->_sprites.size() || !frame->_sprites[ch] || frame->_sprites[ch]->_castId.member == 0) {
+					f++;
+					continue;
+				}
+
+				// Find span end
+				int spanStart = f;
+				int memberNum = frame->_sprites[ch]->_castId.member;
+				int spanEnd = f;
+				while (spanEnd + 1 < numFrames) {
+					Frame *nf = score->_scoreCache[spanEnd + 1];
+					if (nf && ch < (int)nf->_sprites.size() && nf->_sprites[ch] && nf->_sprites[ch]->_castId.member == memberNum)
+						spanEnd++;
+					else
+						break;
+				}
+
+				float x1 = origin.x + labelW + spanStart * cellW;
+				float x2 = origin.x + labelW + (spanEnd + 1) * cellW;
+				float cy = y + cellH * 0.5f;
+				float pad = 1.0f;
+
+				int colorIdx = memberNum % 6;
+				ImU32 barColor = _state->theme->contColors[colorIdx];
+
+				dl->AddRectFilled(ImVec2(x1, y + pad), ImVec2(x2 - 1.0f, y + cellH - pad), barColor);
+				dl->AddLine(ImVec2(x1 + 6.0f, cy), ImVec2(x2 - 6.0f, cy), _state->theme->gridTextColor, 1.0f);
+				dl->AddCircle(ImVec2(x1 + 4.0f, cy), 3.0f, _state->theme->gridTextColor, 0, 1.5f);
+				dl->AddRect(ImVec2(x2 - 7.0f, cy - 3.0f), ImVec2(x2 - 1.0f, cy + 3.0f), _state->theme->gridTextColor, 0.0f, 0, 1.5f);
+
+				float spanW = x2 - x1 - 8.0f;
+				Common::String label = Common::String::format("%d", memberNum);
+				if (spanW > 4.0f) {
+					float textY = y + (cellH - ImGui::GetTextLineHeight()) * 0.5f;
+					// clipText function is static in dt-score.cpp, so inline a simple clip
+					Common::String clipped = label;
+					if (ImGui::CalcTextSize(clipped.c_str()).x > spanW) clipped = "";
+					if (!clipped.empty())
+						dl->AddText(ImVec2(x1 + 4.0f, textY), _state->theme->gridTextColor, clipped.c_str());
+				}
+
+				// Tooltip
+				ImGui::SetCursorScreenPos(ImVec2(x1, y));
+				ImGui::InvisibleButton(Common::String::format("##fl_%d_%d", ch, spanStart).c_str(), ImVec2(x2 - x1, cellH));
+				if (ImGui::IsItemHovered()) {
+					ImGui::BeginTooltip();
+					ImGui::Text("Channel %d | Frames %d-%d | Cast member %d", ch, spanStart + 1, spanEnd + 1, memberNum);
+					ImGui::EndTooltip();
+				}
+
+				f = spanEnd + 1;
+			}
+		}
+
+		// Advance the cursor
+		ImGui::SetCursorScreenPos(ImVec2(origin.x, origin.y + gridH));
+		ImGui::Dummy(ImVec2(gridW, 0));
+
+		ImGui::EndChild();
+		ImGui::EndTabItem();
+	}
+}
+
+// Channel used exclusively for sound previews in the debugger.
+// Chosen high enough to avoid collision with normal score sound channels (1, 2).
+static const int kDebugSoundChannel = 8;
+
+void drawSoundCMprops(SoundCastMember *member) {
+	assert(member != nullptr);
+	if (ImGui::BeginTabItem("Sound")) {
+		DirectorSound *snd = g_director->getCurrentWindow()->getSoundManager();
+
+		// Properties
+		if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::BeginTable("##SoundProps", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders)) {
+				showPropertyBool("looping", member->_looping);
+				if (member->_audio) {
+					showProperty("sampleRate", "%d Hz", member->_audio->getSampleRate());
+					showProperty("sampleSize", "%d bit", member->_audio->getSampleSize());
+					showProperty("channels", "%d", member->_audio->getChannelCount());
+				} else {
+					ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+					showProperty("sampleRate", &gray, "N/A");
+					showProperty("sampleSize", &gray, "N/A");
+					showProperty("channels", &gray, "N/A");
+				}
+				ImGui::EndTable();
+			}
+		}
+
+		// Playback controls
+		ImGui::Spacing();
+
+		bool channelActive = snd->isChannelActive(kDebugSoundChannel);
+		SoundChannel *ch = snd->getChannel(kDebugSoundChannel);
+		CastMemberID memberId(member->getID(), member->getCast()->_castLibID);
+		bool thisIsPlaying = channelActive && ch &&
+			ch->lastPlayedSound.type == kSoundCast &&
+			ch->lastPlayedSound.u.cast.member == memberId.member &&
+			ch->lastPlayedSound.u.cast.castLib == memberId.castLib;
+
+		if (thisIsPlaying) {
+			if (ImGui::Button(ICON_MS_STOP " Stop")) {
+				snd->stopSound(kDebugSoundChannel);
+			}
+		} else {
+			bool hasAudio = member->_audio != nullptr;
+			if (!hasAudio)
+				ImGui::BeginDisabled();
+			if (ImGui::Button(ICON_MS_PLAY_ARROW " Play")) {
+				snd->playCastMember(memberId, kDebugSoundChannel);
+			}
+			if (!hasAudio) {
+				ImGui::EndDisabled();
+				ImGui::SameLine();
+				ImGui::TextDisabled("(no audio data)");
+			}
+		}
+
+		// Cue Points
+		if (!member->_cuePoints.empty()) {
+			ImGui::Spacing();
+			if (ImGui::CollapsingHeader("Cue Points", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (ImGui::BeginTable("##CuePoints", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit)) {
+					ImGui::TableSetupColumn("Time", 0, 80.f);
+					ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableHeadersRow();
+					for (uint i = 0; i < member->_cuePoints.size(); i++) {
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("%d", member->_cuePoints[i]);
+						ImGui::TableSetColumnIndex(1);
+						if (i < member->_cuePointNames.size())
+							ImGui::Text("%s", member->_cuePointNames[i].c_str());
+						else
+							ImGui::TextDisabled("—");
+					}
+					ImGui::EndTable();
+				}
+			}
+		}
+
+		ImGui::EndTabItem();
+	}
+}
+
 void drawCMTypeProps(CastMember *member) {
 	assert(member != nullptr);
 	switch (member->_type) {
@@ -516,12 +1009,16 @@ void drawCMTypeProps(CastMember *member) {
 	case kCastShape:
 		drawShapeCMprops(static_cast<ShapeCastMember *>(member));
 		break;
+	case kCastFilmLoop:
+		drawFilmLoopCMprops(static_cast<FilmLoopCastMember *>(member));
+		break;
+	case kCastSound:
+		drawSoundCMprops(static_cast<SoundCastMember *>(member));
+		break;
 	case kCastTypeAny:
 	case kCastTypeNull:
-	case kCastFilmLoop:
 	case kCastPalette:
 	case kCastPicture:
-	case kCastSound:
 	case kCastMovie:
 	case kCastDigitalVideo:
 	case kCastLingoScript:

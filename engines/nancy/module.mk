@@ -58,8 +58,11 @@ MODULE_OBJS = \
   ui/button.o \
   ui/clock.o \
   ui/inventorybox.o \
+  ui/inventorypopup.o \
+  ui/notebookpopup.o \
   ui/ornaments.o \
   ui/scrollbar.o \
+  ui/taskbar.o \
   ui/textbox.o \
   ui/viewport.o \
   state/credits.o \

@@ -34,6 +34,8 @@
 #include "common/rendermode.h"
 #include "engines/advancedDetector.h"
 #include "engines/engine.h"
+#include "graphics/pixelformat.h"
+#include "graphics/surface.h"
 
 namespace Common {
 class MacResManager;
@@ -47,13 +49,30 @@ class FrameLimiter;
 class MacMenu;
 class MacWindowManager;
 class ManagedSurface;
-struct Surface;
 }
 
 namespace Colony {
 
 class Renderer;
 class Sound;
+
+// Engine-wide color packing. The OpenGL renderer's useColor() treats values
+// with the high byte == 0xFF as direct ARGB (R=bits 16-23, G=8-15, B=0-7) and
+// values with high byte 0 as palette indices. The PixelFormat below matches
+// that direct-ARGB layout exactly so we can build colors via ARGBToColor.
+inline const Graphics::PixelFormat &renderColorFormat() {
+	static const Graphics::PixelFormat fmt(4, 8, 8, 8, 8, 16, 8, 0, 24);
+	return fmt;
+}
+
+inline uint32 packRGB(byte r, byte g, byte b) {
+	return renderColorFormat().ARGBToColor(255, r, g, b);
+}
+
+// Mac native QuickDraw stores RGB as 16-bit-per-channel; we collapse to 8 bits.
+inline uint32 packMacColor(const uint16 rgb[3]) {
+	return packRGB((byte)(rgb[0] >> 8), (byte)(rgb[1] >> 8), (byte)(rgb[2] >> 8));
+}
 
 enum ColonyAction {
 	kActionNone,
@@ -66,11 +85,11 @@ enum ColonyAction {
 	kActionLookLeft,
 	kActionLookRight,
 	kActionLookBehind,
+	kActionFaceForward,
 	kActionToggleMouselook,
 	kActionToggleDashboard,
 	kActionToggleWireframe,
 	kActionToggleFullscreen,
-	kActionSkipIntro,
 	kActionEscape,
 	kActionFire
 };
@@ -373,8 +392,22 @@ struct Sprite {
 	Common::Rect locate;
 	bool used;
 
-	Sprite() : fg(nullptr), mask(nullptr), used(false) {}
-	~Sprite() { delete fg; delete mask; }
+	// Per-sprite render cache: bit-pattern + mask are baked into an
+	// alpha-keyed RGBA surface and uploaded once via drawSurface, instead
+	// of issuing setPixel per pixel each frame. Invalidated when the
+	// (fgColor, bgColor) pair changes (level/palette transition).
+	Graphics::Surface *baked;
+	uint64 bakedKey;
+
+	Sprite() : fg(nullptr), mask(nullptr), used(false), baked(nullptr), bakedKey(0) {}
+	~Sprite() {
+		delete fg;
+		delete mask;
+		if (baked) {
+			baked->free();
+			delete baked;
+		}
+	}
 };
 
 struct ComplexSprite {
@@ -497,6 +530,13 @@ private:
 	bool _rotateLeft;
 	bool _rotateRight;
 	bool _sprint;
+
+	// Sub-unit accumulators for deltaTime-based smooth movement.
+	// Position uses 256-units-per-cell integers, angles are uint8 — these
+	// retain fractional progress between frames so low speeds aren't lost.
+	float _moveAccumX;
+	float _moveAccumY;
+	float _rotAccum;
 
 	Common::RandomSource _randomSource;
 	Common::Point _mousePos;
@@ -623,6 +663,21 @@ private:
 	int occupiedObjectAt(int x, int y, const Locate *pobject);
 	void interactWithObject(int objNum);
 
+	// Convert a mouse coord delivered by the event manager into engine
+	// logical coords. With kSupportsArbitraryResolutions declared, the
+	// framework rewrites _currentState.gameWidth to the overlay (window)
+	// pixel size in recalculateDisplayAreas() — so g_system->getWidth()
+	// no longer matches our _width, and mouse events arrive in window
+	// pixels. The engine's hit-test math (whichSprite, _screenR) is in
+	// logical coords, so we have to scale back. Same pattern Freescape
+	// uses in mousePosToCrossairPos (freescape.cpp:593-597).
+	Common::Point eventMouseToLogical(const Common::Point &p) const;
+	// Inverse of eventMouseToLogical: warp the mouse to a position
+	// expressed in engine-logical coords. _system->warpMouse expects
+	// virtual-screen coords, which with kSupportsArbitraryResolutions
+	// is window pixels.
+	void warpMouseLogical(int x, int y);
+
 	// shoot.c: shooting and power management
 	void setPower(int p0, int p1, int p2);
 	void cShoot();
@@ -699,6 +754,10 @@ private:
 	Common::Array<ComplexSprite *> _lSprites;
 	Image *_backgroundMask = nullptr;
 	Image *_backgroundFG = nullptr;
+	// Same render cache convention as Sprite::baked, applied to the
+	// per-animation background image (no Sprite owner, so it lives here).
+	Graphics::Surface *_backgroundBaked = nullptr;
+	uint64 _backgroundBakedKey = 0;
 	Common::Rect _backgroundClip;
 	Common::Rect _backgroundLocate;
 	bool _backgroundActive;
@@ -707,6 +766,19 @@ private:
 	byte _topBG[8] = {};
 	byte _bottomBG[8] = {};
 	int16 _divideBG;
+
+	// Cache for the animation background pattern. Regenerated only when
+	// pattern bytes / colors / split point change. Replaces a 110k-pixel
+	// setPixel loop with one texture upload, fixing cursor choppiness
+	// during animations on the OpenGL renderer.
+	Graphics::Surface *_animPatternSurface = nullptr;
+	byte _animPatternKeyTopBG[8] = {};
+	byte _animPatternKeyBottomBG[8] = {};
+	int16 _animPatternKeyDivide = -1;
+	uint32 _animPatternKeyTopColor = 0;
+	uint32 _animPatternKeyBotColor = 0;
+	int _animPatternKeyMode = -1; // 0=DOS, 1=Mac B&W, 2=Mac color
+	bool _animPatternValid = false;
 	Common::String _animationName;
 	Common::Array<int16> _animBMColors;
 	bool _animationRunning;
@@ -735,7 +807,8 @@ private:
 	void updateAnimation();
 	void drawAnimation();
 	void drawComplexSprite(int index, int ox, int oy);
-	void drawAnimationImage(Image *img, Image *mask, int x, int y, uint32 fillColor = 0xFFFFFFFF);
+	void drawAnimationImage(Image *img, Image *mask, int x, int y, uint32 fillColor,
+			Graphics::Surface *&bakedCache, uint64 &bakedCacheKey);
 	uint32 resolveAnimColor(int16 bmEntry) const;
 	Image *loadImage(Common::SeekableReadStreamEndian &file);
 	void unpackBytes(Common::SeekableReadStreamEndian &file, byte *dst, uint32 len);

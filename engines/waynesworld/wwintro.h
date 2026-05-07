@@ -126,6 +126,7 @@ public:
 
 private:
 	bool introPt1();
+	bool introPt1_selectware();
 	bool introPt3();
 	bool introPt3Bis();
 	bool introDisplaySign();
@@ -136,6 +137,12 @@ private:
 	bool introPreviewRoom07and15and16();
 	bool introMapDowntown();
 	bool introPreviewRoom10();
+	bool introMapNorthAurora();
+	bool introPreviewRoom03and23();
+	bool introMapSouthEastArea();
+	bool introPreviewRoom13and18();
+	bool introMapWestAurora();
+	bool introPreviewRoom01();
 
 protected:
 	bool introPt4_intro() override;

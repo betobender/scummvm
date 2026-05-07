@@ -56,7 +56,7 @@ void Viewport::init() {
 }
 
 void Viewport::handleInput(NancyInput &input) {
-	const Nancy::State::Scene::SceneSummary &summary = NancySceneState.getSceneSummary();
+	const State::Scene::SceneSummary &summary = NancySceneState.getSceneSummary();
 	Time systemTime = g_system->getMillis();
 	byte direction = 0;
 
@@ -282,7 +282,7 @@ void Viewport::setFrame(uint frameNr) {
 		Video::BinkDecoder *decoder = dynamic_cast<Video::BinkDecoder *>(_decoder.get());
 		if (!decoder)
 			error("Viewport::setFrame(): Decoder is not a BinkDecoder");
-		decoder->seek(frameNr); // Seek to take advantage of caching
+		decoder->seekToFrame(frameNr); // Seek to take advantage of caching
 		newFrame = decoder->decodeNextFrame();
 	}
 

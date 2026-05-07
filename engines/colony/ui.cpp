@@ -45,16 +45,6 @@
 
 namespace Colony {
 
-// Pack RGB into 32-bit ARGB with 0xFF000000 marker for direct RGB rendering.
-uint32 packRGB(byte r, byte g, byte b) {
-	return 0xFF000000 | ((uint32)r << 16) | ((uint32)g << 8) | b;
-}
-
-// Pack Mac 16-bit RGB into 32-bit ARGB.
-uint32 packMacColorUI(const uint16 rgb[3]) {
-	return 0xFF000000 | ((rgb[0] >> 8) << 16) | ((rgb[1] >> 8) << 8) | (rgb[2] >> 8);
-}
-
 bool drawMacTextPopup(Graphics::MacWindowManager *wm, Renderer *gfx,
 		int screenWidth, int screenHeight, int centerX, int centerY,
 		const Common::Array<Common::String> &lines, Graphics::TextAlign align, bool macColor) {
@@ -243,25 +233,14 @@ Graphics::Surface *ColonyEngine::loadPictSurface(int resID) {
 	return result;
 }
 
-// Draw a PICT surface at a specific destination position using packRGB.
-// Matches original DrawPicture(pic, &rect) where rect is positioned at (destX, destY).
+// Draw a PICT surface at a specific destination position. The surface was
+// created by loadPictSurface() in the exact ARGB layout the renderer's
+// drawSurface() consumes, so this is a single textured-quad blit — no need
+// to walk pixels.
 void ColonyEngine::drawPictAt(Graphics::Surface *surf, int destX, int destY) {
 	if (!surf)
 		return;
-	for (int y = 0; y < surf->h; y++) {
-		int sy = destY + y;
-		if (sy < 0 || sy >= _height)
-			continue;
-		for (int x = 0; x < surf->w; x++) {
-			int sx = destX + x;
-			if (sx < 0 || sx >= _width)
-				continue;
-			uint32 pixel = surf->getPixel(x, y);
-			byte a, r, g, b;
-			surf->format.colorToARGB(pixel, a, r, g, b);
-			_gfx->setPixel(sx, sy, packRGB(r, g, b));
-		}
-	}
+	_gfx->drawSurface(surf, destX, destY);
 }
 
 void ColonyEngine::updateViewportLayout() {
@@ -545,7 +524,7 @@ void ColonyEngine::drawDashboardMac() {
 	const bool macColor = _hasMacColors;
 	const uint32 colBlack = packRGB(0, 0, 0);
 	const uint32 colWhite = packRGB(255, 255, 255);
-	const uint32 colWinBg = macColor ? packMacColorUI(_macColors[7].bg) : colWhite;
+	const uint32 colWinBg = macColor ? packMacColor(_macColors[7].bg) : colWhite;
 	// power.c: ForeColor(blueColor)  on 1-bit display, blue maps to black
 	const uint32 colBlue = macColor ? packRGB(0, 0, 255) : colBlack;
 
@@ -943,6 +922,7 @@ void ColonyEngine::drawAutomap() {
 
 	const int lv = _level - 1;
 	const bool isMac = (_renderMode == Common::kRenderMacintosh);
+	const bool macColor = isMac && _hasMacColors;
 
 	const Common::Rect vp(0, _menuBarHeight, _width, _height);
 	const int vpW = vp.width();
@@ -950,7 +930,9 @@ void ColonyEngine::drawAutomap() {
 	if (vpW <= 0 || vpH <= 0)
 		return;
 
-	_gfx->fillRect(vp, isMac ? 0xFFA0D0FF : 15);
+	// Match the minimap: B&W Mac is white background + black lines, like the
+	// compass area; color Mac keeps its tinted background.
+	_gfx->fillRect(vp, macColor ? 0xFFA0D0FF : (isMac ? packRGB(255, 255, 255) : 15));
 	_gfx->drawRect(vp, 0);
 
 	const int lExt = MIN(vpW, vpH) / 12;

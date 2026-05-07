@@ -105,7 +105,7 @@ executable size.
 - "null" music driver is automatically enabled (i.e. OPL emulation is never
   used but still allows playing speech/sfx samples and/or CD audio).
 
-- DOSBox OPL emulator is disabled => smaller executable size.
+- DOSBox and MAME OPL emulator is disabled => smaller executable size.
 
 FireBee package
 ~~~~~~~~~~~~~~~
@@ -168,10 +168,6 @@ value.
 that Falcon doesn't allow mixing in 16-bit mono, so this will have no effect on
 this machine.
 
-"print_rate" in scummvm.ini: used for optimising sample playback (where
-available). It prints input and output sample format as well as the name of the
-converter used. See below for details.
-
 "audio_buffer_size" in scummvm.ini: number of samples to preload. Default is
 2048 which equals to about 83ms of audio lag and seems to be about right for
 most games on my CT60@66 MHz.
@@ -179,6 +175,10 @@ most games on my CT60@66 MHz.
 If you want to play with "audio_buffer_size", the rule of thumb is: (lag in ms)
 = (audio_buffer_size / output_rate) * 1000. But it's totally OK just to double
 the samples value to get rid of stuttering in a heavier game.
+
+"gaudio" debug channel: used for optimising sample playback (where
+available). It prints input and output sample format as well as the name of the
+converter used. See below for details.
 
 
 Graphics modes
@@ -446,9 +446,10 @@ frequencies):
 - Any other combination: "interpolateConvert" (slowest).
 
 So how do you know which frequency to set as "output_rate" ? This is where
-"print_rate" comes to rescue. Enabling this option in scummvm.ini will tell you
-for each game which sample converters are being used and for what input/values.
-So you can easily verify whether the given game's demands match your setting.
+"gaudio" debug channel comes to rescue. Executing ScummVM as
+"scummvm.prg --debugflags=gaudio" will tell you for each game which sample
+converters are being used and for what input/values. So you can easily verify
+whether the given game's demands match your setting.
 
 Unfortunately, currently per-game "output_rate" / "output_channels" is not
 possible but this may change in the future.
@@ -468,12 +469,6 @@ Changes to upstream
 
 There are a few features that have been disabled or changed and are not
 possible / plausible to merge into upstream:
-
-- The aforementioned "print_rate" feature, too invasive for other platforms
-
-- This port contains an implementation of much faster tooltips in the overlay.
-  However, there is a minor rendering bug which sometimes corrupts the
-  background. But since its impact is huge, I left it in.
 
 - This port contains an experimental / pending optimisations to the SCUMM
   engine and audio mixing. I'll try to get them merged in the next release.
@@ -539,17 +534,9 @@ Future plans
 
 - DSP-based sample mixer (WAV, FLAC, MP2).
 
-- Avoid loading music/speech files (and thus slowing down everything) if muted.
-
-- Cached audio/video streams (i.e. don't load only "audio_buffer_size" number
-  of samples but cache, say, 1 second so disk i/o won't be so stressed).
-
-- Using Thorsten Otto's sharedlibs: https://tho-otto.de/sharedlibs.php for game
-  engine plugins to relieve the huge binary size.
+- Avoid decoding music/speech files (and thus slowing down everything) if muted.
 
 - True audio CD support via MetaDOS API.
-
-- OPL2LPT and Retrowave support (if I manage to purchase it somewhere).
 
 
 Closing words

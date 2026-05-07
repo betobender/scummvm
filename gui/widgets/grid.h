@@ -35,6 +35,7 @@ namespace GUI {
 class ScrollBarWidget;
 class GridItemWidget;
 class GridWidget;
+class FluidScroller;
 
 enum {
 	kPlayButtonCmd = 'PLAY',
@@ -84,12 +85,15 @@ class GridItemTray: public Dialog, public CommandSender {
 	PicButtonWidget	*_playButton;
 	PicButtonWidget	*_loadButton;
 	PicButtonWidget	*_editButton;
+
+	bool _mouseOutside;
 public:
 	GridItemTray(GuiObject *boss, int x, int y, int w, int h, int entryID, GridWidget *grid);
 	void enableLoadButton(bool canLoad) { _loadButton->setEnabled(canLoad); }
 
 	void reflowLayout() override;
 
+	void receivedFocus(int x = -1, int y = -1) override;
 	void handleCommand(CommandSender *sender, uint32 cmd, uint32 data) override;
 	void handleMouseDown(int x, int y, int button, int clickCount) override;
 	void handleMouseUp(int x, int y, int button, int clickCount) override;
@@ -100,6 +104,7 @@ public:
 
 /* GridWidget */
 class GridWidget : public ContainerWidget, public CommandSender {
+	friend class GridItemWidget;
 public:
 	typedef bool (*FilterMatcher)(void *arg, int idx, const Common::U32String &item, const Common::U32String &token);
 
@@ -136,7 +141,7 @@ protected:
 	int				_scrollWindowHeight;
 	int				_scrollWindowWidth;
 	int				_scrollSpeed;
-	int				_scrollPos;
+	float			_scrollPos;
 	int				_innerHeight;
 	int				_innerWidth;
 	int				_thumbnailHeight;
@@ -165,6 +170,16 @@ protected:
 
 	FilterMatcher _filterMatcher;
 	void *_filterMatcherArg;
+
+	// Drag to scroll
+	bool _isMouseDown;
+	bool _isDragging;
+	bool _selectionPending;
+	int _dragStartY, _dragLastY;
+	uint32 _mouseDownTime;
+	static const int kDragThreshold = 5;
+
+	FluidScroller *_fluidScroller;
 
 public:
 	int				_gridItemHeight;
@@ -221,12 +236,17 @@ public:
 	int getNewSel(int index);
 	int getVisualPos(int entryID) const;
 	void selectVisualRange(int startPos, int endPos);
-	int getScrollPos() const { return _scrollPos; }
+	float getScrollPos() const { return _scrollPos; }
 	int getSelected() const { return ((_selectedEntry == nullptr) ? -1 : _selectedEntry->entryID); }
 	int getThumbnailHeight() const { return _thumbnailHeight; }
 	int getThumbnailWidth() const { return _thumbnailWidth; }
 
 	void handleMouseWheel(int x, int y, int direction) override;
+	void handleMouseDown(int x, int y, int button, int clickCount) override;
+	void handleMouseUp(int x, int y, int button, int clickCount) override;
+	void handleMouseMoved(int x, int y, int button) override;
+	void handleTickle() override;
+	void applyScrollPos(); // Updates the grid's visual elements to match current scroll position
 	void handleCommand(CommandSender *sender, uint32 cmd, uint32 data) override;
 	void reflowLayout() override;
 
@@ -276,7 +296,9 @@ public:
 	void handleMouseEntered(int button) override;
 	void handleMouseLeft(int button) override;
 	void handleMouseDown(int x, int y, int button, int clickCount) override;
+	void handleMouseUp(int x, int y, int button, int clickCount) override;
 	void handleMouseMoved(int x, int y, int button) override;
+	void doSelection();
 };
 
 } // End of namespace GUI
