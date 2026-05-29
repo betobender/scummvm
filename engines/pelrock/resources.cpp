@@ -328,6 +328,7 @@ void ResourceManager::loadOtherSpecialAnim(uint32 offset, bool rleCompressed, by
 		size_t compressedSize = 0;
 		readUntilBuda(&alfred7, offset, compressed, compressedSize);
 		bufferSize = rleDecompress(compressed, compressedSize, 0, 0, &buffer, true);
+		free(compressed);
 	} else {
 		alfred7.seek(offset, SEEK_SET);
 		alfred7.read(buffer, bufferSize);
@@ -578,7 +579,7 @@ byte *ResourceManager::loadStickerPixels(const Sticker &sticker) {
 InventoryObject ResourceManager::getIconForObject(byte objectIndex) {
 	byte iconIndex = 0;
 	if (objectIndex < 59) {
-		if (objectIndex >= 11 && objectIndex < 59) {
+		if (objectIndex >= 11) {
 			iconIndex = ((objectIndex - 11) & 3) + 11; // Books cycle through icons 11-14
 		} else {
 			iconIndex = objectIndex; // Direct mapping for IDs 0-11

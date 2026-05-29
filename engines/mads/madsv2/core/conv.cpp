@@ -57,6 +57,7 @@ Box conv_box;
 int16 *conv_my_next_start;
 int conv_error_code;
 int conv_dlg_script_ptr, conv_dlg_script_end;
+bool conv_show_boxes;
 
 struct MemoryWriteStreamDynamic : public Common::MemoryWriteStreamDynamic {
 public:
@@ -1218,6 +1219,8 @@ void conv_run(int convId) {
 	char name[80];
 	int idx;
 
+	conv_show_boxes = true;
+
 	// Validate convId is loaded (non-fatal: report error but continue, matching original)
 	if (conv_indexes[convId] < 2)
 		error_report(ERROR_CONV_RUN, ERROR, MODULE_CONV, convId, 0);
@@ -1668,6 +1671,16 @@ void conv_flush() {
 done:
 	if (errorFlag)
 		error("Error flushing conversation data");
+}
+
+void conv_reset(int id) {
+	if (conv_slots[id]) {
+		mem_free(conv_data[id]);
+		mem_free(conv[id]);
+		conv_data[id] = nullptr;
+		conv[id] = nullptr;
+		conv_slots[id] = 0;
+	}
 }
 
 int conv_append(Common::WriteStream *handle) {

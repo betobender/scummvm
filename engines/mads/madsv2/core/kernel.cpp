@@ -685,19 +685,25 @@ int kernel_room_startup(int newRoom, int initial_variant, const char *interface,
 		goto done;
 	}
 
-	kernel_load_vocab();
-
 	pal_activate_shadow(&kernel_shadow_inter);
-	load_flags = ANIM_LOAD_BACKGROUND | ANIM_INTERFACE;
-	if (kernel.translating)
-		load_flags |= ANIM_LOAD_TRANSLATE;
-	inter_anim = (AnimInterPtr)anim_load(interface, &scr_inter_orig, nullptr, nullptr,
-		nullptr, nullptr, nullptr, nullptr, nullptr, load_flags);
-	if (!inter_anim) goto done;
 
-	if (!inter_anim->font) {
-		mem_free(inter_anim);
+	if (g_engine->getGameID() == GType_Dragonsphere) {
 		inter_anim = nullptr;
+
+	} else {
+		kernel_load_vocab();
+
+		load_flags = ANIM_LOAD_BACKGROUND | ANIM_INTERFACE;
+		if (kernel.translating)
+			load_flags |= ANIM_LOAD_TRANSLATE;
+		inter_anim = (AnimInterPtr)anim_load(interface, &scr_inter_orig, nullptr, nullptr,
+			nullptr, nullptr, nullptr, nullptr, nullptr, load_flags);
+		if (!inter_anim) goto done;
+
+		if (!inter_anim->font) {
+			mem_free(inter_anim);
+			inter_anim = nullptr;
+		}
 	}
 
 	// Set up interface background screen
@@ -871,6 +877,19 @@ int kernel_seq_forward(int series_id, int mirror, word ticks, word interval_tick
 		start_ticks, expire));
 }
 
+
+int kernel_seq_forward_scroll(int series_id, int mirror,
+		word ticks, word interval_ticks, word start_ticks, int expire) {
+	int depth = 0;
+	SpritePtr sprite;
+
+	sprite = &series_list[series_id]->index[0];
+
+	return kernel_seq_add(series_id, mirror, 1, 0, 0, AA_LINEAR, 1,
+		depth, 100, true, 0, 0, ticks, interval_ticks,
+		start_ticks, expire);
+}
+
 int kernel_seq_pingpong(int series_id, int mirror,
 	word ticks, word interval_ticks,
 	word start_ticks,
@@ -887,6 +906,18 @@ int kernel_seq_pingpong(int series_id, int mirror,
 	return (kernel_seq_add(series_id, mirror, 1, 0, 0, AA_PINGPONG, 1,
 		depth, 100, true, 0, 0, ticks, interval_ticks,
 		start_ticks, expire));
+}
+
+int kernel_seq_pingpong_scroll(int series_id, int mirror,
+		word ticks, word interval_ticks, word start_ticks, int expire) {
+	int depth = 0;
+	SpritePtr sprite;
+
+	sprite = &series_list[series_id]->index[0];
+
+	return kernel_seq_add(series_id, mirror, 1, 0, 0, AA_PINGPONG, 1,
+		depth, 100, true, 0, 0, ticks, interval_ticks,
+		start_ticks, expire);
 }
 
 int kernel_seq_backward(int series_id, int mirror, word ticks, word interval_ticks,
@@ -1031,6 +1062,17 @@ int kernel_seq_stamp(int series_id, int mirror, int sprite) {
 	int id;
 
 	id = kernel_seq_forward(series_id, mirror, 32767, 0, 0, 0);
+	if (id >= 0) {
+		kernel_seq_range(id, sprite, sprite);
+		sequence_list[id].loop_direction = AA_STAMP;
+	}
+	return (id);
+}
+
+int kernel_seq_stamp_scroll(int series_id, int mirror, int sprite) {
+	int id;
+
+	id = kernel_seq_forward_scroll(series_id, mirror, 32767, 0, 0, 0);
 	if (id >= 0) {
 		kernel_seq_range(id, sprite, sprite);
 		sequence_list[id].loop_direction = AA_STAMP;
@@ -2516,7 +2558,7 @@ int kernel_load_sound_driver(const char *name, char sound_card_, int sound_board
 	// Get the section number from the end of the driver filename, and use it to initialize
 	// the sound system; we provide our own implementation of the drivers
 	int sectionNum = *(name + strlen(name) - 1) - '0';
-	assert((sectionNum >= 1 && sectionNum <= 5) || sectionNum == 9);
+	assert(sectionNum >= 1 && sectionNum <= 9);
 
 	g_engine->_soundManager->init(sectionNum);
 
@@ -2730,7 +2772,7 @@ done:
 }
 
 void kernel_set_interface_mode(int mode) {
-	if (mode != inter_input_mode) {
+	if (mode != inter_input_mode || g_engine->getGameID() == GType_Dragonsphere) {
 		char fname[80];
 		Common::strcpy_s(fname, kernel.interface);
 		char *dot = strchr(fname, '.');

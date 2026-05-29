@@ -293,7 +293,7 @@ int matte_add_message(FontPtr font, char *text, int x, int y, int message_color,
 			message_list[message_handle].font = font;
 			message_list[message_handle].text = text;
 			message_list[message_handle].xs = font_string_width(font, text, auto_spacing);
-			message_list[message_handle].ys = font->max_y_size;
+			message_list[message_handle].ys = font ? font->max_y_size : 0;
 			message_list[message_handle].main_color = message_color;
 			message_list[message_handle].spacing = (char)auto_spacing;
 			message_list[message_handle].status = 1;
@@ -628,8 +628,8 @@ static void matte_special_effect(int special_effect, int full_screen) {
 
 		if (special_effect == MATTE_FX_FADE_THRU_BLACK) {
 			mcga_getpal(&special_pal);
-			matte_quick_to_black(&special_pal[0].r, 1);
-			// magic_fade_to_grey (special_pal, NULL, 0, 256, 0, 1, 1, 16);
+			//matte_quick_to_black(&special_pal[0].r, 1);
+			magic_fade_to_grey(special_pal, NULL, 0, 256, 0, 1, 1, 16);
 			buffer_fill(scr_live, 0);
 		}
 
@@ -641,7 +641,7 @@ static void matte_special_effect(int special_effect, int full_screen) {
 			work_screen->x, work_screen->y);
 
 		matte_quick_from_black(&special_pal[0].r, 1);
-		// magic_fade_from_grey (special_pal, master_palette, 0, 256, 0, 1, 1, 16);
+		//magic_fade_from_grey(special_pal, master_palette, 0, 256, 0, 1, 1, 16);
 		break;
 
 	case MATTE_FX_CORNER_LOWER_LEFT:

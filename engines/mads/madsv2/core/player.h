@@ -73,7 +73,7 @@ struct Player {
 	int walker_visible;           /* Flag if player's sprite is visible      */
 	int walker_previously_visible;/* Flag if player's sprite was visible     */
 	int series_base;              /* Lowest series list handle for walker    */
-	int available[8];             /* Flag if series are available or mirrored*/
+	int16 available[8];           /* Flag if series are available or mirrored*/
 	int facing;                   /* Player's current directional facing     */
 	int turn_to_facing;           /* Player is turning to this facing        */
 	int series;                   /* Player's current active series #        */
@@ -332,6 +332,15 @@ extern void player_demand_location(int x, int y);
  */
 extern void player_first_walk(int from_x, int from_y, int from_facing,
 	int to_x, int to_y, int to_facing, int enable_at_target);
+
+/**
+ * When the player needs to turn to face a different direction
+ * than his current facing, this routine rotates him one place
+ * in the right direction.
+ */
+extern void player_keep_turning();
+
+extern void player_activate_trigger();
 
 } // namespace MADSV2
 } // namespace MADS

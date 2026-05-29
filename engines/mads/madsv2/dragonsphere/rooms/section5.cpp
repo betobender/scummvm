@@ -19,12 +19,17 @@
  *
  */
 
+#include "mads/madsv2/core/config.h"
 #include "mads/madsv2/core/game.h"
+#include "mads/madsv2/core/inter.h"
 #include "mads/madsv2/core/kernel.h"
+#include "mads/madsv2/core/pal.h"
 #include "mads/madsv2/core/player.h"
 #include "mads/madsv2/core/room.h"
+#include "mads/madsv2/core/sound.h"
 #include "mads/madsv2/dragonsphere/global.h"
 #include "mads/madsv2/dragonsphere/rooms/section5.h"
+#include "mads/madsv2/dragonsphere/mads/sounds.h"
 
 namespace MADS {
 namespace MADSV2 {
@@ -50,12 +55,98 @@ void section_5_init() {
 }
 
 void section_5_walker() {
+	char temp_buf[80];
+	int dark_background;
+	int no_walker = false;
+
+	sound_queue(N_NoiseFade);
+
+	Common::strcpy_s(temp_buf, player.series_name);
+
+	no_walker = ((new_room == 506) || (new_room == 507) || (new_room == 510) ||
+		(new_room == 511));
+
+	/*  dark_background = ((new_room >= 113) && (new_room != 118));   */
+	dark_background = false;
+
+	if (no_walker) {
+		player.series_name[0] = 0;
+	} else if (!player.force_series) {
+		if (global[player_persona] == PLAYER_IS_KING) {
+			Common::strcpy_s(player.series_name, "KG");
+		} else {
+			Common::strcpy_s(player.series_name, "PD");
+		}
+		if (dark_background)
+			Common::strcat_s(player.series_name, "D");
+	}
+
+	if (strcmp(temp_buf, player.series_name) != 0) player.walker_must_reload = true;
+
+	player.scaling_velocity = true;
 }
 
 void section_5_interface() {
+	RGBcolor text_color = { 43, 29, 15 };
+
+	if (new_room >= 501 && new_room < 601) {
+		Common::strcpy_s(kernel.interface, kernel_interface_name(4));
+	} else {
+		Common::strcpy_s(kernel.interface, kernel_interface_name(0));
+	}
+
+	pal_change_color(INTER_MESSAGE_COLOR, 56, 47, 32);
 }
 
 void section_5_music() {
+	if (sound_off) {
+		sound_queue(N_NoiseOff);
+	}
+
+	if (music_off) {
+		sound_queue(N_MusicFade);
+		goto done;
+	}
+
+	switch (new_room) {
+	case 501:
+		sound_play(N_BackgroundMus);
+		sound_play(N_WindWhistles);
+		break;
+
+	case 502:
+		sound_play(N_BackgroundMus);
+		sound_play(N_NoiseFade);
+		break;
+
+	case 504:
+		sound_play(N_Hermit);
+		break;
+
+	case 508:
+		if (!global[monster_is_dead]) {
+			if (previous_room == KERNEL_RESTORING_GAME) {
+				sound_play(N_Battle);
+			} else {
+				sound_play(N_BackgroundMus);
+			}
+
+		} else {
+			sound_play(N_BackgroundMus);
+		}
+		break;
+
+	case 509:
+		sound_play(N_ShakMus);
+		break;
+
+	default:
+		sound_play(N_BackgroundMus);
+		break;
+	}
+
+done:
+	;
 }
 
 void section_5_constructor() {

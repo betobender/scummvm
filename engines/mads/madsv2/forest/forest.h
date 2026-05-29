@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef MADS_FOREST_FOREST_H
-#define MADS_FOREST_FOREST_H
+#ifndef MADS_FOREST_H
+#define MADS_FOREST_H
 
 #include "mads/madsv2/engine.h"
 
@@ -30,9 +30,7 @@ namespace Forest {
 
 class ForestEngine : public MADSV2Engine {
 private:
-	static void global_object_sprite();
-	static void stop_walker_basic();
-	static void stop_walker_tricks();
+	static void global_object_examine();
 
 public:
 	ForestEngine(OSystem *syst, const MADSGameDescription *gameDesc) :

@@ -308,6 +308,7 @@ bool syncGameStateData(Common::Serializer &s, GameStateData *gameState) {
 			for (uint16 i = 0; i < numBranches; ++i) {
 				ResetEntry entry = branches[i];
 				syncResetEntry(s, entry);
+				delete[] entry.data;
 			}
 		}
 	} else {
@@ -348,8 +349,6 @@ Common::Error PelrockEngine::syncGame(Common::Serializer &s) {
 
 	if (s.isLoading()) {
 		SaveGameData saveGame;
-		if (saveGame.gameState != nullptr)
-			delete saveGame.gameState;
 		saveGame.gameState = new GameStateData();
 		result = syncSaveData(s, &(saveGame));
 		loadGame(saveGame);

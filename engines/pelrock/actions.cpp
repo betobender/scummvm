@@ -327,6 +327,7 @@ void PelrockEngine::dialogActionTrigger(uint16 actionTrigger, byte room, byte ro
 		_dialog->say(_res->_ingameTexts[kTextUnPocoRespeto]);
 		break;
 	case 264:
+	case 353:
 		// skip to root after the next one
 		_state->setCurrentRoot(room, rootIndex + 2, 0);
 		break;
@@ -411,11 +412,6 @@ void PelrockEngine::dialogActionTrigger(uint16 actionTrigger, byte room, byte ro
 		break;
 	}
 	case 349:
-		_state->setFlag(FLAG_MERCHANT_SLOGANS, _state->getFlag(FLAG_MERCHANT_SLOGANS) + 1);
-		if (_state->getFlag(FLAG_MERCHANT_SLOGANS) == 2) {
-			_state->setCurrentRoot(room, rootIndex + 1, 1);
-		}
-		break;
 	case 350:
 		_state->setFlag(FLAG_MERCHANT_SLOGANS, _state->getFlag(FLAG_MERCHANT_SLOGANS) + 1);
 		if (_state->getFlag(FLAG_MERCHANT_SLOGANS) == 2) {
@@ -443,9 +439,6 @@ void PelrockEngine::dialogActionTrigger(uint16 actionTrigger, byte room, byte ro
 		_dialog->say(_res->_ingameTexts[kTextMejorMeLargo], 1);
 		break;
 		// end merchants
-	case 353:
-		_state->setCurrentRoot(room, rootIndex + 2, 0);
-		break;
 	case 354:
 		if (_state->hasInventoryItem(105)) {
 			addInventoryItem(105);
@@ -454,6 +447,8 @@ void PelrockEngine::dialogActionTrigger(uint16 actionTrigger, byte room, byte ro
 	case 352:
 	case 355:
 	case 291:
+	case 285:
+	case 363:
 		toJail();
 		break;
 	case 356:
@@ -463,9 +458,6 @@ void PelrockEngine::dialogActionTrigger(uint16 actionTrigger, byte room, byte ro
 	//  hermit
 	case 366:
 		_state->setCurrentRoot(room, rootIndex + 1, 0);
-		break;
-	case 363:
-		toJail();
 		break;
 	case 367: // accept riddle
 		_state->setCurrentRoot(room, 27, 0);
@@ -570,9 +562,6 @@ void PelrockEngine::dialogActionTrigger(uint16 actionTrigger, byte room, byte ro
 	case 295:
 		addInventoryItem(84);
 		_state->setCurrentRoot(room, rootIndex + 1, 0);
-		break;
-	case 285:
-		toJail();
 		break;
 	case 374:
 	case 372:
@@ -1831,6 +1820,7 @@ void PelrockEngine::smokeAnimation(int spriteIndex, bool hide) {
 		_screen->update();
 		g_system->delayMillis(10);
 	}
+	smokeSurface.free();
 }
 
 void PelrockEngine::openArchitectDoor(HotSpot *hotspot) {
@@ -2393,6 +2383,8 @@ void PelrockEngine::antiPiracyEffect() {
 	// Generate noise
 	const int kNoiseLength = 8000; // ~1 second at 8000 Hz, will loop
 	byte *noiseData = (byte *)malloc(kNoiseLength);
+	if (!noiseData)
+		return;
 	for (int i = 0; i < kNoiseLength; i++) {
 		noiseData[i] = (byte)((getRandomNumber(255)));
 	}

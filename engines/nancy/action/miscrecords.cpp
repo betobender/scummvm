@@ -181,9 +181,6 @@ void FrameTextBox::readData(Common::SeekableReadStream &stream) {
 }
 
 void FrameTextBox::execute() {
-	// TODO: UICO-driven conversation rendering isn't ready yet; route the
-	// line into the legacy textbox so subtitles still surface (the textbox
-	// is kept off-screen on Nancy 10+ but addTextLine is harmless).
 	auto &tb = NancySceneState.getTextbox();
 	tb.clear();
 	if (!_text.empty()) {
@@ -237,6 +234,57 @@ void AddSearchLink::execute() {
 	// TODO: finish this
 
 	debug("AddSearchLink: mode=%d, key=%s, value=%s, extra=%d, scene1=%d, scene2=%d", _mode, _key.c_str(), _value.c_str(), _extra, _flag, _scene);
+
+	finishExecution();
+}
+
+void SetCellPhoneBatteryAndSignal::readData(Common::SeekableReadStream &stream) {
+	_mode = stream.readUint16LE();
+}
+
+void SetCellPhoneBatteryAndSignal::execute() {
+	UI::CellPhonePopup &popup = NancySceneState.getCellPhonePopup();
+	switch (_mode) {
+	case 0: popup.setBatteryLow(false); break;
+	case 1: popup.setBatteryLow(true);  break;
+	case 2: popup.setNoSignal(false);   break;
+	case 3: popup.setNoSignal(true);    break;
+	default:
+		warning("SetCellPhoneBatteryAndSignal: unknown mode %u", _mode);
+		break;
+	}
+	finishExecution();
+}
+
+void ChangeCellPhoneInfo::readData(Common::SeekableReadStream &stream) {
+	stream.read(_contact.unknownPrefix, sizeof(_contact.unknownPrefix));
+
+	char nameBuf[21];
+	stream.read(nameBuf, 20);
+	nameBuf[20] = '\0';
+	_contact.name = nameBuf;
+
+	stream.read(_contact.unknownSuffix, sizeof(_contact.unknownSuffix));
+}
+
+void ChangeCellPhoneInfo::execute() {
+	NancySceneState.getCellPhonePopup().upsertContact(_contact);
+	finishExecution();
+}
+
+void CellPhonePopCellSceneFromStack::readData(Common::SeekableReadStream &stream) {
+	_sceneChange.readData(stream);
+}
+
+void CellPhonePopCellSceneFromStack::execute() {
+	if (_sceneChange.sceneID == kNoScene) {
+		NancySceneState.popScene(false);
+	} else {
+		NancySceneState.changeScene(_sceneChange);
+	}
+
+	// Conversation is over; take the phone down.
+	NancySceneState.getCellPhonePopup().close();
 
 	finishExecution();
 }

@@ -63,7 +63,12 @@ void Speech::load(Common::SeekableReadStream *src) {
 	resource_id = src->readSint16LE();
 	src->read(text, 60);
 	src->read(misc, 3);
-	src->readMultipleLE(sound, x, y, display_condition);
+	src->readMultipleLE(sound);
+
+	speech = nullptr;
+	src->skip(4);
+
+	src->readMultipleLE(x, y, display_condition);
 
 	for (int i = 0; i < 2; ++i)
 		color[i].load(src);
@@ -324,7 +329,7 @@ AnimPtr anim_load(const char *file_name, Buffer *orig, Buffer *depth,
 
 		size_t size = Speech::SIZE * anim_in.num_speech;
 		byte *buffer = (byte *)malloc(size);
-		if (!loader_read(buffer, speech_size, 1, &load_handle)) {
+		if (!loader_read(buffer, size, 1, &load_handle)) {
 			free(buffer);
 			goto done;
 		}
@@ -505,17 +510,26 @@ done:
 	return (anim);
 }
 
-int anim_get_sound_info(char *file_name, char *sound_file_buffer, int *sound_load_flag) {
+int anim_get_sound_info(const char *file_name, char *sound_file_buffer, int *sound_load_flag) {
 	int error_flag = true;
 	AnimFile anim_in;
 	Load load_handle;
 
 	load_handle.open = false;
 
+	// Open up the source animation file
 	if (loader_open(&load_handle, file_name, "rb", true)) goto done;
 
-	if (!loader_read(&anim_in, sizeof(AnimFile), 1, &load_handle)) goto done;
+	// Load the file header contents
+	byte buffer[AnimFile::SIZE];
+	if (!loader_read(buffer, AnimFile::SIZE, 1, &load_handle)) goto done;
 
+	{
+		Common::MemoryReadStream src(buffer, AnimFile::SIZE);
+		anim_in.load(&src);
+	}
+
+	// Copy out the sound filename
 	Common::strcpy_s(sound_file_buffer, 65536, anim_in.sound_file_name);
 	*sound_load_flag = (anim_in.load_flags & AA_LOAD_SOUND);
 

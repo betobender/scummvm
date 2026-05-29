@@ -814,6 +814,17 @@ static const NancyGameDescription gameDescriptions[] = {
 		},
 		kGameTypeNancy16
 	},
+	{ // MD5 by eientei95
+		{
+			"nancy16", nullptr,
+			AD_ENTRY1s("ciftree.dat", "dcc8ab339061dbd855ff158548543dcc", 1257169),
+			Common::EN_ANY,
+			Common::kPlatformWii,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy16
+	},
 	{ // MD5 by bluegr
 		{
 			"nancy17", nullptr,
@@ -874,6 +885,17 @@ static const NancyGameDescription gameDescriptions[] = {
 			"nancy1new", nullptr,
 			AD_ENTRY1s("ciftree.dat", "27dc04f52f2022c7eae8028b0b0dd215", 15296357),
 			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
+			NANCY8_GUIOPTIONS
+		},
+		kGameTypeNancy1New
+	},
+	{ // MD5 by mmogas
+		{
+			"nancy1new", nullptr,
+			AD_ENTRY1s("ciftree.dat", "2f0c77c84bb5533f5bc6ec824ddf4c31", 14936536),
+			Common::ES_ESP,
 			Common::kPlatformWindows,
 			ADGF_UNSUPPORTED | ADGF_DROPPLATFORM,
 			NANCY8_GUIOPTIONS

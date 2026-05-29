@@ -36,11 +36,14 @@
 #include "engines/nancy/action/puzzle/arcadepuzzle.h"
 #include "engines/nancy/action/puzzle/assemblypuzzle.h"
 #include "engines/nancy/action/puzzle/bballpuzzle.h"
+#include "engines/nancy/action/puzzle/beadpuzzle.h"
 #include "engines/nancy/action/puzzle/bulpuzzle.h"
 #include "engines/nancy/action/puzzle/bombpuzzle.h"
 #include "engines/nancy/action/puzzle/collisionpuzzle.h"
 #include "engines/nancy/action/puzzle/cubepuzzle.h"
 #include "engines/nancy/action/puzzle/cuttingpuzzle.h"
+#include "engines/nancy/action/puzzle/dotconnectpuzzle.h"
+#include "engines/nancy/action/puzzle/gridmappuzzle.h"
 #include "engines/nancy/action/puzzle/matchpuzzle.h"
 #include "engines/nancy/action/puzzle/hamradiopuzzle.h"
 #include "engines/nancy/action/puzzle/leverpuzzle.h"
@@ -61,6 +64,7 @@
 #include "engines/nancy/action/puzzle/safedialpuzzle.h"
 #include "engines/nancy/action/puzzle/setplayerclock.h"
 #include "engines/nancy/action/puzzle/sliderpuzzle.h"
+#include "engines/nancy/action/puzzle/sortpuzzle.h"
 #include "engines/nancy/action/puzzle/soundequalizerpuzzle.h"
 #include "engines/nancy/action/puzzle/soundmatchpuzzle.h"
 #include "engines/nancy/action/puzzle/spigotpuzzle.h"
@@ -89,7 +93,7 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		if (g_nancy->getGameType() <= kGameTypeNancy9)
 			return new HotMultiframeSceneChange(CursorManager::kHotspot);
 		else
-			return new Hot1FrSceneChange(CursorManager::kNormal, true);
+			return new Hot1FrSceneChange(CursorManager::kNormal, true, true);
 	case 12:
 		if (g_nancy->getGameType() <= kGameTypeNancy9) {
 			return new SceneChange();
@@ -250,7 +254,6 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return new ModifyListEntry(ModifyListEntry::kMark);
 	case 74:	// Added in Nancy 10
 	case 75:	// Changed in Nancy 10
-	case 81:	// Nancy 11+
 		if (g_nancy->getGameType() <= kGameTypeNancy9 && type == 75) {
 			return new TextBoxWrite();
 		} else {
@@ -264,6 +267,8 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return new SetValueCombo();
 	case 79:
 		return new ValueTest();
+	//case 81: // Nancy 11+
+	//	return nullptr;	// TODO
 	case 97:
 		return new EventFlags(true);
 	case 98:
@@ -331,10 +336,15 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return new PopInvViewPriorScene();
 	case 126:
 		return new GoInvViewScene();
+	case 128:
+		// Nancy 10+
+		return new CellPhonePopCellSceneFromStack();
+	case 129:
+		// Nancy 10+
+		return new SetCellPhoneBatteryAndSignal();
 	case 130:
 		// Nancy 10+
-		warning("ChangeCellPhoneInfo - not implemented yet");
-		return nullptr;
+		return new ChangeCellPhoneInfo();
 	case 131:
 		// Nancy 10+
 		return new AddSearchLink();
@@ -455,15 +465,15 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return new MemoryPuzzle();
 	// -- Nancy 10 and up --
 	case 239:
-		//return new SortPuzzle();
+		return new SortPuzzle();
 	case 241:
-		// return new DotConnectPuzzle();
+		return new DotConnectPuzzle();
 	case 242:
 		// return new MagnetMazePuzzle();
 	case 243:
-		// return new BeadPuzzle();
+		return new BeadPuzzle();
 	case 244:
-		// return new GridMapPuzzle();
+		return new GridMapPuzzle();
 	// -- Nancy 11 and up --
 	case 245:
 		// return new TypingQuizPuzzle();

@@ -19,12 +19,17 @@
  *
  */
 
+#include "mads/madsv2/core/config.h"
 #include "mads/madsv2/core/game.h"
+#include "mads/madsv2/core/inter.h"
 #include "mads/madsv2/core/kernel.h"
+#include "mads/madsv2/core/pal.h"
 #include "mads/madsv2/core/player.h"
 #include "mads/madsv2/core/room.h"
+#include "mads/madsv2/core/sound.h"
 #include "mads/madsv2/dragonsphere/global.h"
 #include "mads/madsv2/dragonsphere/rooms/section3.h"
+#include "mads/madsv2/dragonsphere/mads/sounds.h"
 
 namespace MADS {
 namespace MADSV2 {
@@ -40,12 +45,75 @@ void section_3_init() {
 }
 
 void section_3_walker() {
+	char temp_buf[80];
+	int dark_background = false;
+	int no_walker = false;
+
+	sound_queue(N_NoiseFade);
+
+	Common::strcpy_s(temp_buf, player.series_name);
+
+	global[perform_displacements] = false;
+
+	if (new_room == 603) {
+		dark_background = false;
+	}
+
+	if (no_walker || global[no_load_walker]) {
+		player.series_name[0] = 0;
+	} else if (!player.force_series) {
+		if (global[player_persona] == PLAYER_IS_KING) {
+			Common::strcpy_s(player.series_name, "KG");
+		} else {
+			Common::strcpy_s(player.series_name, "PD");
+		}
+		if (dark_background)
+			Common::strcat_s(player.series_name, "D");
+	}
+
+	if (strcmp(temp_buf, player.series_name) != 0) player.walker_must_reload = true;
+
+	player.scaling_velocity = true;
 }
 
 void section_3_interface() {
+	RGBcolor text_color = { 43, 29, 15 };
+
+	Common::strcpy_s(kernel.interface, kernel_interface_name(7));
+
+	pal_change_color(INTER_MESSAGE_COLOR, 56, 47, 32);
 }
 
 void section_3_music() {
+	if (sound_off) {
+		sound_queue(N_NoiseOff);
+	}
+
+	if (music_off) {
+		sound_queue(N_MusicFade);
+		goto done;
+	}
+
+	switch (new_room) {
+	case 301:
+		sound_play(N_BackgroundMus);
+		break;
+
+	case 302:
+		sound_play(N_MazeMusic);
+		break;
+
+	case 303:
+		sound_play(N_ToadRing);
+		break;
+
+	default:
+		sound_play(N_BackgroundMus);
+		break;
+	}
+
+done:
+	;
 }
 
 void section_3_constructor() {

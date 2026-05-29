@@ -27,7 +27,7 @@
 
 namespace Freescape {
 
-static const PlainGameDescriptor freescapeGames[] = {
+const PlainGameDescriptor freescapeGames[] = {
 	{"3dkit", "3D Kit Game"},
 	{"driller", "Driller"},
 	{"spacestationoblivion", "Space Station Oblivion"},
@@ -39,7 +39,7 @@ static const PlainGameDescriptor freescapeGames[] = {
 	{0, 0}
 };
 
-static const ADGameDescription gameDescriptions[] = {
+const ADGameDescription gameDescriptions[] = {
 	// Original Freescape games
 	// Driller
 	{
@@ -851,7 +851,7 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::EN_ANY,
 		Common::kPlatformDOS,
 		ADGF_DEMO,
-		GUIO5(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS)
+		GUIO6(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS, GAMEOPTION_OPL_MUSIC)
 	},
 	{
 		"castlemaster",
@@ -880,6 +880,38 @@ static const ADGameDescription gameDescriptions[] = {
 		ADGF_DEMO,
 		GUIO4(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDERAMIGA, GAMEOPTION_WASD_CONTROLS)
 	},
+	// Full Castle Master, Amiga
+	{
+		"castlemaster",
+		"",
+		{
+			{"cm", 0, "67dcb3f62fe15f18ecc31380ffaf5c4e", 1112},
+			{"w", 0, "63c770f1008a641c5fd5d0b9df2bcbb6", 32048},
+			{"x", 0, "afc245de66ef8eb1b5fd061c6bbd602e", 349975},
+			AD_LISTEND
+		},
+		Common::EN_ANY,
+		Common::kPlatformAmiga,
+		ADGF_UNSTABLE,
+		GUIO4(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDERAMIGA, GAMEOPTION_WASD_CONTROLS)
+	},
+	// Full Castle Master, Atari ST.
+	// The player must provide the Copylock-decrypted game executable as "M.PRG"
+	// and the intro program as "J.PRG" (both Huffman-packed; the engine
+	// decompresses them at load time).
+	{
+		"castlemaster",
+		"",
+		{
+			{"M.PRG", 0, "70975b6656cd00a52ddede00d9ef3e64", 266232},
+			{"J.PRG", 0, "4934cf2f304b8ae5327e92b773acd35c", 58514},
+			AD_LISTEND
+		},
+		Common::EN_ANY,
+		Common::kPlatformAtariST,
+		ADGF_UNSTABLE,
+		GUIO4(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDERATARIST, GAMEOPTION_WASD_CONTROLS)
+	},
 	{
 		"castlemaster",
 		"",
@@ -892,13 +924,13 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::UNK_LANG, // Multi-language
 		Common::kPlatformAmstradCPC,
 		ADGF_NO_FLAGS,
-		GUIO4(GUIO_NOMIDI, GUIO_RENDERCPC, GAMEOPTION_TRAVEL_ROCK, GAMEOPTION_WASD_CONTROLS)
+		GUIO5(GUIO_NOMIDI, GUIO_RENDERCPC, GAMEOPTION_TRAVEL_ROCK, GAMEOPTION_WASD_CONTROLS, GAMEOPTION_AY_MUSIC)
 	},
 	// C64 tape release
 	{
 		"castlemaster",
 		"",
-		AD_ENTRY1s("CASTLEMASTER.C64.DATA", "d433af0fc854d91fb22f986e274d809b", 51198),
+		AD_ENTRY1s("CASTLEMASTER.C64.DATA", "d433af0fc854d91fb22f986e274d809b", 51201),
 		Common::EN_ANY,
 		Common::kPlatformC64,
 		ADGF_UNSTABLE | GF_C64_TAPE,
@@ -934,7 +966,7 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::UNK_LANG, // Multi-language
 		Common::kPlatformDOS,
 		ADGF_NO_FLAGS,
-		GUIO5(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS)
+		GUIO6(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS, GAMEOPTION_OPL_MUSIC)
 	},
 	{
 		"castlemaster",
@@ -950,7 +982,7 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::UNK_LANG, // Multi-language
 		Common::kPlatformDOS,
 		ADGF_NO_FLAGS,
-		GUIO5(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS)
+		GUIO6(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS, GAMEOPTION_OPL_MUSIC)
 	},
 	{
 		"castlemaster",
@@ -998,7 +1030,7 @@ static const ADGameDescription gameDescriptions[] = {
 		Common::ES_ESP,
 		Common::kPlatformDOS,
 		ADGF_NO_FLAGS,
-		GUIO5(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS)
+		GUIO6(GUIO_NOMIDI, GAMEOPTION_TRAVEL_ROCK, GUIO_RENDEREGA, GUIO_RENDERCGA, GAMEOPTION_WASD_CONTROLS, GAMEOPTION_OPL_MUSIC)
 	},
 	// Castle Master 2: The Crypt
 	{
@@ -1201,7 +1233,7 @@ static const ADGameDescription gameDescriptions[] = {
 };
 } // End of namespace Freescape
 
-static const DebugChannelDef debugFlagList[] = {
+const DebugChannelDef debugFlagList[] = {
 	{Freescape::kFreescapeDebugMove, "move", ""},
 	{Freescape::kFreescapeDebugParser, "parser", ""},
 	{Freescape::kFreescapeDebugCode, "code", ""},

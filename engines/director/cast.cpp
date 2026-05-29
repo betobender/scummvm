@@ -321,7 +321,9 @@ void Cast::loadArchive() {
 void configLenSanityCheck(uint16 len, uint16 fileVersion) {
 	int tlen = -1;
 
-	if (fileVersion < kFileVer300) {
+	if (fileVersion < kFileVer200) {
+		tlen = 28;							// D1
+	} else if (fileVersion < kFileVer300) {
 		tlen = 30;							// D2
 	} else if (fileVersion < kFileVer400) {
 		tlen = 48;							// D3
@@ -353,6 +355,16 @@ bool Cast::loadConfig() {
 		stream = _castArchive->getMovieResourceIfPresent(MKTAG('V', 'W', 'C', 'F'));
 	}
 	if (!stream) {
+		if (g_director->getVersion() < 100) {
+			// D1 and below did not have a config chunk, use defaults
+			debugC(1, kDebugLoading, "Cast::loadConfig(): No config chunk found, using defaults for cast libID %d (%s)", _castLibID, _castName.c_str());
+			_version = g_director->getVersion() == 20 ? kFileVer020 : kFileVer010;
+			_frameRate = 15;
+			_movieRect = Common::Rect(512, 342);
+			_bitdepth = 1;
+			return true;
+		}
+
 		warning("Cast::loadConfig(): Wrong format. VWCF resource missing");
 		return false;
 	}
@@ -481,6 +493,16 @@ bool Cast::loadConfig() {
 
 		debugC(1, kDebugLoading, "Cast::loadConfig(): field17: %d, field18: %d, field19: %d, movieDepth: %d, field22: %d field23: %d",
 			_field17, _field18, _field19, _movieDepth, _field22, _field23);
+	} else {
+		// D2 and below
+
+		_field17 = 0;
+		_field18 = 0;
+		_field19 = 0;
+
+		_movieDepth = _bitdepth;
+		_field22 = 0;
+		_field23 = 0;
 	}
 
 	if (_version >= kFileVer400) {
@@ -1768,7 +1790,8 @@ void Cast::loadLingoContext(Common::SeekableReadStreamEndian &stream) {
 				debugC(1, kDebugCompile, "Cast::loadLingoContext: Script %d is used but empty", i);
 				continue;
 			}
-			_lingoArchive->addCodeV4(*(r = _castArchive->getResource(MKTAG('L', 's', 'c', 'r'), entry.index)), i, _macName, _version);
+			_lingoArchive->addCodeV4(*(r = _castArchive->getResource(MKTAG('L', 's', 'c', 'r'), entry.index)), i,
+					getArchive()->getPathName().toString(g_director->_dirSeparator), _version);
 			delete r;
 		}
 
@@ -1816,7 +1839,7 @@ void Cast::loadLingoContext(Common::SeekableReadStreamEndian &stream) {
 					scriptType = kCastScript;
 				}
 
-				Common::String filename = encodePathForDump(_macName);
+				Common::String filename = encodePathForDump(getArchive()->getPathName().toString(g_director->_dirSeparator));
 				Common::Path lingoPath(dumpScriptName(filename.c_str(), scriptType, _castsScriptIds[it->first], "lingo"));
 
 				if (out.open(lingoPath, true)) {

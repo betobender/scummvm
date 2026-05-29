@@ -1,6 +1,7 @@
 MODULE := engines/mads
 
 MODULE_OBJS := \
+	core/mps_installer.o \
 	core/sound_manager.o \
 	nebular/nebular.o \
 	nebular/debugger.o \
@@ -38,7 +39,6 @@ MODULE_OBJS := \
 	nebular/core/menu_views.o \
 	nebular/core/messages.o \
 	nebular/core/msurface.o \
-	nebular/core/mps_installer.o \
 	nebular/core/palette.o \
 	nebular/core/player.o \
 	nebular/core/rails.o \
@@ -57,9 +57,11 @@ ifdef ENABLE_MADSV2
 MODULE_OBJS += \
 	madsv2/console.o \
 	madsv2/engine.o \
+	madsv2/animview/anim_timer.o \
 	madsv2/animview/animview.o \
+	madsv2/animview/functions.o \
+	madsv2/textview/textview.o \
 	madsv2/core/anim.o \
-	madsv2/core/asound.o \
 	madsv2/core/attr.o \
 	madsv2/core/buffer.o \
 	madsv2/core/camera.o \
@@ -172,14 +174,14 @@ MODULE_OBJS += \
 	madsv2/phantom/rooms/room505.o \
 	madsv2/phantom/rooms/room506.o \
 	madsv2/phantom/phantom.o \
+	madsv2/phantom/asound.o \
 	madsv2/phantom/catacombs.o \
 	madsv2/phantom/global.o \
 	madsv2/phantom/main_menu.o \
 	madsv2/phantom/menus.o \
 	madsv2/phantom/main.o \
 	madsv2/phantom/sound_phantom.o \
-	madsv2/dragonsphere/dragonsphere.o \
-	madsv2/dragonsphere/global.o \
+	madsv2/dragonsphere/mads/mads.o \
 	madsv2/dragonsphere/rooms/section1.o \
 	madsv2/dragonsphere/rooms/room101.o \
 	madsv2/dragonsphere/rooms/section2.o \
@@ -206,6 +208,7 @@ MODULE_OBJS += \
 	madsv2/dragonsphere/rooms/room117.o \
 	madsv2/dragonsphere/rooms/room118.o \
 	madsv2/dragonsphere/rooms/room119.o \
+	madsv2/dragonsphere/rooms/room120.o \
 	madsv2/dragonsphere/rooms/room201.o \
 	madsv2/dragonsphere/rooms/room203.o \
 	madsv2/dragonsphere/rooms/room204.o \
@@ -241,21 +244,76 @@ MODULE_OBJS += \
 	madsv2/dragonsphere/rooms/room512.o \
 	madsv2/dragonsphere/rooms/room557.o \
 	madsv2/dragonsphere/rooms/room601.o \
-	madsv2/dragonsphere/rooms/room602.o \
 	madsv2/dragonsphere/rooms/room603.o \
 	madsv2/dragonsphere/rooms/room604.o \
 	madsv2/dragonsphere/rooms/room605.o \
 	madsv2/dragonsphere/rooms/room606.o \
 	madsv2/dragonsphere/rooms/room607.o \
-	madsv2/dragonsphere/rooms/room608.o \
 	madsv2/dragonsphere/rooms/room609.o \
-	madsv2/dragonsphere/rooms/room610.o \
-	madsv2/dragonsphere/rooms/room611.o \
 	madsv2/dragonsphere/rooms/room612.o \
 	madsv2/dragonsphere/rooms/room613.o \
 	madsv2/dragonsphere/rooms/room614.o \
 	madsv2/dragonsphere/rooms/room909.o \
-	madsv2/forest/forest.o
+	madsv2/dragonsphere/dragonsphere.o \
+	madsv2/dragonsphere/asound.o \
+	madsv2/dragonsphere/global.o \
+	madsv2/dragonsphere/main.o \
+	madsv2/dragonsphere/main_menu.o \
+	madsv2/dragonsphere/menus.o \
+	madsv2/dragonsphere/sound_dragonsphere.o \
+	madsv2/forest/forest.o \
+	madsv2/forest/asound.o \
+	madsv2/forest/global.o \
+	madsv2/forest/main.o \
+	madsv2/forest/main_menu.o \
+	madsv2/forest/menus.o \
+	madsv2/forest/sound_forest.o \
+	madsv2/forest/mads/mads.o \
+	madsv2/forest/rooms/room101.o \
+	madsv2/forest/rooms/room103.o \
+	madsv2/forest/rooms/room104.o \
+	madsv2/forest/rooms/room106.o \
+	madsv2/forest/rooms/room107.o \
+	madsv2/forest/rooms/room199.o \
+	madsv2/forest/rooms/room201.o \
+	madsv2/forest/rooms/room203.o \
+	madsv2/forest/rooms/room204.o \
+	madsv2/forest/rooms/room205.o \
+	madsv2/forest/rooms/room210.o \
+	madsv2/forest/rooms/room211.o \
+	madsv2/forest/rooms/room220.o \
+	madsv2/forest/rooms/room221.o \
+	madsv2/forest/rooms/room301.o \
+	madsv2/forest/rooms/room302.o \
+	madsv2/forest/rooms/room303.o \
+	madsv2/forest/rooms/room304.o \
+	madsv2/forest/rooms/room305.o \
+	madsv2/forest/rooms/room306.o \
+	madsv2/forest/rooms/room307.o \
+	madsv2/forest/rooms/room308.o \
+	madsv2/forest/rooms/room321.o \
+	madsv2/forest/rooms/room322.o \
+	madsv2/forest/rooms/room401.o \
+	madsv2/forest/rooms/room402.o \
+	madsv2/forest/rooms/room403.o \
+	madsv2/forest/rooms/room404.o \
+	madsv2/forest/rooms/room405.o \
+	madsv2/forest/rooms/room420.o \
+	madsv2/forest/rooms/room501.o \
+	madsv2/forest/rooms/room503.o \
+	madsv2/forest/rooms/room509.o \
+	madsv2/forest/rooms/room510.o \
+	madsv2/forest/rooms/room520.o \
+	madsv2/forest/rooms/room901.o \
+	madsv2/forest/rooms/room903.o \
+	madsv2/forest/rooms/room904.o \
+	madsv2/forest/rooms/section1.o \
+	madsv2/forest/rooms/section2.o \
+	madsv2/forest/rooms/section3.o \
+	madsv2/forest/rooms/section4.o \
+	madsv2/forest/rooms/section5.o \
+	madsv2/forest/rooms/section9.o
+
 endif
 
 # This module can be built as a plugin

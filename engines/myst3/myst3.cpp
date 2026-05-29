@@ -1529,6 +1529,9 @@ void Myst3Engine::dragSymbol(uint16 var, uint16 id) {
 	HotSpot *hovered = getHoveredHotspot(nodeData, var);
 	if (hovered) {
 		_cursor->setVisible(false);
+		// Enable free camera movement after placing the symbol on the imaging/scanner table.
+		// Part of fix for #16758
+		_cursor->lockPosition(true);
 		_scriptEngine->run(&hovered->script);
 		_cursor->setVisible(true);
 	}
@@ -1932,6 +1935,7 @@ void Myst3Engine::settingsInitDefaults() {
 	ConfMan.registerDefault("mouse_inverted", false);
 	ConfMan.registerDefault("zip_mode", false);
 	ConfMan.registerDefault("subtitles", false);
+	ConfMan.registerDefault("speech_mute", false);
 	ConfMan.registerDefault("vibrations", true); // Xbox specific
 }
 
@@ -1960,6 +1964,7 @@ void Myst3Engine::settingsApplyFromVars() {
 	ConfMan.setInt("mouse_speed", _state->getMouseSpeed());
 	ConfMan.setBool("zip_mode", _state->getZipModeEnabled());
 	ConfMan.setBool("subtitles", _state->getSubtitlesEnabled());
+	ConfMan.setBool("speech_mute", false);
 
 	if (getPlatform() != Common::kPlatformXbox) {
 		ConfMan.setInt("overall_volume", _state->getOverallVolume() * 256 / 100);
@@ -1995,6 +2000,13 @@ void Myst3Engine::settingsApplyFromVars() {
 
 void Myst3Engine::syncSoundSettings() {
 	Engine::syncSoundSettings();
+
+	// If speech_mute is set to true, either in the game domain "Text and speech" settings or inherited from the global settings
+	// translate it to false, since speech cannot be muted in Myst 3.
+	// This will result in a setting of "just subtitles" for the game's domain option "Text and speech" to change to "both" (after the game is run).
+	if (ConfMan.getBool("speech_mute") == true) {
+		ConfMan.setBool("speech_mute", false);
+	}
 
 	uint soundOverall = ConfMan.getInt("overall_volume");
 	uint soundVolumeMusic = ConfMan.getInt("music_volume");

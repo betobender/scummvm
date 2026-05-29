@@ -613,7 +613,7 @@ void RoomManager::resetConversationStates(byte roomNumber, byte *conversationDat
 		return;
 	}
 	bool roomDone = false;
-	while (!alfredB.eos() && !roomDone) {
+	while (!alfredB.eos()) {
 		ResetEntry entry;
 		entry.room = alfredB.readUint16LE();
 		entry.offset = alfredB.readUint16LE();
@@ -998,6 +998,7 @@ void RoomManager::loadRoomAnimations(byte *pixelData, size_t pixelDataSize, byte
 				}
 
 			} else {
+				delete[] anim.animData;
 				continue;
 			}
 			sprite.animData[j] = anim;
@@ -1075,7 +1076,7 @@ uint32 RoomManager::loadDescriptions(byte *pair12data, size_t pair12size, Common
 			description.index = pair12data[pos++];
 			description.text = "";
 
-			while (pos < (pair12size) && pair12data[pos] != 0xFD && pos < (pair12size)) {
+			while (pos < (pair12size) && pair12data[pos] != 0xFD) {
 
 				if (pair12data[pos] != 0x00) {
 					description.text.append(1, (char)pair12data[pos]);
@@ -1157,7 +1158,7 @@ void RoomManager::resetMetadataDefaults(byte room, byte *&data, size_t size) {
 		error("RoomManager::resetMetadataDefaults(): Couldnt find file ALFRED.8");
 	}
 	bool roomDone = false;
-	while (!alfred8.eos() && !roomDone) {
+	while (!alfred8.eos()) {
 		ResetEntry entry;
 		entry.room = alfred8.readUint16LE();
 		entry.offset = alfred8.readUint16LE();
@@ -1290,6 +1291,7 @@ byte *RoomManager::loadShadowMap(int roomNumber) {
 	size_t decompressedSize = rleDecompress(compressed, compressedSize, 0, 640 * 400, &shadows);
 	if (decompressedSize == 0) {
 		debug("Failed to decompress shadow map for room %d", roomNumber);
+		free(shadows);
 		shadows = nullptr;
 	}
 	// debug("Decompressed shadow map for room %d, compressed size: %zu, decompressed size: %zu", roomNumber, compressedSize, decompressedSize);

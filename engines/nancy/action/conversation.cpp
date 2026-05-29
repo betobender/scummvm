@@ -40,7 +40,8 @@ namespace Action {
 
 ConversationSound::ConversationSound() :
 		RenderActionRecord(8),
-		_noResponse(g_nancy->getGameType() <= kGameTypeNancy2 ? 10 : 20),
+		_noResponse(g_nancy->getGameType() <= kGameTypeNancy2 ||
+					g_nancy->getGameType() >= kGameTypeNancy10 ? 10 : 20),
 		_hasDrawnTextbox(false),
 		_pickedResponse(-1) {
 	_conditionalResponseCharacterID = _noResponse;
@@ -136,6 +137,8 @@ void ConversationSound::readTerseData(Common::SeekableReadStream &stream) {
 	_defaultNextScene = stream.readByte();
 
 	_sceneChange.sceneID = stream.readUint16LE();
+	if (g_nancy->getGameType() >= kGameTypeNancy10)
+		_sceneChange.frameID = stream.readUint16LE();
 	_sceneChange.continueSceneSound = kContinueSceneSound;
 
 	uint16 numResponses = stream.readUint16LE();
@@ -182,7 +185,14 @@ void ConversationSound::readTerseCaptionText(Common::SeekableReadStream &stream)
 	const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
 	assert(convo);
 
-	_text = convo->texts[key];
+	// WORKAROUND: Return an empty string for captions that aren't found.
+	// Happens with some conversations in Nancy10 (e.g. when calling the Rawleys).
+	if (convo->texts.contains(key)) {
+		_text = convo->texts[key];
+	} else {
+		warning("Convo key not found: %s", key.c_str());
+		_text = "";
+	}
 }
 
 void ConversationSound::readTerseResponseText(Common::SeekableReadStream &stream, ResponseStruct &response) {
@@ -253,13 +263,21 @@ void ConversationSound::execute() {
 	case kRun:
 		if (!_hasDrawnTextbox) {
 			_hasDrawnTextbox = true;
-			auto *textboxData = GetEngineData(TBOX);
-			assert(textboxData);
-			NancySceneState.getTextbox().clear();
-			NancySceneState.getTextbox().setOverrideFont(textboxData->conversationFontID);
+			if (g_nancy->getGameType() >= kGameTypeNancy10) {
+				NancySceneState.getConversationPopup().open();
 
-			if (ConfMan.getBool("subtitles")) {
-				NancySceneState.getTextbox().addTextLine(_text);
+				if (ConfMan.getBool("subtitles")) {
+					NancySceneState.getConversationPopup().addTextLine(_text);
+				}
+			} else {
+				auto *textboxData = GetEngineData(TBOX);
+				assert(textboxData);
+				NancySceneState.getTextbox().clear();
+				NancySceneState.getTextbox().setOverrideFont(textboxData->conversationFontID);
+
+				if (ConfMan.getBool("subtitles")) {
+					NancySceneState.getTextbox().addTextLine(_text);
+				}
 			}
 
 			Common::Array<uint> responsesToAdd;
@@ -314,8 +332,16 @@ void ConversationSound::execute() {
 				responsesToAdd.push_back(i);
 			}
 
+			if (g_nancy->getGameType() >= kGameTypeNancy10) {
+				NancySceneState.getConversationPopup().setResponseStart();
+			}
+
 			for (uint i : responsesToAdd) {
-				NancySceneState.getTextbox().addTextLine(_responses[i].text);
+				if (g_nancy->getGameType() >= kGameTypeNancy10) {
+					NancySceneState.getConversationPopup().addTextLine(_responses[i].text);
+				} else {
+					NancySceneState.getTextbox().addTextLine(_responses[i].text);
+				}
 				_responses[i].isOnScreen = true;
 			}
 		}
@@ -403,6 +429,10 @@ void ConversationSound::execute() {
 				}
 			}
 
+			if (g_nancy->getGameType() >= kGameTypeNancy10) {
+				NancySceneState.getConversationPopup().close();
+			}
+			
 			finishExecution();
 		}
 
@@ -891,6 +921,17 @@ void ConversationCelTerse::readData(Common::SeekableReadStream &stream) {
 	_overrideTreeRects.resize(4, kCelOverrideTreeRectsOff);
 
 	readTerseData(stream);
+
+	// WORKAROUND: Fix the last frame for some videos, to prevent them from
+	// running for too long, if the associated sound file is shorter than
+	// the video
+	if (g_nancy->getGameType() == kGameTypeNancy9 && xsheetName == "KFB28" && _lastFrame == 102 && _sound.name == "KFF28") {
+		// Offerring to call the Sheriff for Katie - bug #16753
+		_lastFrame = 70;
+	}  else if (g_nancy->getGameType() == kGameTypeNancy9 && xsheetName == "StubAndy" && _lastFrame == 344 && _sound.name == "ACC03") {
+		// Asking Andy for a whale watching keychain design - bug #16786
+		_lastFrame = 30;
+	}
 }
 
 } // End of namespace Action

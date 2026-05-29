@@ -30,9 +30,7 @@ namespace Dragonsphere {
 
 class DragonsphereEngine : public MADSV2Engine {
 private:
-	static void global_object_sprite();
-	static void stop_walker_basic();
-	static void stop_walker_tricks();
+	static void global_object_examine();
 
 public:
 	DragonsphereEngine(OSystem *syst, const MADSGameDescription *gameDesc) :
@@ -51,6 +49,7 @@ public:
 	void global_error_code() override;
 	void global_room_init() override;
 	void global_sound_driver() override;
+	void player_keep_walking() override;
 };
 
 } // namespace Dragonsphere

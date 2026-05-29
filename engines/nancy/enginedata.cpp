@@ -277,7 +277,11 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	defaultFontID = chunkStream->readUint16LE();
 	defaultTextColor = chunkStream->readUint16LE();
 
-	if (g_nancy->getGameType() >= kGameTypeNancy2) {
+	if (g_nancy->getGameType() >= kGameTypeNancy10) {
+		// Nancy 10+ moved the conversation font IDs to a later position;
+		// the 4 bytes here are unrelated, so skip them.
+		chunkStream->skip(4);
+	} else if (g_nancy->getGameType() >= kGameTypeNancy2) {
 		conversationFontID = chunkStream->readUint16LE();
 		highlightConversationFontID = chunkStream->readUint16LE();
 	} else {
@@ -287,6 +291,12 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 
 	tabWidth = chunkStream->readUint16LE();
 	pageScrollPercent = chunkStream->readUint16LE(); // Not implemented yet
+
+	if (g_nancy->getGameType() >= kGameTypeNancy10) {
+		conversationFontID = chunkStream->readUint16LE();
+		highlightConversationFontID = chunkStream->readUint16LE();
+		chunkStream->skip(4); // 2 unknown uint16 fields (values: 4, 75 in nancy10)
+	}
 
 	Graphics::PixelFormat format = g_nancy->_graphics->getInputPixelFormat();
 	if (g_nancy->getGameType() >= kGameTypeNancy2) {
@@ -298,9 +308,6 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 		textBackground =			(r << format.rShift) |
 									(g << format.gShift) |
 									(b << format.bShift);
-
-		if (g_nancy->getGameType() >= kGameTypeNancy10)
-			chunkStream->skip(1);
 
 		r = chunkStream->readByte();
 		g = chunkStream->readByte();
@@ -888,7 +895,7 @@ TASK::TASK(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	char nameBuf[34];
 	for (uint i = 0; i < kNumButtons; ++i) {
 		readUIButton(*chunkStream, buttons[i].button);
-		chunkStream->read(buttons[i].unknownPad, sizeof(buttons[i].unknownPad));
+		readRect(*chunkStream, buttons[i].notificationSrcRect);
 		for (uint s = 0; s < kNumAltSounds; ++s) {
 			chunkStream->read(nameBuf, 33);
 			nameBuf[33] = '\0';

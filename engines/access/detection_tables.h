@@ -130,6 +130,36 @@ static const AccessGameDescription gameDescriptions[] = {
 		0
 	},
 
+	{
+		// Noctropolis Demo
+		{
+			"noctropolis",
+			"Demo",
+			AD_ENTRY1s("demo/scene01.ap", "3a154bf58e10cd7ace14cab1bf5adf4a", 145796),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DEMO,
+			GUIO1(GUIO_NONE)
+		},
+		kGameNoctropolis,
+		0
+	},
+
+	{
+		// Noctropolis (Sum from GOG Windows and macOS versions)
+		{
+			"noctropolis",
+			nullptr,
+			AD_ENTRY1s("dark/scene01.ap", "3a154bf58e10cd7ace14cab1bf5adf4a", 147954),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE,
+			GUIO1(GUIO_NONE)
+		},
+		kGameNoctropolis,
+		0
+	},
+
 	{ AD_TABLE_END_MARKER, 0, 0 }
 };
 

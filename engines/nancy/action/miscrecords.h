@@ -23,6 +23,7 @@
 #define NANCY_ACTION_RECORDTYPES_H
 
 #include "engines/nancy/action/actionrecord.h"
+#include "engines/nancy/enginedata.h"
 
 namespace Nancy {
 
@@ -185,6 +186,46 @@ public:
 
 protected:
 	Common::String getRecordTypeName() const override { return "AddSearchLink"; }
+};
+
+// Sets the cellphone's battery/signal indicators. Modes 0/1 toggle the
+// battery (normal / low) and 2/3 toggle the signal (normal / no signal).
+class SetCellPhoneBatteryAndSignal : public ActionRecord {
+public:
+	void readData(Common::SeekableReadStream &stream) override;
+	void execute() override;
+
+	uint16 _mode = 0;
+
+protected:
+	Common::String getRecordTypeName() const override { return "SetCellPhoneBatteryAndSignal"; }
+};
+
+// Adds a new entry to the cellphone directory, or overwrites an existing
+// one matched by dial pattern. Used to unlock contacts as the player
+// progresses (Nancy 10+).
+class ChangeCellPhoneInfo : public ActionRecord {
+public:
+	void readData(Common::SeekableReadStream &stream) override;
+	void execute() override;
+
+	UICL::Contact _contact;
+
+protected:
+	Common::String getRecordTypeName() const override { return "ChangeCellPhoneInfo"; }
+};
+
+// Returns from a cellphone-driven conversation scene to the pre-call scene.
+// sceneID == kNoScene pops the saved scene; any other sceneID overrides it.
+class CellPhonePopCellSceneFromStack : public ActionRecord {
+public:
+	void readData(Common::SeekableReadStream &stream) override;
+	void execute() override;
+
+	SceneChangeDescription _sceneChange;
+
+protected:
+	Common::String getRecordTypeName() const override { return "CellPhonePopCellSceneFromStack"; }
 };
 
 // Changes the in-game time. Used prior to the introduction of SetPlayerClock.

@@ -19,11 +19,14 @@ MODULE_OBJS = \
   action/puzzle/arcadepuzzle.o \
   action/puzzle/assemblypuzzle.o \
   action/puzzle/bballpuzzle.o \
+  action/puzzle/beadpuzzle.o \
   action/puzzle/bulpuzzle.o \
   action/puzzle/bombpuzzle.o \
   action/puzzle/collisionpuzzle.o \
   action/puzzle/cubepuzzle.o \
   action/puzzle/cuttingpuzzle.o \
+  action/puzzle/dotconnectpuzzle.o \
+  action/puzzle/gridmappuzzle.o \
   action/puzzle/hamradiopuzzle.o \
   action/puzzle/leverpuzzle.o \
   action/puzzle/mazechasepuzzle.o \
@@ -44,6 +47,7 @@ MODULE_OBJS = \
   action/puzzle/safedialpuzzle.o \
   action/puzzle/setplayerclock.o \
   action/puzzle/sliderpuzzle.o \
+  action/puzzle/sortpuzzle.o \
   action/puzzle/soundequalizerpuzzle.o \
   action/puzzle/soundmatchpuzzle.o \
   action/puzzle/spigotpuzzle.o \
@@ -57,6 +61,8 @@ MODULE_OBJS = \
   ui/animatedbutton.o \
   ui/button.o \
   ui/clock.o \
+  ui/cellphonepopup.o \
+  ui/conversationpopup.o \
   ui/inventorybox.o \
   ui/inventorypopup.o \
   ui/notebookpopup.o \

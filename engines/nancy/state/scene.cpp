@@ -365,11 +365,11 @@ void Scene::removeItemFromInventory(int16 id, bool pickUp) {
 
 		if (pickUp) {
 			setHeldItem(id);
+			g_nancy->_sound->playSound("BUOK");
 		} else if (getHeldItem() == id) {
 			setHeldItem(-1);
+			g_nancy->_sound->playSound("BUOK");
 		}
-
-		g_nancy->_sound->playSound("BUOK");
 
 		if (g_nancy->getGameType() <= kGameTypeNancy9) {
 			_inventoryBox.removeItem(id);
@@ -392,8 +392,17 @@ void Scene::setNoHeldItem() {
 byte Scene::hasItem(int16 id) const {
 	if (getHeldItem() == id) {
 		return g_nancy->_true;
-	} else {
+	} else if (id >= 0 && (uint)id < _flags.items.size()) {
 		return _flags.items[id];
+	} else {
+		// TODO: Happens in Nancy10+. Gets called for item IDs
+		// 1824, 1825, 1826, 1827, when adding tasks to the
+		// notebook, for an array of 70 items in total. Looks
+		// like a case where a flag is contained for the held
+		// item ID to be checked.
+		debug(2, "Scene::hasItem: out-of-range id %d (items.size=%u)", id,
+			  (uint)_flags.items.size());
+		return g_nancy->_false;
 	}
 }
 
@@ -599,14 +608,7 @@ void Scene::registerGraphics() {
 	_frame.registerGraphics();
 	_viewport.registerGraphics();
 
-	// Pre-Nancy 10: legacy textbox is the on-screen subtitle/conversation
-	// strip. Nancy 10+: that role moves to the UICO popup; the legacy
-	// textbox is kept around in memory (other code still calls clear() /
-	// addTextLine() on it) but stays unregistered so its surface is
-	// never blitted to the screen.
-	if (g_nancy->getGameType() <= kGameTypeNancy9) {
-		_textbox.registerGraphics();
-	}
+	_textbox.registerGraphics();
 
 	// Pre-Nancy 10: inventory box is always-on-screen.
 	// Nancy 10+: a separate popup widget driven by UIIV (initially hidden).
@@ -615,6 +617,8 @@ void Scene::registerGraphics() {
 	} else {
 		_inventoryPopup.registerGraphics();
 		_notebookPopup.registerGraphics();
+		_cellPhonePopup.registerGraphics();
+		_conversationPopup.registerGraphics();
 	}
 
 	_hotspotDebug.registerGraphics();
@@ -962,6 +966,10 @@ void Scene::load(bool fromSaveFile) {
 	if (sceneSummaryChunk) {
 		_sceneState.summary.read(*sceneSummaryChunk);
 	} else {
+		// Reset panning type set from previous scenes, since terse summary
+		// chunks don't contain panning type information
+		_sceneState.summary.panningType = kPan360;
+
 		sceneSummaryChunk = sceneIFF->getChunkStream("TSUM");
 		if (sceneSummaryChunk) {
 			_sceneState.summary.readTerse(*sceneSummaryChunk);
@@ -1003,12 +1011,18 @@ void Scene::load(bool fromSaveFile) {
 		_sceneState.currentScene.paletteID = 0;
 	}
 
-	_viewport.loadVideo(_sceneState.summary.videoFile,
-						_sceneState.currentScene.frameID,
-						_sceneState.currentScene.verticalOffset,
-						_sceneState.summary.panningType,
-						_sceneState.summary.videoFormat,
-						_sceneState.summary.palettes.size() ? _sceneState.summary.palettes[(byte)_sceneState.currentScene.paletteID] : Common::Path());
+	if (_sceneState.summary.videoFile != "NO_ART_SCENE") {
+		const Common::Path palettePath = !_sceneState.summary.palettes.empty() ?
+			_sceneState.summary.palettes[(byte)_sceneState.currentScene.paletteID] :
+			Common::Path();
+
+		_viewport.loadVideo(_sceneState.summary.videoFile,
+							_sceneState.currentScene.frameID,
+							_sceneState.currentScene.verticalOffset,
+							_sceneState.summary.panningType,
+							_sceneState.summary.videoFormat,
+							palettePath);
+	}
 
 	if (_viewport.getFrameCount() <= 1) {
 		_viewport.disableEdges(kLeft | kRight);
@@ -1043,6 +1057,13 @@ void Scene::load(bool fromSaveFile) {
 	// loading from a save
 	if (!fromSaveFile) {
 		_flags.sceneCounts.getOrCreateVal(_sceneState.currentScene.sceneID)++;
+	}
+
+	// Enable all task buttons
+	// TODO: This should be done elsewhere
+	if (g_nancy->getGameType() >= kGameTypeNancy10) {
+		for (int i = 0; i < 5; ++i)
+			_taskbar->toggleButton(i, true);
 	}
 
 	delete sceneIFF;
@@ -1138,13 +1159,21 @@ void Scene::handleInput() {
 	}
 
 	// We handle the textbox and inventory box first because of their scrollbars, which
-	// need to take highest priority
+	// need to take highest priority. On Nancy 10+ the taskbar-driven popups
+	// (inventory/notebook/cellphone) sit visually on top of the textbox
+	// strip, so they get first crack at input — otherwise a click inside
+	// the popup that overlapped the textbox area could accidentally pick
+	// a conversation response.
+	if (g_nancy->getGameType() >= kGameTypeNancy10) {
+		_conversationPopup.handleInput(input);
+		_inventoryPopup.handleInput(input);
+		_notebookPopup.handleInput(input);
+		_cellPhonePopup.handleInput(input);
+	}
+
 	_textbox.handleInput(input);
 	if (g_nancy->getGameType() <= kGameTypeNancy9) {
 		_inventoryBox.handleInput(input);
-	} else {
-		_inventoryPopup.handleInput(input);
-		_notebookPopup.handleInput(input);
 	}
 
 	// Handle invisible map button
@@ -1202,7 +1231,7 @@ void Scene::handleInput() {
 				_notebookPopup.toggle();
 				break;
 			case kTaskButtonCellphone:
-				// TODO: open cell-phone popup (UICL)
+				_cellPhonePopup.toggle();
 				break;
 			case kTaskButtonHelp:
 				requestStateChange(NancyState::kHelp);
@@ -1273,6 +1302,8 @@ void Scene::initStaticData() {
 	} else {
 		_inventoryPopup.init();
 		_notebookPopup.init();
+		_cellPhonePopup.init();
+		_conversationPopup.init();
 	}
 
 	// Init buttons

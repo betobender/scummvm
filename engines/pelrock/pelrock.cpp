@@ -599,7 +599,7 @@ void PelrockEngine::checkMouse() {
 		} else if (_actionPopupState.isAlfredUnder && actionClicked != NO_ACTION) {
 			useOnAlfred(_state->selectedInventoryItem);
 		} else if (_inventoryOverlayState.isActive && _inventoryOverlayState.posInInventorySelectionArea(_events->_releaseX, _events->_releaseY)) {
-			int item = checkMouseClickInventoryOverlay(_events->_releaseX, _events->_releaseY);
+			int item = checkMouseClickInventoryOverlay(_events->_releaseX);
 			_state->selectedInventoryItem = item;
 			if (_actionPopupState.isAlfredUnder) {
 				useOnAlfred(item);
@@ -995,7 +995,7 @@ void PelrockEngine::drawAlfred(byte *buf) {
 	if (_room->_pixelsShadows != nullptr) {
 		byte shadowLevel = 0xFF; // 0xFF = no shadow
 		int feetY = _alfredState.y;
-		if (feetY >= 0 && feetY < 400 && _room->_pixelsShadows != nullptr) {
+		if (feetY < 400) {
 			for (int col = 0; col < finalWidth; col++) {
 				int checkX = _alfredState.x + col;
 				if (checkX >= 0 && checkX < 640) {
@@ -1107,7 +1107,7 @@ void PelrockEngine::drawNextFrame(Sprite *sprite) {
 
 					// Trigger ring on phone on every start of animation 2 in room 9
 					if (_room->_currentRoomNumber == 9 && sprite->index == 3) {
-						if (sprite->curAnimIndex == 1 && animData.curLoop == 0) {
+						if (sprite->curAnimIndex == 1) {
 							byte soundFileIndex = _room->_roomSfx[2];
 							_sound->playSound(soundFileIndex, 2);
 						}
@@ -1283,7 +1283,7 @@ void PelrockEngine::showActionBalloon(int posx, int posy, int curFrame) {
 		showInventoryOverlay();
 		if (_inventoryOverlayState.posInInventorySelectionArea(_events->_mouseX, _events->_mouseY)) {
 			_inventoryOverlayState.flashingIconIndex = -1;
-			checkMouseOverInventoryOverlay(_events->_mouseX, _events->_mouseY);
+			checkMouseOverInventoryOverlay(_events->_mouseX);
 		}
 	}
 
@@ -1405,7 +1405,7 @@ void PelrockEngine::showInventoryOverlay() {
 	}
 }
 
-void PelrockEngine::checkMouseOverInventoryOverlay(int x, int y) {
+void PelrockEngine::checkMouseOverInventoryOverlay(int x) {
 	if (x < 20) {
 		if (_inventoryOverlayState.invStartingPos > 0) {
 			_inventoryOverlayState.invStartingPos--;
@@ -1425,7 +1425,7 @@ void PelrockEngine::checkMouseOverInventoryOverlay(int x, int y) {
 	}
 }
 
-int PelrockEngine::checkMouseClickInventoryOverlay(int x, int y) {
+int PelrockEngine::checkMouseClickInventoryOverlay(int x) {
 
 	if (x < 20) {
 		return -1;
@@ -1522,7 +1522,6 @@ AlfredDirection PelrockEngine::calculateAlfredsDirection(HotSpot *hotspot) {
 			if (((_alfredState.y + _alfredState.h) < hotspot->y) ||
 				(_alfredState.y <= hotspot->y + hotspot->h &&
 				 hotspot->zOrder <= ((399 - _alfredState.y) / 2) + 10)) {
-				calculatedDirection = ALFRED_DOWN; // Face DOWN
 			} else {
 				calculatedDirection = ALFRED_UP; // Face UP
 			}
@@ -1540,7 +1539,6 @@ AlfredDirection PelrockEngine::calculateAlfredsDirection(HotSpot *hotspot) {
 		else if (((_alfredState.y + _alfredState.h) < hotspot->y) ||
 				 (_alfredState.y <= hotspot->y + hotspot->h &&
 				  (hotspot->actionFlags & 0x80) == 0x80)) {
-			calculatedDirection = ALFRED_DOWN; // Face DOWN
 		} else {
 			calculatedDirection = ALFRED_UP; // Face UP
 		}
@@ -1992,8 +1990,8 @@ void PelrockEngine::pyramidCollapse() {
 		npc->zOrder = 254;
 
 	npc = _room->findSpriteByIndex(0);
-	npc->animData[0].nframes = 5;
 	if (npc) {
+		npc->animData[0].nframes = 5;
 		npc->animData[npc->curAnimIndex].movementFlags = 0x1C;
 		npc->y -= 25; // One-time nudge upward to emerge from behind pyramid
 	}
@@ -2035,9 +2033,10 @@ void PelrockEngine::pyramidCollapse() {
 
 	// Stop NPC movement
 	npc = _room->findSpriteByIndex(0);
-	npc->animData[0].nframes = 1;
-	if (npc)
+	if (npc) {
+		npc->animData[0].nframes = 1;
 		npc->animData[npc->curAnimIndex].movementFlags = 0;
+	}
 
 	_dialog->say(_res->_ingameTexts[kTextPor5Minutos], 0);
 
@@ -2119,6 +2118,7 @@ void PelrockEngine::endingScene() {
 		}
 
 		if (isIdleAnim) {
+			assert(sprite->numAnims == 2);
 			Anim idleAnim;
 			idleAnim.nframes = 1;
 			idleAnim.loopCount = 1;

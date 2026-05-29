@@ -22,13 +22,39 @@
 #ifndef MADSV2_ANIMVIEW_H
 #define MADSV2_ANIMVIEW_H
 
-#include "common/scummsys.h"
+#include "audio/audiostream.h"
+#include "mads/madsv2/core/anim.h"
+#include "mads/madsv2/core/cycle.h"
 
 namespace MADS {
 namespace MADSV2 {
 namespace AnimView {
 
+// Variables shared with other AnimView namespace files
+extern Audio::AudioStream *speechStream;
+extern int speechFlags;
+extern int current_error_code;
+extern int currentFrame, minFrame, maxFrame;
+extern bool foundSeries;
+extern int seriesMinFrame, seriesMaxFrame;
+extern bool timerFlag1;
+extern bool peelFlag;
+extern int runCtr1;
+extern int runFx;
+extern long timer1, timer2;;
+extern AnimPtr current_anim;
+extern AnimInterPtr current_anim_inter;
+extern int speechIndex;
+extern int speechLoops;
+extern int runVal6, runVal7, runVal8;
+extern bool loadFontFlag;
+extern int imageFrame;
+extern CycleList anim_cycle_list;
+extern bool has_cycles;
+extern int currentViewX, currentViewY;
 
+
+// Main animview function
 extern void animview_main(const char *resName);
 
 } // namespace AnimView

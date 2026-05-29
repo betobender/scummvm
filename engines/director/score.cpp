@@ -305,9 +305,6 @@ void Score::startPlay() {
 		return;
 	}
 
-	if (_haveInteractivity && _version >= kFileVer300)
-		_movie->processEvent(kEventStartMovie);
-
 	// load first frame (either 1 or _nextFrame)
 	updateCurrentFrame();
 
@@ -319,7 +316,7 @@ void Score::startPlay() {
 	updateSprites(kRenderForceUpdate, true);
 
 	// Stage has been set up, run the StartMovie script
-	if (_version >= kFileVer300)
+	if (_haveInteractivity && _version >= kFileVer300)
 		_movie->processEvent(kEventStartMovie);
 }
 
@@ -783,6 +780,11 @@ void Score::update() {
 	}
 
 	_firstRun = false;
+
+	// Force cursor update if a new movie's started.
+	if (_window->_newMovieStarted)
+		renderCursor(_movie->getWindow()->getMousePos(), true);
+
 	_window->_newMovieStarted = false;
 
 	if (!_haveInteractivity)
@@ -942,9 +944,6 @@ void Score::updateSprites(RenderMode mode, bool withClean) {
 		}
 
 		if (channel->isDirty(nextSprite) || widgetRedrawn || mode == kRenderForceUpdate) {
-			bool invalidCastMember = currentSprite && currentSprite->_spriteType == kCastMemberSprite && currentSprite->_cast == nullptr;
-			if (currentSprite && !invalidCastMember && !currentSprite->_trails)
-				_window->addDirtyRect(channel->getBbox());
 
 			if (currentSprite && currentSprite->_cast && currentSprite->_cast->_erase) {
 				currentSprite->_cast->_erase = false;
@@ -957,13 +956,13 @@ void Score::updateSprites(RenderMode mode, bool withClean) {
 			// Only clean out the channel if we're moving to a different frame
 			if (withClean)
 				channel->setClean(nextSprite);
-			invalidCastMember = currentSprite ? (currentSprite->_spriteType == kCastMemberSprite && currentSprite->_cast == nullptr) : false;
+			bool invalidCastMember = currentSprite ? (currentSprite->_spriteType == kCastMemberSprite && currentSprite->_cast == nullptr) : false;
 			// Check again to see if a video has just been started by setClean.
 			if (channel->isActiveVideo())
 				_movie->_videoPlayback = true;
 
-			if (!invalidCastMember)
-				_window->addDirtyRect(channel->getBbox());
+			// flag channel for drawing
+			channel->setNeedsDraw();
 
 			if (currentSprite) {
 				Common::Rect bbox = channel->getBbox();
@@ -1459,7 +1458,7 @@ void Score::updateWidgets(bool hasVideoPlayback) {
 			channel->updateVideoTime();
 		if (cast && (cast->_type != kCastDigitalVideo || hasVideoPlayback) && cast->isModified()) {
 			channel->replaceWidget();
-			_window->addDirtyRect(channel->getBbox());
+			channel->setNeedsDraw();
 		}
 	}
 }
@@ -1468,7 +1467,7 @@ void Score::invalidateRectsForMember(CastMember *member) {
 	for (uint16 i = 0; i < _channels.size(); i++) {
 		Channel *channel = _channels[i];
 		if (channel->_sprite->_cast == member) {
-			_window->addDirtyRect(channel->getBbox());
+			channel->setDirty();
 		}
 	}
 }
@@ -1676,9 +1675,9 @@ uint16 Score::getRollOverSpriteIDFromPos(Common::Point pos) {
 }
 
 
-Common::List<Channel *> Score::getSpriteIntersections(const Common::Rect &r) {
-	Common::List<Channel *> intersections;
-	Common::List<Channel *> appendix;
+Common::Array<Channel *> Score::getSpriteIntersections(const Common::Rect &r) {
+	Common::Array<Channel *> intersections;
+	Common::Array<Channel *> appendix;
 
 	for (uint i = 0; i < _channels.size(); i++) {
 		if (!_channels[i]->isEmpty() && !r.findIntersectingRect(_channels[i]->getBbox()).isEmpty()) {
@@ -1706,6 +1705,32 @@ uint16 Score::getSpriteIdByMemberId(CastMemberID id) {
 	return 0;
 }
 
+Common::Rect Score::getChannelDirtyRectBounds() {
+	// if we've just started a new movie, we need to redraw everything.
+	if (_window->_newMovieFirstDraw) {
+		return _window->_window->getInnerDimensions();
+	}
+	Common::Array<Common::Rect> dirtyRects;
+	for (auto &it : _channels) {
+		if (it->_needsDraw) {
+			if (!it->_lastRenderedBbox.isEmpty())
+				dirtyRects.push_back(it->_lastRenderedBbox);
+			Common::Rect bbox = it->getBbox();
+			if (!bbox.isEmpty())
+				dirtyRects.push_back(bbox);
+		}
+	}
+
+	Common::Rect result;
+	if (dirtyRects.size() == 0)
+		return result;
+	result = Common::Rect(dirtyRects.front());
+	for (auto &r : dirtyRects) {
+		result.extend(r);
+	}
+	return result;
+}
+
 bool Score::refreshPointersForCastMemberID(CastMemberID id) {
 	// FIXME: This can be removed once Sprite is refactored to not
 	// keep a pointer to a CastMember.
@@ -1714,7 +1739,6 @@ bool Score::refreshPointersForCastMemberID(CastMemberID id) {
 		if (it->_sprite->_castId == id) {
 			it->_sprite->_cast = nullptr;
 			it->setCast(id);
-			it->_dirty = true;
 			hit = true;
 		}
 	}
@@ -1737,7 +1761,6 @@ bool Score::refreshPointersForCastLib(uint16 castLib) {
 		if (it->_sprite->_castId.castLib == castLib) {
 			it->_sprite->_cast = nullptr;
 			it->setCast(it->_sprite->_castId);
-			it->_dirty = true;
 			hit = true;
 		}
 	}
@@ -1845,7 +1868,12 @@ void Score::loadFrames(Common::SeekableReadStreamEndian &stream, uint16 version,
 	_frameDataOffset = 0;
 	_maxChannelsUsed = 0;
 
-	if (version < kFileVer400) {
+	if (version < kFileVer100) {
+		_framesStreamSize = _framesStream->readUint32();
+		_numChannelsDisplayed = 24;
+
+		_firstFramePosition = _framesStream->pos();
+	} else if (version < kFileVer400) {
 		_framesStreamSize = _framesStream->readUint32();
 		_numChannelsDisplayed = 30;
 

@@ -19,12 +19,17 @@
  *
  */
 
+#include "mads/madsv2/core/config.h"
 #include "mads/madsv2/core/game.h"
+#include "mads/madsv2/core/inter.h"
 #include "mads/madsv2/core/kernel.h"
+#include "mads/madsv2/core/pal.h"
 #include "mads/madsv2/core/player.h"
 #include "mads/madsv2/core/room.h"
+#include "mads/madsv2/core/sound.h"
 #include "mads/madsv2/dragonsphere/global.h"
 #include "mads/madsv2/dragonsphere/rooms/section6.h"
+#include "mads/madsv2/dragonsphere/mads/sounds.h"
 
 namespace MADS {
 namespace MADSV2 {
@@ -32,16 +37,12 @@ namespace Dragonsphere {
 namespace Rooms {
 
 extern void room_601_preload();
-extern void room_602_preload();
 extern void room_603_preload();
 extern void room_604_preload();
 extern void room_605_preload();
 extern void room_606_preload();
 extern void room_607_preload();
-extern void room_608_preload();
 extern void room_609_preload();
-extern void room_610_preload();
-extern void room_611_preload();
 extern void room_612_preload();
 extern void room_613_preload();
 extern void room_614_preload();
@@ -51,12 +52,110 @@ void section_6_init() {
 }
 
 void section_6_walker() {
+	char temp_buf[80];
+	int dark_background = true;
+	int no_walker = false;
+
+	sound_queue(N_NoiseFade);
+
+	Common::strcpy_s(temp_buf, player.series_name);
+
+	if (new_room == 603 || new_room == 601) {
+		dark_background = false;
+	}
+
+	if (no_walker || global[no_load_walker]) {
+		player.series_name[0] = 0;
+	} else if (!player.force_series) {
+		if (global[player_persona] == PLAYER_IS_KING) {
+			Common::strcpy_s(player.series_name, "KG");
+		} else {
+			Common::strcpy_s(player.series_name, "PD");
+		}
+		if (dark_background)
+			Common::strcat_s(player.series_name, "D");
+	}
+
+	if (strcmp(temp_buf, player.series_name) != 0)
+		player.walker_must_reload = true;
+
+	player.scaling_velocity = true;
 }
 
 void section_6_interface() {
+	RGBcolor text_color = { 43, 29, 15 };
+
+	Common::strcpy_s(kernel.interface, kernel_interface_name(6));
+	pal_change_color(INTER_MESSAGE_COLOR, 56, 47, 32);
 }
 
 void section_6_music() {
+	if (sound_off) {
+		sound_queue(N_NoiseOff);
+	}
+
+	if (music_off) {
+		sound_queue(N_MusicFade);
+		goto done;
+	}
+
+	switch (new_room) {
+	case 601:
+		if (global[vines_have_player]) {
+			sound_play(N_EerieSounds);
+		} else {
+			sound_play(N_BackgroundMus);
+		}
+		break;
+
+	case 603:
+		sound_play(N_Bk603Music);
+		break;
+
+	case 604:
+		sound_play(N_Bk604Music);
+		break;
+
+	case 605:
+		if (global[rope_is_alive]) {
+			sound_play(N_Bk605WithRope);
+		} else {
+			sound_play(N_Bk605Music);
+		}
+		break;
+
+	case 606:
+	case 607:
+		sound_play(N_Bk606Music);
+		break;
+
+	case 609:
+		sound_play(N_Bk609Music);
+		break;
+
+	case 612:
+		sound_play(N_Bk612Music);
+		break;
+
+	case 613:
+		sound_play(N_WaterFlows);
+		break;
+
+	case 614:
+		if (global[wizard_dead]) {
+			sound_play(N_BackgroundMus);
+		} else {
+			sound_play(N_Bk614Music);
+		}
+		break;
+
+	default:
+		sound_play(N_BackgroundMus);
+		break;
+	}
+
+done:
+	;
 }
 
 void section_6_constructor() {
@@ -71,9 +170,6 @@ void section_6_constructor() {
 	switch (new_room) {
 	case 601:
 		room_preload_code_pointer = room_601_preload;
-		break;
-	case 602:
-		room_preload_code_pointer = room_602_preload;
 		break;
 	case 603:
 		room_preload_code_pointer = room_603_preload;
@@ -90,17 +186,8 @@ void section_6_constructor() {
 	case 607:
 		room_preload_code_pointer = room_607_preload;
 		break;
-	case 608:
-		room_preload_code_pointer = room_608_preload;
-		break;
 	case 609:
 		room_preload_code_pointer = room_609_preload;
-		break;
-	case 610:
-		room_preload_code_pointer = room_610_preload;
-		break;
-	case 611:
-		room_preload_code_pointer = room_611_preload;
 		break;
 	case 612:
 		room_preload_code_pointer = room_612_preload;

@@ -19,18 +19,22 @@
  *
  */
 
+#include "audio/audiostream.h"
 #include "common/file.h"
-#include "mads/madsv2/core/cycle.h"
 #include "mads/madsv2/core/env.h"
 #include "mads/madsv2/core/himem.h"
+#include "mads/madsv2/core/kernel.h"
 #include "mads/madsv2/core/matte.h"
 #include "mads/madsv2/core/mcga.h"
 #include "mads/madsv2/core/mouse.h"
 #include "mads/madsv2/core/pack.h"
 #include "mads/madsv2/core/pal.h"
+#include "mads/madsv2/core/speech.h"
 #include "mads/madsv2/core/tile.h"
 #include "mads/madsv2/core/timer.h"
 #include "mads/madsv2/animview/animview.h"
+#include "mads/madsv2/animview/anim_timer.h"
+#include "mads/madsv2/animview/functions.h"
 #include "mads/madsv2/engine.h"
 
 namespace MADS {
@@ -40,157 +44,337 @@ namespace AnimView {
 #define MADS_FORMAT(BUF, SRC) Common::strcpy_s(BUF, in_mads_mode ? "*" : ""); \
 	Common::strcat_s(BUF, SRC)
 
-struct AnimEntry {
-	char name[16];
-	uint8 bg_load_status;
-	uint8 sound_mode;
-	uint8 show_bars;
-	uint8 fx;
-};
-constexpr int MAX_ANIM = 40;
 constexpr bool in_mads_mode = true;
 
-static int anim_count;
-static AnimEntry anim_list[MAX_ANIM];
-static uint8 background_load_status;
-static int16 sound_interrupts_mode;
-static bool show_white_bars;
+Audio::AudioStream *speechStream;
+int speechFlags;
+int current_error_code;
+int currentFrame;
+int minFrame, maxFrame;
+bool foundSeries;
+int seriesMinFrame, seriesMaxFrame;
+bool timerFlag1;
+bool peelFlag;
+int runCtr1;
+int runFx;
+long timer1, timer2;
+AnimPtr current_anim;
+AnimInterPtr current_anim_inter;
+int speechIndex;
+int speechLoops;
+int runVal6, runVal7, runVal8;
+bool loadFontFlag;
+int imageFrame;
+CycleList anim_cycle_list;
+bool has_cycles;
+int currentViewX, currentViewY;
+
+static const byte FX_TIMES[16] = {
+	0, 110, 110, 64, 64, 64, 64, 64, 64, 64, 64, 0, 0, 0
+};
+
 static int concat_mode;
-static bool resync_timer1, resync_timer2;
-static bool exit_immediately_at_end;
-static bool do_not_clear_screen;
 static bool has_sound_file;
 static char sound_file_name[80];
+static TileMapHeader picture_map, depth_map;
+static TileResource picture_res, depth_res;
+static Buffer scr_work_orig;
+static Room *room;
+static int viewing_at_y2;
+constexpr int SPEECH_LINES_COUNT = 10;
+static Audio::AudioStream *speech_lines[SPEECH_LINES_COUNT];
+static int speech_lines_count;
+static SeriesPtr animSeries;
+static SpritePageInfoPtr pageInfo;
+static SpritePageTablePtr pageTable;
+static int imageFrame1, imageFrame2;
+static int largeBufferSize;
+static byte *largeBuffer, *largeBufferEnd;
+static byte *largeBuffer1, *largeBuffer2, *largeBuffer3;
+static bool seriesFlag1, seriesFlag2;
+static bool hasAnimInited;
+static int runVal1, runVal2, runVal3;
+static int runVal12;
+static int error_code;
+static bool wait_for_music_at_end;
 
 /**
  * Initializes animview global variables
  */
 static void init_globals() {
-	anim_count = 0;
-	background_load_status = 0xff;
-	sound_interrupts_mode = -1;
-	show_white_bars = true;
+	anim_timer_init();
+	functions_init();
 	concat_mode = 0;
-	resync_timer1 = true;
-	resync_timer2 = false;
-	exit_immediately_at_end = false;
-	do_not_clear_screen = false;
 	has_sound_file = false;
 	*sound_file_name = '\0';
+	memset(&picture_map, 0, sizeof(TileMapHeader));
+	memset(&depth_map, 0, sizeof(TileMapHeader));
+	memset(&picture_res, 0, sizeof(TileResource));
+	memset(&depth_res, 0, sizeof(TileResource));
+	memset(&anim_cycle_list, 0, sizeof(CycleList));
+	memset(&scr_work_orig, 0, sizeof(Buffer));
+	room = nullptr;
+	current_anim = nullptr;
+	current_anim_inter = nullptr;
+	has_cycles = false;
+	viewing_at_y2 = 0;
+	memset(speech_lines, 0, sizeof(speech_lines));
+	speech_lines_count = 0;
+	animSeries = nullptr;
+	pageInfo = nullptr;
+	pageTable = nullptr;
+	foundSeries = false;
+	imageFrame1 = imageFrame2 = seriesMaxFrame = 0;
+	seriesMinFrame = 0;
+	largeBufferSize = 0;
+	largeBuffer = largeBufferEnd = nullptr;
+	largeBuffer1 = largeBuffer2 = nullptr;
+	largeBuffer3 = nullptr;
+	seriesFlag1 = false;
+	seriesFlag2 = true;
+	hasAnimInited = false;
+	minFrame = maxFrame = -1;
+	timer1 = timer2 = 0;
+	runVal1 = 0;
+	runVal2 = runVal3 = -1;
+	speechIndex = speechLoops = runVal6 = 0;
+	runVal7 = runVal8 = 0;
+	speechStream = nullptr;
+	timerFlag1 = false;
+	runVal12 = 0;
+	loadFontFlag = 0;
+	runFx = 0;
+	runCtr1 = 0;
+	currentFrame = 0;
+	peelFlag = false;
+	error_code = current_error_code = 0;
+	wait_for_music_at_end = false;
+	exit_immediately_at_end = false;
+	imageFrame = 0;
+}
+
+static void anim_inter_timer() {
+	error("TODO: Inter anim timer");
 }
 
 /**
- * Adds an animation to the list of .aa files to show in sequence
- * @param name		Animation resource name
+ * Responsible for running a loaded animation
  */
-static void add_anim(const char *name) {
-	static char buf[16];
+static void run_animation(int animIndex) {
+	int ctr;
 
-	if (strlen(name) > 0 && anim_count < MAX_ANIM) {
-		Common::strcpy_s(buf, name);
-		if (!strchr(buf, '.'))
-			Common::strcat_s(buf, ".aa");
-
-		Common::strcpy_s(anim_list[anim_count].name, buf);
-		anim_list[anim_count].bg_load_status = background_load_status;
-		anim_list[anim_count].sound_mode = sound_interrupts_mode;
-		anim_list[anim_count].show_bars = show_white_bars;
-		++anim_count;
+	if (!hasAnimInited) {
+		hasAnimInited = true;
+		mouse_set_work_buffer(scr_work.data, scr_work.x);
+		mouse_set_view_port_loc(0, viewing_at_y, scr_work.x, scr_work.y + viewing_at_y - 1);
+		mouse_set_view_port(0, 0);
 	}
-}
 
-/**
- * Parses a flag from an animation line in the resource file
- */
-static void flag_parse(const char *param) {
-	switch (tolower(*param++)) {
-	case 'o':
-		// Specify opening special effect
-		assert(anim_count < MAX_ANIM);
-		if (*param == ':')
-			anim_list[anim_count].fx = atoi(param + 1);
-		break;
+	auto &screen = *g_engine->getScreen();
+	if (viewing_at_y && anim_list[animIndex].show_bars) {
+		screen.hLine(0, viewing_at_y - 2, 319, 253);
+		screen.hLine(0, viewing_at_y + scr_work.y + 1, 319, 253);
+	} else if (viewing_at_y) {
+		screen.hLine(0, viewing_at_y - 2, 319, 0);
+		screen.hLine(0, viewing_at_y + scr_work.y + 1, 319, 0);
+	}
 
-	case 'r':
-		// -r[:abn] Resynch timer (always, beginning, never)
-		if (*param == ':') {
-			switch (tolower(*++param)) {
-			case 'n':
-				resync_timer1 = true;
-				resync_timer2 = false;
-				break;
-			case 'a':
-				resync_timer1 = false;
-				break;
-			case 'b':
-				resync_timer1 = true;
-				resync_timer2 = true;
-				break;
-			default:
-				break;
+	buffer_fill(scr_work, 0);
+
+	imageFrame = 0;
+	currentViewX = currentViewY = -1;
+	current_error_code = error_code;
+
+	if (minFrame == -1)
+		minFrame = 0;
+	if (maxFrame == -1)
+		maxFrame = current_anim->num_frames;
+
+	minFrame = CLIP<int>(minFrame, 0, current_anim->num_frames);
+	maxFrame = CLIP<int>(maxFrame, 0, current_anim->num_frames);
+	if (maxFrame < minFrame)
+		maxFrame = minFrame;
+
+	if (animIndex == 0)
+		timer1 = timer_read();
+
+	speechIndex = -1;
+	loadFontFlag = (current_anim->load_flags & AA_LOAD_FONT) != 0;
+
+	speechLoops = runVal6 = runVal7 = runVal8 = 0;
+	speechStream = 0;
+	timerFlag1 = false;
+
+	if (current_anim->background_type == AA_INTERFACE) {
+		currentFrame = -1;
+		runVal12 = -1;
+		runFx = 0;
+
+		for (ctr = 0; ctr < current_anim_inter->num_frames; ++ctr)
+			current_anim_inter->segment[ctr].counter = -1;
+
+		image_inter_marker = 1;
+		image_inter_list[0].flags = -2;
+		image_inter_list[0].segment_id = KERNEL_SEGMENT_SYSTEM;
+
+		timer_activate_low_priority(anim_inter_timer);
+
+	} else {
+		timer1 += current_anim->frame[minFrame].ticks;
+		runFx = anim_list[animIndex].fx;
+		currentFrame = minFrame;
+		runCtr1 = 0;
+		peelFlag = current_anim->misc_peel_x || current_anim->misc_peel_y;
+		timer2 = timer1;
+		timer_activate_low_priority(anim_timer);
+	}
+
+	// Main animation loop
+	while (currentFrame < maxFrame && !current_error_code) {
+		if (speechStream) {
+			if (current_anim->load_flags & AA_LOAD_SPEECH) {
+				//char speechName[80];
+				//MADS_FORMAT(speechName, current_anim->speech_file);
+
+				g_engine->playSpeech(speechStream);
+				//speech_play(speechName, speechStream);
 			}
+
+			timerFlag1 = true;
+			speechStream = 0;
 		}
-		break;
 
-	case 'w':
-		// Toggle white bars on or off
-		show_white_bars = !show_white_bars;
-		break;
+		if (foundSeries && seriesMinFrame < seriesMaxFrame) {
+			// Get the memory needed for the page, rounded up
+			int frameIndex = seriesMinFrame - imageFrame1 + 2;
+			int pageMemNeeded = (pageTable[frameIndex - 1].memory_needed & ~15) + 16;
+			bool flag1 = false;
 
-	case 'x':
-		// Exit immediately after last frame
-		exit_immediately_at_end = true;
-		break;
-
-	case 'y':
-		// Do not clear screen at start
-		do_not_clear_screen = true;
-		break;
-
-	default:
-		error("Unsupported animview flag - %c", *param);
-		break;
-	}
-}
-
-/**
- * Reads the contents of the resource file stream, and adds
- * entries to the anim_list for what to display
- */
-static void read_resource(Common::SeekableReadStream *src) {
-	while (!src->eos()) {
-		Common::String line = src->readLine();
-		line.trim();
-		if (line.empty())
-			continue;
-
-		// Handle any flags at the start of the line
-		const char *lineP = line.c_str();
-		while (strchr("/-", *lineP)) {
-			// It's a flag
-			++lineP;
-			const char *switchEnd = strchr(lineP, ' ');
-			Common::String param;
-
-			if (switchEnd) {
-				// There's more line after the flag
-				param = Common::String(lineP, switchEnd);
-				for (lineP = switchEnd; *lineP == ' '; ++lineP) {
+			if (!seriesFlag1) {
+				if ((largeBufferEnd - largeBuffer2) <= pageMemNeeded) {
+					flag1 = true;
+				} else {
+					seriesFlag1 = true;
+					largeBuffer2 = largeBuffer;
 				}
-			} else {
-				// This is the last flag of the line
-				param = Common::String(lineP);
-				lineP = lineP + strlen(lineP);
+			}
+			if (seriesFlag1) {
+				if ((largeBuffer2 - largeBuffer1) <= pageMemNeeded)
+					flag1 = true;
 			}
 
-			flag_parse(param.c_str());
+			if (seriesFlag2 && currentFrame <= seriesMinFrame && !picture_map.one_to_one)
+				flag1 = false;
+
+			if (flag1)
+				seriesFlag2 = false;
+
+			if (flag1) {
+				(void)sprite_data_load(animSeries, frameIndex, largeBuffer2);
+				largeBuffer2 += pageMemNeeded;
+				++seriesMinFrame;
+			}
+
+			while (((speechIndex == -1 && currentFrame > imageFrame2) ||
+					(speechIndex != -1 && current_anim->speech[speechIndex].first_frame > imageFrame2)) &&
+					imageFrame2 < seriesMaxFrame) {
+				frameIndex = imageFrame2 - imageFrame1 + 1;
+				pageMemNeeded = (pageTable[frameIndex - 1].memory_needed & ~15) + 16;
+				largeBuffer1 += pageMemNeeded;
+				++imageFrame2;
+
+				if (animSeries->index[frameIndex].data != largeBuffer1) {
+					largeBuffer1 = largeBuffer;
+					seriesFlag1 = false;
+
+					if (seriesMinFrame < imageFrame2)
+						largeBuffer2 = largeBuffer;
+				}
+			}
 		}
 
-		// As long as we're not at the end of the line, any remainder
-		// should be the name of the animation resource to play
-		if (*lineP)
-			add_anim(lineP);
+		if (g_engine->shouldQuit())
+			current_error_code = 1;
+		if (g_engine->hasPendingKey()) {
+			g_engine->flushKeys();
+			error_code = 1;
+			current_error_code = 1;
+		}
+		if (mouse_get_status(&mouse_x, &mouse_y)) {
+			current_error_code = -1;
+			error_code = 3;
+		}
+
+		// Animation loop delay
+		g_system->delayMillis(10);
 	}
+
+	cycling_threshold = 3;
+	timer_activate_low_priority(cycling_active ? cycle_colors : nullptr);
+
+	if (!current_error_code && current_anim->misc_slow_fade) {
+		timer_activate_low_priority(nullptr);
+		timer2 = timer_read();
+		bool fadeFlag = true;
+
+		while (fadeFlag && !current_error_code) {
+			do {
+				// Brief pause
+				g_system->delayMillis(10);
+
+				// Check for any keypress
+				if (g_engine->hasPendingKey()) {
+					g_engine->flushKeys();
+					error_code = 1;
+					current_error_code = 1;
+				}
+
+				if (g_engine->shouldQuit())
+					current_error_code = 1;
+			} while (timer_read() < timer2);
+
+			if (peelFlag) {
+				anim_peel();
+				matte_frame(0, 0);
+			}
+
+			fadeFlag = anim_fade(&cycling_palette, current_anim->misc_slow_fade);
+			mcga_setpal(&cycling_palette);
+			timer2 += current_anim->misc_peel_rate;
+		}
+	}
+
+	if ((animIndex == (anim_count - 1)) &&
+			(wait_for_music_at_end || !exit_immediately_at_end)) {
+		while (current_error_code == 0) {
+			// Check for any keypress or mouse clicks
+			if (g_engine->hasPendingKey()) {
+				g_engine->flushKeys();
+				error_code = 1;
+				current_error_code = 1;
+			}
+
+			int mouseX = 0, mouseY = 0;
+			if (mouse_get_status(&mouseX, &mouseY))
+				current_error_code = 1;
+
+			if (g_engine->shouldQuit())
+				current_error_code = 1;
+
+			if (!exit_immediately_at_end)
+				continue;
+			if (g_engine->_soundManager->command(8))
+				continue;
+			current_error_code = 1;
+		}
+	}
+
+	// Teardown for final animation
+	if (animIndex == (anim_count - 1) || current_error_code) {
+		timer_activate_low_priority(nullptr);
+	}
+
+	g_engine->stopSpeech();
 }
 
 /**
@@ -198,12 +382,13 @@ static void read_resource(Common::SeekableReadStream *src) {
  * in sequence
  */
 static void animate() {
-	char buf[80], speech_name[80];
+	char buf[80];
 	AnimFile anim_in;
-	int count, series_ctr;
+	int count, series_ctr, ctr;
 	int soundLoadFlag = 0;
 	bool foundSound;
-	int oldMode;
+	int imageIndex;
+	static int packIndex = 0;
 
 	himem_startup();
 	(void)tile_setup();
@@ -215,16 +400,17 @@ static void animate() {
 
 	timer_install();
 	matte_init(-1);
+	cycle_list.num_cycles = 0;
 
 	// Preload resources used by the animations
-	for (count = 0; count < anim_count && !g_engine->shouldQuit(); ++count) {
+	for (count = 0; count < anim_count; ++count) {
 		AnimEntry &entry = anim_list[count];
 
 		MADS_FORMAT(buf, entry.name);
 		himem_preload_series(buf, 0);
 
 		if (anim_get_header_info(buf, &anim_in))
-			return;
+			continue;
 
 		// Preload resources used by the animation
 		if (anim_in.load_flags & AA_LOAD_FONT) {
@@ -247,6 +433,9 @@ static void animate() {
 				himem_preload_series(buf, 0);
 			}
 		}
+
+		if (g_engine->shouldQuit())
+			error_code = 1;
 	}
 
 	if (!do_not_clear_screen) {
@@ -255,7 +444,7 @@ static void animate() {
 
 	speech_init();
 
-	for (count = 0; count < anim_count; ++count) {
+	for (count = 0; count < anim_count && !error_code; ++count) {
 		MADS_FORMAT(buf, anim_list[count].name);
 
 		foundSound = false;
@@ -264,27 +453,152 @@ static void animate() {
 			if (anim_get_sound_info(buf, sound_file_name, &soundLoadFlag))
 				goto done;
 
-			if (soundLoadFlag) {
-				oldMode = concat_mode;
-				*speech_name = '\0';
-				MADS_FORMAT(speech_name, sound_file_name);
-				env_get_path(sound_file_name, speech_name);
-				concat_mode = oldMode;
+			Common::String name(sound_file_name);
+			has_sound_file = !name.empty() && Common::isDigit(name.lastChar());
+		}
 
-				// Original did setup of sound card driver type here. Not needed for ScummVM
+		if (has_sound_file) {
+			// Initialize the sound driver
+			int section = sound_file_name[strlen(sound_file_name) - 1] - '0';
+			g_engine->_soundManager->init(section);
+		}
 
-				has_sound_file = Common::File::exists(sound_file_name);
+		if (anim_list[count].bg_load_status) {
+			buffer_free(&scr_depth);
+			buffer_free(&scr_orig);
+			tile_map_free(&picture_map);
+			tile_map_free(&depth_map);
+
+			if (room) {
+				pal_deallocate(room->color_handle);
+				mem_free(room);
+			} else {
+				pal_init(1, 8);
+				mouse_hard_cursor_mode(2, &master_palette);
 			}
 		}
 
-		if (has_sound_file)
-			// TODO: Load proper driver number
-			g_engine->_soundManager->init(9);
+		int loadFlags = anim_list[count].bg_load_status ? ANIM_LOAD_BACKGROUND : 0;
+		current_anim = anim_load(buf, &scr_orig, &scr_depth,
+			&picture_map, &depth_map, &picture_res, &depth_res, &room,
+			&anim_cycle_list, loadFlags);
+		scr_inter_orig = scr_orig;
 
-		//Anim *current_anim = anim_load()
+		if (!current_anim)
+			error("Could not load anim for - %s", buf);
+
+		tile_pan(&picture_map, current_anim->frame->view_x, current_anim->frame->view_y);
+		tile_pan(&depth_map, current_anim->frame->view_x, current_anim->frame->view_y);
+
+		if (current_anim->misc_any_packed) {
+			packIndex = current_anim->misc_packed_series;
+			animSeries = current_anim->series[packIndex];
+			pageInfo = animSeries->page_info;
+			pageTable = animSeries->page_table;
+			mem_free(animSeries->arena);
+			animSeries->arena = nullptr;
+		}
+
+		has_cycles = anim_cycle_list.num_cycles > 0;
+		current_anim_inter = (AnimInterPtr)current_anim;
+
+		int height = (scr_orig.y == 200) ? 200 : 156;
+		buffer_init(&scr_work, 320, height);
+		scr_inter = scr_work;
+		assert(scr_work.data);
+
+		viewing_at_y = (height == 200) ? 0 : (200 - height) / 2;
+		viewing_at_y2 = viewing_at_y;
+
+		buffer_fill(scr_work, 0);
+
+		// Speech handling
+		speech_lines_count = 0;
+		for (ctr = 0; ctr < current_anim->num_speech; ++ctr) {
+			Speech &speech = current_anim->speech[ctr];
+			speech.speech = nullptr;
+
+			if ((speech.flags & 0x2000) && speech_lines_count < SPEECH_LINES_COUNT) {
+				// Load the speech audio
+				MADS_FORMAT(buf, current_anim->speech_file);
+				speech_lines[speech_lines_count] = speech.speech =
+					speech_load(buf, speech.resource_id);
+
+				++speech_lines_count;
+			}
+		}
+
+		if (current_anim->misc_any_packed) {
+			largeBufferSize = 0xfffff;	// Aribitrarily large value
+			largeBuffer = (byte *)mem_get(largeBufferSize);
+			assert(largeBuffer);
+
+			largeBufferEnd = largeBuffer + largeBufferSize - 1;
+			largeBuffer1 = largeBuffer2 = largeBuffer;
+
+			foundSeries = true;
+			imageIndex = -1;
+			seriesFlag1 = false;
+
+			for (ctr = 0; ctr < current_anim->num_images; ++ctr) {
+				int seriesId = current_anim->series_id[packIndex];
+				if (current_anim->image[ctr].series_id == seriesId) {
+					imageIndex = ctr;
+					break;
+				}
+			}
+
+			if (imageIndex < 0)
+				foundSeries = false;
+
+			if (foundSeries) {
+				Image &img = current_anim->image[imageIndex];
+				imageFrame1 = imageFrame2 = img.flags;
+				seriesMinFrame = img.flags - 1;
+				seriesMaxFrame = img.flags + img.sprite_id - 1;
+			}
+		}
+
+		// Run the animation
+		run_animation(count);
+
+		for (auto &line : speech_lines) {
+			mem_free(line);
+			line = nullptr;
+		}
+
+		mem_free(largeBuffer);
+		largeBuffer = nullptr;
+
+		minFrame = maxFrame = -1;
+
+		// Free the allocated sound driver
+		g_engine->_soundManager->closeDriver();
+		has_sound_file = false;
+
+		// Free surface
+		buffer_free(&scr_work);
+		anim_unload(current_anim);
+		current_anim = nullptr;
+
+		if (g_engine->shouldQuit())
+			error_code = 1;
 	}
 done:
-	;
+	timer_activate_low_priority(nullptr);
+	buffer_free(&scr_work);
+	anim_unload(current_anim);
+	buffer_free(&scr_depth);
+	buffer_free(&scr_orig);
+	tile_map_free(&picture_map);
+	tile_map_free(&depth_map);
+
+	if (room)
+		mem_free(room);
+	timer_set_sound_flag(false);
+
+	timer_remove();
+	himem_shutdown();
 }
 
 void animview_main(const char *resName) {
@@ -294,6 +608,7 @@ void animview_main(const char *resName) {
 
 	pack_enable_pfab_explode();
 	(void)env_verify();
+	mouse_hide();
 
 	Common::strcpy_s(name, resName);
 	if (*name == '@') {

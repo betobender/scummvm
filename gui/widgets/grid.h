@@ -180,6 +180,7 @@ protected:
 	static const int kDragThreshold = 5;
 
 	FluidScroller *_fluidScroller;
+	GridItemWidget *_highlightedItem = nullptr;
 
 public:
 	int				_gridItemHeight;
@@ -252,6 +253,7 @@ public:
 
 	bool wantsFocus() override { return true; }
 
+	void lostFocusWidget() override;
 	bool handleKeyDown(Common::KeyState state) override;
 	bool handleKeyUp(Common::KeyState state) override;
 	void openTrayAtSelected();
