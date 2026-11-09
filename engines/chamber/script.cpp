@@ -30,6 +30,7 @@
 #include "chamber/cga.h"
 #include "chamber/ega.h"
 #include "chamber/ega_resource.h"
+#include "chamber/amiga.h"
 #include "chamber/cursor.h"
 #include "chamber/portrait.h"
 #include "chamber/input.h"
@@ -59,19 +60,24 @@ byte *script_ptr, *script_end_ptr;
 byte *script_stack[5 * 2];
 byte **script_stack_ptr = script_stack;
 
-void *script_vars[kScrPools_MAX] = {
-	&script_word_vars,
-	&script_word_vars,
-	&script_byte_vars,
-	inventory_items,
-	zones_data,
-	pers_list,
-	inventory_items,
-	inventory_items + kItemZapstik1 - 1,
-	pers_list
-};
+void *script_vars[kScrPools_MAX] = {};
 
 extern void askDisk2(void);
+
+
+void initScriptVars() {
+	// Late init of global array entries to avoid having a global constructor
+
+	script_vars[0] = &script_word_vars;
+	script_vars[1] = &script_word_vars;
+	script_vars[2] = &script_byte_vars;
+	script_vars[3] = inventory_items;
+	script_vars[4] = zones_data;
+	script_vars[5] = pers_list;
+	script_vars[6] = inventory_items;
+	script_vars[7] = inventory_items + kItemZapstik1 - 1;
+	script_vars[8] = pers_list;
+}
 
 /*
 Get next random byte value
@@ -110,7 +116,7 @@ uint16 CMD_TRAP(void) {
 }
 
 uint16 SCR_TRAP(void) {
-	warning("SCR TRAP 0x%02X @ 0x%lX", *script_ptr, script_ptr - templ_data);
+	warning("SCR TRAP 0x%02X @ 0x%X", *script_ptr, (uint32)(script_ptr - templ_data));
 	promptWait();
 	for (;;) ;
 	return 0;
@@ -378,14 +384,12 @@ uint16 SCR_2C_Wait4(void) {
 
 /*
 Wait for a specified number of seconds or a keypress
-TODO: Always waits for a 4 seconds due to a bug?
 */
 uint16 SCR_2D_Wait(void) {
 	byte seconds;
 	script_ptr++;
 	seconds = *script_ptr++;
-	(void)seconds;
-	wait(4);    /*TODO: looks like a bug?*/
+	wait(seconds);
 	return 0;
 }
 
@@ -671,7 +675,7 @@ uint16 SCR_5_DrawPortraitLiftRight(void) {
 		return 0;
 
 	/*TODO: use local args instead of globals*/
-	if (g_vm->_videoMode == Common::kRenderEGA)
+	if (isEgaLikeRenderer())
 		g_vm->_renderer->animLiftToRight(width, cur_image_pixels + width * 4 - 4, width, 1, height, SCREENBUFFER, g_vm->_renderer->calcXY_p(x, y));
 	else
 		g_vm->_renderer->animLiftToRight(width, cur_image_pixels + width - 1, width, 1, height, SCREENBUFFER, g_vm->_renderer->calcXY_p(x, y));
@@ -868,7 +872,7 @@ uint16 SCR_D_DrawPortraitDotEffect(void) {
 	if (!drawPortrait(&script_ptr, &x, &y, &width, &height))
 		return 0;
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
+	if (isEgaLikeRenderer()) {
 		uint16 pw = width * 4;
 		cur_image_end = pw * height;
 		uint16 baseOfs = g_vm->_renderer->calcXY_p(x, y);
@@ -878,8 +882,13 @@ uint16 SCR_D_DrawPortraitDotEffect(void) {
 			uint16 py = offs / pw;
 			target[baseOfs + py * EGA_BYTES_PER_LINE + px] = cur_image_pixels[offs];
 
-			if (count % 20 == 0)
+			if (count % 20 == 0) {
 				g_vm->_renderer->blitToScreen(x * 4, y, pw, height);
+				pollInput();
+				g_system->updateScreen();
+				if (g_vm->_shouldQuit)
+					return 0;
+			}
 
 			offs += step;
 			if (offs > cur_image_end)
@@ -903,8 +912,15 @@ uint16 SCR_D_DrawPortraitDotEffect(void) {
 	for (offs = 0; offs != cur_image_end;) {
 		target[g_vm->_renderer->calcXY_p(x + offs % cur_image_size_w, y + offs / cur_image_size_w)] = cur_image_pixels[offs]; // TODO check this
 
-		if (count % 5 == 0)
+		if (count % 5 == 0) {
 			g_vm->_renderer->blitToScreen(offs, g_vm->_screenPPB, 1);
+			if ((count % 100) == 0) {
+				pollInput();
+				g_system->updateScreen();
+				if (g_vm->_shouldQuit)
+					return 0;
+			}
+		}
 
 		offs += step;
 		if (offs > cur_image_end)
@@ -942,7 +958,7 @@ uint16 drawPortraitZoomed(byte **params) {
 	zwidth = *((*params)++);
 	zheight = *((*params)++);
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
+	if (isEgaLikeRenderer()) {
 		/*EGA can't zoom: draw at original size; dirty rect already has correct dimensions from drawPortrait*/
 		g_vm->_renderer->zoomImage(cur_image_pixels, cur_image_size_w, cur_image_size_h, cur_image_size_w, cur_image_size_h, frontbuffer, cur_image_offs);
 	} else {
@@ -991,7 +1007,7 @@ uint16 SCR_19_HidePortraitLiftLeft(void) {
 
 	/*TODO: This originally was done by reusing door sliding routine*/
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
+	if (isEgaLikeRenderer()) {
 		offs += 4;
 		while (--width)
 			g_vm->_renderer->hideScreenBlockLiftToLeft(1, SCREENBUFFER, backbuffer, width, height, SCREENBUFFER, offs);
@@ -1052,7 +1068,7 @@ uint16 SCR_1A_HidePortraitLiftRight(void) {
 
 	/*TODO: This originally was done by reusing door sliding routine*/
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
+	if (isEgaLikeRenderer()) {
 		offs = g_vm->_renderer->calcXY_p(x + width - 2, y);
 		while (--width)
 			g_vm->_renderer->hideScreenBlockLiftToRight(1, SCREENBUFFER, backbuffer, width, height, SCREENBUFFER, offs);
@@ -1110,8 +1126,14 @@ uint16 SCR_1B_HidePortraitLiftUp(void) {
 		return 0;
 	}
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
-		g_vm->_renderer->copyScreenBlock(backbuffer, width, height, SCREENBUFFER, offs);
+	if (isEgaLikeRenderer()) {
+		offs = g_vm->_renderer->calcXY_p(x, y + 1);
+		while (--height)
+			g_vm->_renderer->hideScreenBlockLiftToUp(1, SCREENBUFFER, backbuffer, width, height, SCREENBUFFER, offs);
+		/*hide topmost line*/
+		offs -= EGA_BYTES_PER_LINE;
+		memcpy(SCREENBUFFER + offs, backbuffer + offs, width * 4);
+		g_vm->_renderer->blitToScreen(offs % EGA_BYTES_PER_LINE, offs / EGA_BYTES_PER_LINE, width * 4, 1);
 		return 0;
 	}
 
@@ -1151,8 +1173,14 @@ uint16 SCR_1C_HidePortraitLiftDown(void) {
 		return 0;
 	}
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
-		g_vm->_renderer->copyScreenBlock(backbuffer, width, height, SCREENBUFFER, offs);
+	if (isEgaLikeRenderer()) {
+		offs = g_vm->_renderer->calcXY_p(x, y + height - 2);
+		while (--height)
+			g_vm->_renderer->hideScreenBlockLiftToDown(1, SCREENBUFFER, backbuffer, width, height, SCREENBUFFER, offs);
+		/*hide bottommost line*/
+		offs += EGA_BYTES_PER_LINE;
+		memcpy(SCREENBUFFER + offs, backbuffer + offs, width * 4);
+		g_vm->_renderer->blitToScreen(offs % EGA_BYTES_PER_LINE, offs / EGA_BYTES_PER_LINE, width * 4, 1);
 		return 0;
 	}
 
@@ -1411,7 +1439,7 @@ void drawStars(star_t *stars, int16 iter, byte *target) {
 		short z, x, y;
 		byte pixel, mask;
 
-		if (g_vm->_videoMode == Common::kRenderEGA)
+		if (isEgaLikeRenderer())
 			target[stars->ofs] = 0;
 		else
 			target[stars->ofs] &= stars->mask;
@@ -1435,7 +1463,7 @@ void drawStars(star_t *stars, int16 iter, byte *target) {
 			continue;
 		}
 
-		if (g_vm->_videoMode == Common::kRenderEGA) {
+		if (isEgaLikeRenderer()) {
 			stars->ofs = g_vm->_renderer->calcXY_p(x, y);
 			pixel = (stars->z < 0xE00) ? 15 : 8;
 			stars->pixel = pixel;
@@ -1482,8 +1510,10 @@ uint16 SCR_26_GameOver(void) {
 	script_byte_vars.zone_index = 135;
 
 	/*reload background*/
-	while (!loadFond())
+	Graphics::Surface *fond;
+	while (!(fond = loadFond()))
 		askDisk2();
+	delete fond;
 
 	jaggedZoom(backbuffer, frontbuffer);
 
@@ -1518,6 +1548,14 @@ If go through a door, play door's opening animation
 */
 uint16 SCR_42_LoadZone(void) {
 	byte index;
+	bool door_animated = false;
+	// Freeze the ordeal timer (timer_ticks2) while we load the zone and play the
+	// room transition. These are far slower under ScummVM than on DOS and would
+	// otherwise bleed real seconds into the one-hour ordeal budget. timer_ticks
+	// (animation pacing) keeps running. Save/restore so we don't unpause an
+	// already-paused state (e.g. a zone load during the game-over sequence).
+	byte saved_paused = script_byte_vars.game_paused;
+	script_byte_vars.game_paused = 1;
 
 	script_ptr++;
 	index = *script_ptr++;
@@ -1530,6 +1568,7 @@ uint16 SCR_42_LoadZone(void) {
 			script_byte_vars.last_door = script_byte_vars.cur_spot_flags & 7;
 		else if ((script_byte_vars.cur_spot_flags & ((SPOTFLG_20 | SPOTFLG_10 | SPOTFLG_8))) == SPOTFLG_8) {
 			skip_zone_transition = 1;
+			door_animated = true;
 			animRoomDoorOpen(script_byte_vars.cur_spot_idx);
 			script_byte_vars.last_door = script_byte_vars.cur_spot_flags & 7;
 		} else
@@ -1537,6 +1576,15 @@ uint16 SCR_42_LoadZone(void) {
 	}
 	beforeChangeZone(index);
 	changeZone(index);
+
+	// End any in-flight interaction when going through a door: an Aspirant trade
+	// can still be mid-flight (runCommand ScriptRerun loop, CurrentPers still on
+	// the old room's actor), so abort the chain and drop the stale actor here.
+	// prepareVorts/Turkey/Aspirant below repopulate CurrentPers. Done here, not in
+	// changeZone(), since SCR_25_ChangeZoneOnly's in-place swaps must keep both.
+	the_command = 0;
+	script_vars[kScrPool8_CurrentPers] = pers_list;
+
 	script_byte_vars.zone_area_copy = script_byte_vars.zone_area;
 	script_byte_vars.cur_spot_idx = findInitialSpot();
 	skip_zone_transition |= script_byte_vars.cur_spot_idx;
@@ -1554,6 +1602,11 @@ uint16 SCR_42_LoadZone(void) {
 	prepareAspirant();
 	drawPersons();
 	script_byte_vars.cur_spot_flags = 0;
+
+	if (door_animated)
+		g_vm->_renderer->backBufferToRealFull();
+
+	script_byte_vars.game_paused = saved_paused;
 	return 0;
 }
 
@@ -1591,6 +1644,8 @@ Draw new zone
 */
 uint16 SCR_43_RefreshZone(void) {
 	script_ptr++;
+	// A standalone refresh (not a zone change) should just redraw instantly.
+	skip_zone_transition = 1;
 	refreshZone();
 	return 0;
 }
@@ -1871,11 +1926,6 @@ uint16 SCR_23_HidePortrait(void) {
 	index = *script_ptr++;
 
 	getDirtyRectAndFree(index, &kind, &x, &y, &width, &height, &offs);
-	if (right_button) {
-		g_vm->_renderer->copyScreenBlock(backbuffer, width, height, SCREENBUFFER, offs);
-		return 0;
-	}
-
 	g_vm->_renderer->copyScreenBlock(backbuffer, width, height, SCREENBUFFER, offs);
 
 	return 0;
@@ -2414,7 +2464,7 @@ uint16 SCR_46_DeProfundisLowerHook(void) {
 	script_ptr++;
 
 	/*draw Hook*/
-	sprofs = getPuzzlSprite(96, 140 / 4, 18, &w, &h, &ofs);
+	getPuzzlSprite(96, 140 / 4, 18, &w, &h, &ofs);
 
 	h = 1;
 	y = 15;
@@ -2801,6 +2851,8 @@ Copy backbuffer to screen, with added vertical mirror
 void ShowMirrored(uint16 h, uint16 ofs) {
 	uint16 x, ofs2 = ofs;
 
+	bool egaClearAbove = isEgaLikeRenderer();
+
 	/*move 1 line up*/
 	ofs2 ^= g_vm->_line_offset;
 	if ((ofs2 & g_vm->_line_offset) != 0 || g_vm->_line_offset == 0)
@@ -2809,7 +2861,8 @@ void ShowMirrored(uint16 h, uint16 ofs) {
 	while (h--) {
 
 		for (x = 0; x < g_vm->_screenBPL; x++) {
-			frontbuffer[ofs2 + x] = frontbuffer[ofs + x] = backbuffer[ofs + x];
+			frontbuffer[ofs + x] = backbuffer[ofs + x];
+			frontbuffer[ofs2 + x] = egaClearAbove ? 0 : backbuffer[ofs + x];
 			backbuffer[ofs + x] = 0;
 		}
 
@@ -2854,7 +2907,17 @@ static void AnimSaucer(void) {
 	uint16 delay;
 	byte scroll_done = 0;
 
-	memset(backbuffer, 0, sizeof(backbuffer) - 2);  /*TODO: original bug?*/
+	/*Clear the whole buffer: the original's "- 2" left the bottom-right two
+	  bytes (row 199, x=318..319) holding stale pixels. In EGA those are visible
+	  and the scroll-reveal lifts them up the screen as a red dot rising with the
+	  saucer, so clear all of it.*/
+	memset(backbuffer, 0, sizeof(backbuffer));
+	/*EGA: also blank the front buffer. The saucer animation only paints the
+	  saucer region, so leftover sprites from the final game frame (player,
+	  HUD pixels) would otherwise survive on the black backdrop right through to
+	  THE END screen.*/
+	if (isEgaLikeRenderer())
+		memset(frontbuffer, 0, sizeof(SCREENBUFFER));
 	g_vm->_renderer->backBufferToRealFull();
 	g_vm->_renderer->colorSelect(0x30);
 
@@ -2887,6 +2950,8 @@ static void AnimSaucer(void) {
 		height_prev -= (yy - 1);
 
 		/*scale the saucer*/
+		if (isEgaLikeRenderer())
+			memset(backbuffer, 0, 320 * 200);
 		g_vm->_renderer->zoomInplaceXY(cur_image_pixels, width, height, ww, hh, xx, yy, backbuffer);
 
 		baseofs = g_vm->_renderer->calcXY(0, yy);
@@ -2947,7 +3012,7 @@ static void AnimSaucer(void) {
 		height_prev = height_new;
 
 		waitVBlank();
-		for (i = delay; i--;) ; /*TODO: weak delay*/
+		g_system->delayMillis(delay / 1000);
 		delay += 500;
 	}
 }
@@ -2973,13 +3038,25 @@ void theEnd(void) {
 		}
 		while(buttons == 0);
 
-		while (!loadFond())
+		Graphics::Surface *fond;
+		while (!(fond = loadFond()))
 			askDisk2();
+		delete fond;
 		jaggedZoom(backbuffer, frontbuffer);
 		g_vm->_renderer->backBufferToRealFull();
-	} else {
-		while (!loadSplash("PRES.BIN"))
+	} else if (g_vm->getPlatform() == Common::kPlatformAmiga) {
+		Graphics::Surface *fond;
+		while (!(fond = ega_loadFond("PRES.BIN")))
 			askDisk2();
+		delete fond;
+		g_vm->_renderer->colorSelect(AMIGA_NUM_PALETTES - 1);
+		g_vm->_renderer->backBufferToRealFull();
+	} else {
+		Graphics::Surface *splash;
+		while (!(splash = loadSplash("PRES.BIN")))
+			askDisk2();
+		splash->free();
+		delete splash;
 		g_vm->_renderer->backBufferToRealFull();
 	}
 }
@@ -2990,10 +3067,17 @@ uint16 SCR_5B_TheEnd(void) {
 
 	theEnd();
 
-	if (g_vm->getLanguage() == Common::EN_USA)
+	if (g_vm->getLanguage() == Common::EN_USA) {
 		restartGame();
-	else
-		for (;;) ;  /*HANG*/
+	} else {
+		clearButtons();
+		do {
+			pollInputButtonsOnly();
+			g_system->delayMillis(10);
+			g_system->updateScreen();
+		} while (!g_vm->_shouldQuit && buttons == 0);
+		g_vm->_shouldQuit = true;
+	}
 
 	return 0;
 }
@@ -3251,12 +3335,15 @@ uint16 SCR_67_Unused(void) {
 /*
 Play Sfx
 NB! Do nothing in EU PC/CGA version
+EGA (kultega.bin) encodes this as a single operand byte (the sfx index) - unlike
+SCR_69 below which has a trailing pad byte. Reading a pad here too would consume
+the following opcode and desync script_ptr (e.g. eats the setVar that unlocks the
+Scorpion ordeal door, leaving its speech bubble stuck on screen).
 */
 uint16 SCR_68_PlaySfx(void) {
 	byte index;
 	script_ptr++;
 	index = *script_ptr++;
-	script_ptr++;
 	IFGM_PlaySfx(index);
 	return 0;
 }
@@ -3283,6 +3370,15 @@ uint16 SCR_6A_Unused(void) {
 }
 
 /*
+EGA-only opcode (kultega.bin): redraw room statics.
+The CGA script (TEMPL.BIN) uses SCR_13 for the same purpose; the EGA build
+re-numbered this command to 0x6B. Behaviour and operand are identical.
+*/
+uint16 SCR_6B_RedrawRoomStatics(void) {
+	return SCR_13_RedrawRoomStatics();
+}
+
+/*
 Open room's items inventory
 */
 uint16 CMD_1_RoomObjects(void) {
@@ -3299,6 +3395,7 @@ uint16 CMD_2_PsiPowers(void) {
 	/*Psi powers bar*/
 	g_vm->_renderer->backupAndShowSprite(3, 280 / 4, 40);
 	processInput();
+	clearButtons();
 	do {
 		pollInput();
 		g_vm->_renderer->selectCursor(CURSOR_FINGER);
@@ -3346,6 +3443,7 @@ uint16 CMD_4_EnergyLevel(void) {
 		g_vm->_renderer->blitAndWait(cur_image_pixels, cur_image_size_w, cur_image_size_w, cur_image_size_h, SCREENBUFFER, cur_image_offs);
 	}
 
+	clearButtons();
 	do {
 		IFGM_PlaySample(28);
 		animPortrait(1, anim, 10);
@@ -3495,7 +3593,7 @@ void DrawStickyNet(void) {
 
 	/*16x30 is the net sprite size*/
 
-	if (g_vm->_videoMode == Common::kRenderEGA) {
+	if (isEgaLikeRenderer()) {
 		Graphics::Surface *surf = ega_puzzl_res->getSprite(80);
 		uint16 sprW = surf->w;
 		uint16 sprH = surf->h;
@@ -3606,7 +3704,8 @@ uint16 CMD_D_PsiBrainwarp(void) {
 
 
 uint16 CMD_E_PsiZoneScan(void) {
-	byte x, y, w, h;
+	byte y, h;
+	uint16 x, w;
 	uint16 offs;
 
 	if (!ConsumePsiEnergy(1))
@@ -3621,16 +3720,26 @@ uint16 CMD_E_PsiZoneScan(void) {
 
 	IFGM_PlaySample(26);
 
+	// On Amiga the scan tints the whole room green for its duration: the exe
+	// ships a dedicated green stone-ramp delta (19) that no room ever uses
+	if (g_vm->_videoMode == Common::kRenderAmiga)
+		amigaApplyRoomPalette(19);
+
 	offs = g_vm->_renderer->calcXY_p(room_bounds_rect.sx, room_bounds_rect.sy);
 	w = room_bounds_rect.ex - room_bounds_rect.sx;
 	h = room_bounds_rect.ey - room_bounds_rect.sy;
 
+	if (isEgaLikeRenderer())
+		w *= 4;
+
+	byte inv = isEgaLikeRenderer() ? 0x0F : 0xFF;
+
 	for (y = room_bounds_rect.sy; h; y++, h--) {
 		spot_t *spot;
-		for (x = 0; x < w; x++) frontbuffer[offs + x] = ~frontbuffer[offs + x];
+		for (x = 0; x < w; x++) frontbuffer[offs + x] ^= inv;
 		g_vm->_renderer->blitToScreen(offs, w, 1);
 		waitVBlank();
-		for (x = 0; x < w; x++) frontbuffer[offs + x] = ~frontbuffer[offs + x];
+		for (x = 0; x < w; x++) frontbuffer[offs + x] ^= inv;
 		g_vm->_renderer->blitToScreen(offs, w, 1);
 
 		for (spot = zone_spots; spot != zone_spots_end; spot++) {
@@ -3646,6 +3755,10 @@ uint16 CMD_E_PsiZoneScan(void) {
 		if ((offs & g_vm->_line_offset) == 0)
 			offs += g_vm->_screenBPL;
 	}
+
+	// Bring back the room's own palette once the scan is over
+	if (g_vm->_videoMode == Common::kRenderAmiga)
+		amigaApplyRoomPalette(script_byte_vars.palette_index);
 
 	restoreScreenOfSpecialRoom();
 
@@ -4167,8 +4280,6 @@ uint16 CMD_21_VortTalk(void) {
 
 	if (script_byte_vars.rand_value >= 85)
 		num = 6;
-	else if (script_byte_vars.rand_value >= 170)
-		num = 7;
 	else
 		num = 35;
 
@@ -4384,6 +4495,7 @@ cmdhandler_t script_handlers[] = {
 	SCR_68_PlaySfx,
 	SCR_69_playSound,
 	SCR_6A_Unused,
+	SCR_6B_RedrawRoomStatics,   /*EGA-only; same as SCR_13*/
 };
 #define MAX_SCR_HANDLERS ARRAYSIZE(script_handlers)
 
@@ -4406,6 +4518,8 @@ uint16 RunScript(byte *code) {
 	while (script_ptr != script_end_ptr) {
 		byte opcode = *script_ptr;
 
+		debug(9, "scr %04X: %02X", (uint16)((script_ptr - templ_data) & 0xFFFF), opcode);
+
 #ifdef DEBUG_SCRIPT
 		{
 			FILE *f = fopen(DEBUG_SCRIPT_LOG, "at");
@@ -4418,14 +4532,25 @@ uint16 RunScript(byte *code) {
 #endif
 
 #ifdef DEBUG_QUEST
-		if (script_ptr - templ_data == 0x4F) {
+		if (script_ptr - templ_data == 0x5B) {
 			/*manipulate rand_value to get a quest item we need*/
+			// 0x5B is the EGA (kultega.bin) offset of the quest-selection branch
+			// 'if rand_value < 0x40'; the old 0x4F was mid-instruction so it never
+			// fired. Forcing rand_value here picks the quest: 0x00=Rope/De Profundis,
+			// 0x40=Knife/The Wall, 0x80=Goblet/Twins, 0xC0=Fly/Scorpion's.
 			script_byte_vars.rand_value = DEBUG_QUEST;
 		}
 #endif
 
 
-		if (opcode == 0 || opcode >= 107)
+		// Amiga pads opcodes to word with 0x00 or 0xAA
+		if (g_vm->getPlatform() == Common::kPlatformAmiga
+		        && (opcode == 0x00 || opcode == 0xAA)) {
+			script_ptr++;
+			continue;
+		}
+
+		if (opcode == 0 || opcode >= MAX_SCR_HANDLERS)
 			break;
 
 		status = script_handlers[opcode]();
@@ -4496,9 +4621,17 @@ again:;
 		break;
 	case 0xF000:
 		/*restore sp from keep_sp then run script*/
-		/*currently only supposed to work correctly from the SCR_4D_PriorityCommand handler*/
+		// A priority command (SCR_4D_PriorityCommand) discards the current
+		// callchain. The original restored the script stack pointer to the
+		// main-loop baseline (keep_sp); here that baseline is an empty stack.
+		// Without this, a priority command fired from inside a call'd
+		// subroutine breaks out via ScriptRerun before the matching ret runs,
+		// leaking a script_stack frame each time. In the endgame confrontation
+		// repeated PSI POWERS use overflows the 5-frame script_stack array,
+		// corrupting adjacent globals (sprite/rendering glitches) and script
+		// state (looping menu + forced game-over).
 		debug("Restore: $%X 0x%X", the_command, cmd);
-	/*TODO("SCR_RESTORE\n");*/
+		script_stack_ptr = script_stack;
 	/*fall through*/
 	default:
 		res = RunScript(getScriptSubroutine(cmd - 1));
@@ -4520,11 +4653,17 @@ again:;
 	if (g_vm->_shouldRestart)
 		return runCommandKeepSp();
 
-	if (g_vm->_prioritycommand_1 && !(g_vm->_prioritycommand_2))
+	// A priority command (SCR_4D_PriorityCommand) discards the entire current
+	// callchain and re-runs from the main-loop baseline. Propagate the pending
+	// flag straight up to the runCommandKeepSp anchor instead of re-entering
+	// here: re-entering at this (possibly deeply nested) level ran the priority
+	// script but left the outer ActionsMenu frames alive on the C stack. In the
+	// endgame confrontation each PSI POWERS use fired a priority command and
+	// nested one menu level deeper; after the winning flask the stack unwound
+	// only one level into a stale confrontation menu, which re-prompted and (the
+	// win state already consumed) forced a game-over.
+	if (g_vm->_prioritycommand_1)
 		return res;
-
-	if (g_vm->_prioritycommand_1 && g_vm->_prioritycommand_2)
-		return runCommandKeepSp();
 
 	/*TODO: this is pretty hacky, original code manipulates the stack to discard old script invocation*/
 	if (res == ScriptRerun)
@@ -4535,11 +4674,21 @@ again:;
 
 uint16 runCommandKeepSp(void) {
 	/*keep_sp = sp;*/
-	g_vm->_prioritycommand_1 = false;
-	g_vm->_prioritycommand_2 = false;
-	if (g_vm->_shouldRestart)
-		return RUNCOMMAND_RESTART;
-	return runCommand();
+	// Anchor for priority commands. The original engine restored the stack
+	// pointer to this baseline (keep_sp) on every priority command, collapsing
+	// any nested script/menu callchain. Emulate that by draining every pending
+	// priority command here in a loop: nested frames propagate the flag up to
+	// this point (see runCommand) and we re-run from the baseline until none
+	// remain, so menu frames never accumulate on the call stack.
+	uint16 res = 0;
+	do {
+		g_vm->_prioritycommand_1 = false;
+		g_vm->_prioritycommand_2 = false;
+		if (g_vm->_shouldRestart)
+			return RUNCOMMAND_RESTART;
+		res = runCommand();
+	} while (g_vm->_prioritycommand_1);
+	return res;
 }
 
 } // End of namespace Chamber

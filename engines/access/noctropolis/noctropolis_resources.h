@@ -35,8 +35,6 @@ class ComicResource;
 
 extern const byte ICON_PALETTE[];
 
-extern const int16 MENU_POLYS[];
-
 extern const int16 TRAV_ROOMS[];
 
 extern const int16 TRAV_MAN_POS[];
@@ -76,6 +74,8 @@ public:
 	const ComicResource *getLastComicResource() const;
 	const ComicResource *getSpecialComicResource() const;
 
+	Common::Path translatePath(const char *rawPath) const;
+
 	int menuAt(int16 x, int16 y) const;
 
 private:
@@ -87,7 +87,7 @@ private:
 	Font *_fontChaletse;
 	Font *_fontComicseu;
 
-	PolygonArray _menus;
+	Common::Array<const Common::Point *> _menus;
 };
 
 } // end namespace Noctropolis

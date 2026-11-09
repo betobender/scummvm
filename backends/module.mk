@@ -30,7 +30,6 @@ MODULE_OBJS := \
 ifdef USE_HTTP
 MODULE_OBJS += \
 	networking/http/connectionmanager.o \
-	networking/http/networkreadstream.o \
 	networking/http/httpjsonrequest.o \
 	networking/http/httprequest.o \
 	networking/http/postrequest.o \
@@ -104,7 +103,9 @@ MODULE_OBJS += \
 	fs/emscripten/emscripten-fs-factory.o \
 	fs/emscripten/emscripten-posix-fs.o \
 	fs/emscripten/http-fs.o \
-	midi/webmidi.o
+	midi/webmidi.o \
+	mixer/emscriptensdl/emscriptensdl-mixer.o \
+	timer/emscripten/emscripten-timer.o
 ifdef USE_CLOUD
 MODULE_OBJS += \
 	fs/emscripten/cloud-fs.o
@@ -238,11 +239,7 @@ endif
 
 ifndef RISCOS
 ifndef KOLIBRIOS
-ifdef USE_ATARI_PLUGIN_PROVIDER
-MODULE_OBJS += plugins/atari/atari-provider.o
-else ifdef USE_FIREBEE_PLUGIN_PROVIDER
-MODULE_OBJS += plugins/firebee/firebee-provider.o
-else
+ifndef SDL_ATARI
 MODULE_OBJS += plugins/sdl/sdl-provider.o
 endif
 endif
@@ -263,6 +260,14 @@ ifdef USE_DISCORD
 MODULE_OBJS += \
 	presence/discord/discord.o
 endif
+endif
+
+ifdef SDL_ATARI
+MODULE_OBJS += \
+	fs/atari/atari-fs.o \
+	fs/atari/atari-fs-factory.o \
+	plugins/atari/atari-provider.o \
+	plugins/firebee/firebee-provider.o
 endif
 
 ifdef KOLIBRIOS
@@ -329,7 +334,7 @@ MODULE_OBJS += \
 	dialogs/win32/win32-dialogs.o \
 	fs/windows/windows-fs.o \
 	fs/windows/windows-fs-factory.o \
-	midi/windows.o \
+	midi/winmm.o \
 	plugins/win32/win32-provider.o \
 	printing/win32/win32-printman.o \
 	saves/windows/windows-saves.o \
@@ -354,6 +359,7 @@ MODULE_OBJS += \
 	fs/android/android-posix-fs.o \
 	fs/android/android-saf-fs.o \
 	graphics/android/android-graphics.o \
+	midi/android.o \
 	mixer/android/android-mixer.o \
 	mutex/pthread/pthread-mutex.o \
 	networking/basic/android/jni.o \
@@ -366,8 +372,13 @@ MODULE_OBJS += \
 	networking/http/android/networkreadstream-android.o
 endif
 
-# Oboe headers need C++14...
-$(MODULE)/mixer/android/android-mixer.o: CXXFLAGS += "-std=c++14"
+ifdef USE_TTS
+MODULE_OBJS += \
+	text-to-speech/android/android-text-to-speech.o
+endif
+
+# Oboe headers need C++14 and alignment when using new needs C++17
+$(MODULE)/mixer/android/android-mixer.o: CXXFLAGS += "-std=c++17"
 
 endif
 

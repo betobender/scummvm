@@ -22,11 +22,13 @@
 #include "gui/editgamedialog.h"
 
 #include "backends/keymapper/keymapper.h"
+#include "graphics/hotspot_renderer.h"
 
 #include "common/config-manager.h"
 #include "common/gui_options.h"
 #include "common/translation.h"
 #include "common/system.h"
+#include "engines/engine.h"
 
 #include "gui/browser.h"
 #include "gui/gui-manager.h"
@@ -79,7 +81,8 @@ enum {
 	kCmdSavePathClear = 'PSAC',
 	kCmdCheckIntegrity = 'PCHI',
 
-	kGraphicsTabContainerReflowCmd = 'gtcr'
+	kGraphicsTabContainerReflowCmd = 'gtcr',
+	kEnableHotspotsCmd = 'enhs',
 };
 
 class DomainEditTextWidget : public EditTextWidget {
@@ -317,7 +320,59 @@ EditGameDialog::EditGameDialog(const Common::String &domain)
 	_savePathClearButton = addClearButton(tab, "GameOptions_Paths.SavePathClearButton", kCmdSavePathClear);
 
 	//
-	// 9) The Achievements & The Statistics tabs
+	// 9) The Misc tab
+	//
+	tab->addTab(g_gui.useLowResGUI() ? _c("Misc", "lowres") : _("Misc"), "GameOptions_Misc");
+
+	ScrollContainerWidget *miscContainer = new ScrollContainerWidget(tab,
+			"GameOptions_Misc.Container", "GameOptions_Misc_Container");
+	miscContainer->setBackgroundType(ThemeEngine::kWidgetBackgroundNo);
+	miscContainer->setTarget(this);
+
+	bool hotspotsEnabled = ConfMan.getBool("enable_hotspots", _domain);
+	_enableHotspotsCheckbox = new CheckboxWidget(miscContainer, "GameOptions_Misc_Container.EnableHotspots",
+		_("Enable hotspot display"),
+		_("Enable visual markers and labels for interactive objects"),
+		kEnableHotspotsCmd
+	);
+
+	_hotspotMarkerPopUpDesc = new StaticTextWidget(miscContainer,
+			"GameOptions_Misc_Container.HotspotMarkerPopupDesc", _("Hotspot marker:"));
+	_hotspotMarkerPopUp = new PopUpWidget(miscContainer, "GameOptions_Misc_Container.HotspotMarkerPopup");
+	_hotspotMarkerPopUp->appendEntry(_("<default>"), (uint32)Graphics::kMarkerDefault);
+	_hotspotMarkerPopUp->appendEntry(_("Point"), Graphics::kMarkerPoint);
+	_hotspotMarkerPopUp->appendEntry(_("Square"), Graphics::kMarkerSquare);
+	_hotspotMarkerPopUp->appendEntry(_("Crosshair"), Graphics::kMarkerCrosshair);
+	_hotspotMarkerPopUp->setSelectedTag(ConfMan.hasKey("hotspot_marker", _domain) ?
+		(uint32)ConfMan.getInt("hotspot_marker", _domain) : (uint32)Graphics::kMarkerDefault);
+	_hotspotMarkerPopUp->setEnabled(hotspotsEnabled);
+	_hotspotMarkerPopUpDesc->setEnabled(hotspotsEnabled);
+
+	bool showHotspotText = ConfMan.getBool("show_hotspot_text", _domain);
+	if (!ConfMan.hasKey("show_hotspot_text", _domain))
+		showHotspotText = true;
+	_showHotspotTextCheckbox = new CheckboxWidget(miscContainer, "GameOptions_Misc_Container.ShowHotspotText",
+		_("Show hotspot labels"),
+		_("Display text labels next to hotspot markers")
+	);
+	_showHotspotTextCheckbox->setState(showHotspotText);
+	_showHotspotTextCheckbox->setEnabled(hotspotsEnabled);
+
+	_hotspotKeyModePopUpDesc = new StaticTextWidget(miscContainer,
+			"GameOptions_Misc_Container.HotspotKeyModePopupDesc", _("Hotspot key mode:"));
+	_hotspotKeyModePopUp = new PopUpWidget(miscContainer, "GameOptions_Misc_Container.HotspotKeyModePopup");
+	_hotspotKeyModePopUp->appendEntry(_("<default>"), (uint32)-1);
+	_hotspotKeyModePopUp->appendEntry(_("Hold to show"), kHotspotKeyModeHold);
+	_hotspotKeyModePopUp->appendEntry(_("Toggle"), kHotspotKeyModeToggle);
+	_hotspotKeyModePopUp->setSelectedTag(ConfMan.hasKey("hotspot_key_mode", _domain) ?
+		(uint32)ConfMan.getInt("hotspot_key_mode", _domain) : (uint32)-1);
+	_hotspotKeyModePopUp->setEnabled(hotspotsEnabled);
+	_hotspotKeyModePopUpDesc->setEnabled(hotspotsEnabled);
+
+	_enableHotspotsCheckbox->setState(hotspotsEnabled);
+
+	//
+	// 10) The Achievements & The Statistics tabs
 	//
 	if (enginePlugin) {
 		const MetaEngine &metaEngine = enginePlugin->get<MetaEngine>();
@@ -529,11 +584,29 @@ void EditGameDialog::apply() {
 		_engineOptions->save();
 	}
 
+	ConfMan.setBool("enable_hotspots", _enableHotspotsCheckbox->getState(), _domain);
+	ConfMan.setInt("hotspot_marker", _hotspotMarkerPopUp->getSelectedTag(), _domain);
+	ConfMan.setBool("show_hotspot_text", _showHotspotTextCheckbox->getState(), _domain);
+	if (_hotspotKeyModePopUp->getSelectedTag() == (uint32)-1)
+		ConfMan.removeKey("hotspot_key_mode", _domain);
+	else
+		ConfMan.setInt("hotspot_key_mode", _hotspotKeyModePopUp->getSelectedTag(), _domain);
+
 	OptionsDialog::apply();
 }
 
 void EditGameDialog::handleCommand(CommandSender *sender, uint32 cmd, uint32 data) {
 	switch (cmd) {
+	case kEnableHotspotsCmd: {
+		bool enabled = _enableHotspotsCheckbox->getState();
+		_hotspotMarkerPopUpDesc->setEnabled(enabled);
+		_hotspotMarkerPopUp->setEnabled(enabled);
+		_showHotspotTextCheckbox->setEnabled(enabled);
+		_hotspotKeyModePopUpDesc->setEnabled(enabled);
+		_hotspotKeyModePopUp->setEnabled(enabled);
+		g_gui.scheduleTopDialogRedraw();
+		break;
+	}
 	case kCmdGlobalGraphicsOverride:
 		setGraphicSettingsState(data != 0);
 		g_gui.scheduleTopDialogRedraw();

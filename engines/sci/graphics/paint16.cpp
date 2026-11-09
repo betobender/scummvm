@@ -307,7 +307,7 @@ void GfxPaint16::bitsShow(const Common::Rect &rect) {
 	// the engine would normally be unable to update the screen. We just have to offset the rect first, before clipping it,
 	// to make it work. Another solution would be to improve the script patches that implement the speech/text mode for
 	// better vertical placement of the portrait frames (inside the port rect).
-	bool triggeredWorkaround = false;;
+	bool triggeredWorkaround = false;
 	if (rect.top < 0 && _hiresPortraitWorkaroundFlag) {
 		_ports->offsetRect(workerRect);
 		triggeredWorkaround = true;
@@ -335,6 +335,9 @@ reg_t GfxPaint16::bitsSave(const Common::Rect &rect, byte screenMask, bool hires
 		if (workerRect.isEmpty()) // nothing to save
 			return NULL_REG;
 		_ports->offsetRect(workerRect);
+	} else {
+		workerRect.setHeight(_screen->gfxDriver()->getHiResBoxHeight(workerRect.height()));
+		workerRect.bottom = MIN<int16>(workerRect.bottom, _screen->getHeight());
 	}
 
 	// now actually ask _screen how much space it will need for saving
@@ -362,8 +365,17 @@ void GfxPaint16::bitsRestore(reg_t memoryHandle) {
 		byte *memoryPtr = _segMan->getHunkPointer(memoryHandle);
 
 		if (memoryPtr) {
+			Common::Rect rect;
+			_screen->bitsGetRect(memoryPtr, &rect);
+			bool isEnlargedHiResBox = _screen->gfxDriver()->supportsHiResGraphics() && !_screen->bitsGetMask(memoryPtr) &&
+				_screen->gfxDriver()->getHiResBoxHeight(rect.height()) != rect.height();
 			_screen->bitsRestore(memoryPtr);
 			bitsFree(memoryHandle);
+			if (isEnlargedHiResBox) {
+				// bitsSave() made this hires box taller than the scripts requested. They only
+				// repaint the area they requested, so repaint the extra rows too
+				_screen->copyRectToScreen(rect);
+			}
 		}
 
 		// KQ6WinCD specific

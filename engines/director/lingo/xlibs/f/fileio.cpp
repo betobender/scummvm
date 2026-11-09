@@ -128,6 +128,7 @@ delete object me -- deletes the open file
 #include "image/pict.h"
 
 #include "director/director.h"
+#include "director/archive.h"
 #include "director/picture.h"
 #include "director/types.h"
 #include "director/util.h"
@@ -291,20 +292,19 @@ FileIOError FileObject::open(const Common::String &origpath, const Common::Strin
 	} else if (option.equalsIgnoreCase("append")) {
 		Common::SeekableReadStream *inFile = saves->openForLoading(filename);
 		if (!inFile) {
+			// Create file if it doesn't exist.
 			Common::Path location = findPath(origpath);
-			Common::SeekableReadStream *file = Common::MacResManager::openFileOrDataFork(location);
-			if (!file) {
-				return saveFileError();
-			}
-			inFile = file;
+			inFile = Common::MacResManager::openFileOrDataFork(location);
 		}
 		_outStream = new Common::MemoryWriteStreamDynamic(DisposeAfterUse::YES);
-		byte b = inFile->readByte();
-		while (!inFile->eos() && !inFile->err()) {
-			_outStream->writeByte(b);
-			b = inFile->readByte();
+		if (inFile) {
+			byte b = inFile->readByte();
+			while (!inFile->eos() && !inFile->err()) {
+				_outStream->writeByte(b);
+				b = inFile->readByte();
+			}
+			delete inFile;
 		}
-		delete inFile;
 	} else {
 		error("Unsupported FileIO option: '%s'", option.c_str());
 	}
@@ -324,6 +324,8 @@ void FileObject::clear() {
 			Common::OutSaveFile *outFile = saves->openForSaving(*_filename, false);
 			outFile->write(_outStream->getData(), _outStream->size());
 			outFile->finalize();
+			// Add to search index
+			((SavedArchive *)SearchMan.getArchive(kSavedFilesArchive))->_addFile(*_filename);
 			delete outFile;
 		}
 		delete _outStream;
@@ -393,13 +395,15 @@ void FileIO::m_openFile(int nargs) {
 	int mode = d1.asInt();
 	Common::String option;
 	switch (mode) {
+	case 0:
+		option = "append";
+		break;
 	case 1:
 		option = "read";
 		break;
 	case 2:
 		option = "write";
 		break;
-	case 0:
 	default:
 		warning("FIXME: Mode %d not supported, falling back to read", mode);
 		option = "read";
@@ -565,7 +569,17 @@ void FileIO::m_writeChar(int nargs) {
 		return;
 	}
 
-	me->_outStream->writeByte(d.asInt());
+	// The XObject API passes an integer ASCII code (mWriteChar, charNum),
+	// while the Xtra API passes the character itself as a string (writeChar, theChar).
+	byte ch;
+	if (d.type == STRING) {
+		Common::String s = d.asString();
+		ch = s.empty() ? 0 : (byte)s[0];
+	} else {
+		ch = (byte)d.asInt();
+	}
+
+	me->_outStream->writeByte(ch);
 	g_lingo->push(Datum(kErrorNone));
 }
 

@@ -31,7 +31,8 @@
 
 #include "freescape/freescape.h"
 #include "freescape/games/driller/driller.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/detokeniser.h"
+#include "freescape/language/variables.h"
 
 namespace Freescape {
 
@@ -100,7 +101,8 @@ DrillerEngine::DrillerEngine(OSystem *syst, const ADGameDescription *gd) : Frees
 
 DrillerEngine::~DrillerEngine() {
 	delete _playerMusic;
-	delete _playerC64Sfx;
+	if (_sound != _playerC64Sfx)
+		delete _playerC64Sfx;
 
 	if (_borderExtra) {
 		delete _borderExtra;
@@ -264,11 +266,13 @@ void DrillerEngine::gotoArea(uint16 areaID, int entranceID) {
 		if (isC64()) {
 			if (!_c64UseSFX && _playerMusic)
 				_playerMusic->startMusic();
-			playSound(_soundIndexStart, true, _soundFxHandle);
+			playSound(_soundIndexStart, true);
 		} else {
-			playSound(_soundIndexStart, true, _soundFxHandle);
-			// Start playing music, if any, in any supported format
-			playMusic("Matt Gray - The Best Of Reformation - 07 Driller Theme");
+			playSound(_soundIndexStart, true);
+			if (_playerMusic)
+				_playerMusic->startMusic();
+			else
+				playMusic("Matt Gray - The Best Of Reformation - 07 Driller Theme");
 		}
 
 	} else if (areaID == 127) {
@@ -278,7 +282,7 @@ void DrillerEngine::gotoArea(uint16 areaID, int entranceID) {
 		// Show the number of completed areas
 		_areaMap[127]->_name.replace(0, isAmiga() || isAtariST() ? 4 : 3, Common::String::format("%4d", _gameStateVars[32]));
 	} else
-		playSound(_soundIndexAreaChange, false, _soundFxHandle);
+		playSound(_soundIndexAreaChange, false);
 
 	debugC(1, kFreescapeDebugMove, "starting player position: %f, %f, %f", _position.x(), _position.y(), _position.z());
 	clearTemporalMessages();
@@ -324,7 +328,7 @@ void DrillerEngine::loadAssets() {
 		conditionArray.push_back(0x7f);
 		conditionArray.push_back(0x0);
 
-		Common::String conditionSource = detokenise8bitCondition(conditionArray, instructions, false);
+		Common::String conditionSource = detokeniseFreescapeCondition(conditionArray, instructions, false);
 		debugC(1, kFreescapeDebugParser, "%s", conditionSource.c_str());
 		_areaMap[18]->_conditions.push_back(instructions);
 		_areaMap[18]->_conditionSources.push_back(conditionSource);
@@ -599,7 +603,7 @@ void DrillerEngine::pressedKey(const int keycode) {
 		// RIG POSITIONED / NO GAS FOUND messages are displayed and
 		// before subsequent state changes can clobber the channel).
 		if (isDOS() || isAmiga() || isAtariST())
-			playSound(_soundIndexAreaChange, false, _soundFxHandle);
+			playSound(_soundIndexAreaChange, false);
 		insertTemporaryMessage(_messagesList[3], _countdown - 2);
 		addDrill(drill, success > 0);
 		if (success <= 0) {
@@ -676,7 +680,7 @@ void DrillerEngine::pressedKey(const int keycode) {
 		_drillSuccessByArea[areaID] = 0;
 		executeMovementConditions();
 		if (isDOS() || isAmiga() || isAtariST())
-			playSound(_soundIndexAreaChange, false, _soundFxHandle);
+			playSound(_soundIndexAreaChange, false);
 	}
 }
 
@@ -1003,7 +1007,7 @@ void DrillerEngine::endGame() {
 			// The original routine is blocking, so keep the redraw pacing in the
 			// engine's wait loop instead of stretching it across separate frames.
 			const int areaScale = MAX<int>(_currentArea ? _currentArea->getScale() : 1, 1);
-			playSound(11, false, _soundFxHandle);
+			playSound(11, false);
 			_position.z() -= 8000.0f / areaScale;
 			_position.y() += 3000.0f / areaScale;
 			_lastPosition = _position;
@@ -1075,7 +1079,7 @@ bool DrillerEngine::onScreenControls(Common::Point mouse) {
 void DrillerEngine::drawSensorShoot(Sensor *sensor) {
 	if (_underFireFrames == 1 && _gameStateControl == kFreescapeGameStatePlaying) {
 		// Avoid playing new sounds, so the endgame can progress
-		playSound(_soundIndexHit, true, _soundFxHandle);
+		playSound(_soundIndexHit, true);
 	}
 
 	Math::Vector3d sensorPos = sensor->getOrigin();

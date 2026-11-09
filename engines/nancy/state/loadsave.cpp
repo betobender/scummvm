@@ -24,7 +24,7 @@
 #include "engines/nancy/sound.h"
 #include "engines/nancy/input.h"
 #include "engines/nancy/util.h"
-#include "engines/nancy/resource.h"
+#include "engines/nancy/resource/resource.h"
 #include "engines/nancy/graphics.h"
 
 #include "engines/nancy/state/loadsave.h"
@@ -1005,6 +1005,13 @@ void LoadSaveMenu_V2::run() {
 				}
 
 				_loadButton->setDisabled(false);
+
+				// Copy the clicked save's name into the input textbox at the top,
+				// so clicking Save overwrites that save without retyping its name
+				if (_currentPage == 0 && _inputTextbox && Scene::hasInstance()) {
+					_enteredString = _filenameStrings[i];
+					writeToInputTextbox(_baseFont);
+				}
 
 				_hoveredSave = -1;
 				_selectedSave = i;

@@ -54,6 +54,8 @@ protected:
 	struct {
 		uint16 width;
 		uint16 height;
+		int16 xoffs;   // X offset from NUT frame header (for sprite positioning)
+		int16 yoffs;   // Y offset from NUT frame header (for sprite positioning)
 		byte *src;
 		byte transparency;
 	} _chars[256];
@@ -64,16 +66,22 @@ protected:
 	void loadFont(const char *filename);
 
 public:
-	NutRenderer(ScummEngine *vm, const char *filename);
+	NutRenderer(ScummEngine *vm, const char *filename = nullptr);
 	virtual ~NutRenderer();
+	void loadFontFromData(const byte *data, int32 dataSize);
 	int getNumChars() const { return _numChars; }
 
-	void drawFrame(byte *dst, int c, int x, int y);
+	void drawFrame(byte *dst, int c, int x, int y, int pitch = -1);
 	int draw2byte(byte *buffer, Common::Rect &clipRect, int x, int y, int pitch, int16 col, uint16 chr);
 	int drawCharV7(byte *buffer, Common::Rect &clipRect, int x, int y, int pitch, int16 col, TextStyleFlags flags, byte chr, bool hardcodedColors = false, bool smushColorMode = false);
 
 	int getCharWidth(byte c) const;
 	int getCharHeight(byte c) const;
+	int16 getCharXOffset(byte c) const { return _chars[c].xoffs; }
+	int16 getCharYOffset(byte c) const { return _chars[c].yoffs; }
+	const byte *getCharData(byte c);
+	byte getCharTransparency(byte c) const { return _chars[c].transparency; }
+	byte getBpp() const { return 8; }
 
 	int getFontHeight() const { return _fontHeight; }
 };

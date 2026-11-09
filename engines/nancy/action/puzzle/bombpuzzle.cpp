@@ -21,7 +21,7 @@
 
 #include "engines/nancy/nancy.h"
 #include "engines/nancy/graphics.h"
-#include "engines/nancy/resource.h"
+#include "engines/nancy/resource/resource.h"
 #include "engines/nancy/sound.h"
 #include "engines/nancy/input.h"
 #include "engines/nancy/util.h"
@@ -45,7 +45,7 @@ void BombPuzzle::init() {
 	setTransparent(true);
 
 	g_nancy->_resource->loadImage(_imageName, _image);
-	RenderActionRecord::init();
+	PuzzleRecord::init();
 }
 
 void BombPuzzle::readData(Common::SeekableReadStream &stream) {
@@ -68,7 +68,7 @@ void BombPuzzle::readData(Common::SeekableReadStream &stream) {
 	_noToolSound.readNormal(stream);
 	_toolID = stream.readUint16LE();
 
-	_solveSceneChange.readData(stream);
+	_solveScene.readData(stream);
 	stream.skip(2);
 	_solveSound.readNormal(stream);
 
@@ -213,8 +213,7 @@ void BombPuzzle::execute() {
 		if (_playerOrder.size() == _solveOrder.size()) {
 			_failed = false;
 			_state = kActionTrigger;
-			g_nancy->_sound->loadSound(_solveSound);
-			g_nancy->_sound->playSound(_solveSound);
+			playSolveSound();
 		}
 
 		break;
@@ -228,12 +227,12 @@ void BombPuzzle::execute() {
 			g_nancy->_sound->stopSound(_failSound);
 			_failSceneChange.execute();
 		} else {
-			if (g_nancy->_sound->isSoundPlaying(_solveSound)) {
+			if (isSolveSoundPlaying()) {
 				return;
 			}
 
 			g_nancy->_sound->stopSound(_solveSound);
-			_solveSceneChange.execute();
+			_solveScene.execute();
 		}
 
 		g_nancy->_sound->stopSound(_snipSound);

@@ -617,8 +617,13 @@ bool MacWindow::processEvent(Common::Event &event) {
 		if (!_editable && !(_wm->getActiveWidget() && _wm->getActiveWidget()->isEditable()))
 			return result;
 
-		if (_wm->getActiveWidget())
-			return _wm->getActiveWidget()->processEvent(event) || result;
+		if (_wm->getActiveWidget()) {
+			if (_callback) {
+				return result && _wm->getActiveWidget()->processEvent(event);
+			} else {
+				return _wm->getActiveWidget()->processEvent(event);
+			}
+		}
 
 		return result;
 
@@ -691,7 +696,7 @@ void MacWindow::mergeDirtyRects() {
 		rInner = rOuter;
 		while (++rInner != _dirtyRects.end()) {
 
-			if ((*rOuter).intersects(*rInner)) {
+			if (rOuter->intersects(*rInner)) {
 				// These two rectangles overlap, so merge them
 				rOuter->extend(*rInner);
 

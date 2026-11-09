@@ -25,7 +25,7 @@
 #include "engines/nancy/input.h"
 #include "engines/nancy/util.h"
 #include "engines/nancy/enginedata.h"
-#include "engines/nancy/resource.h"
+#include "engines/nancy/resource/resource.h"
 
 #include "engines/nancy/action/puzzle/raycastpuzzle.h"
 #include "engines/nancy/state/scene.h"
@@ -97,7 +97,7 @@ public:
 	uint _verticalHeight;
 	float _objectsBaseDensity;
 
-	uint _startX, _startY;
+	uint _startX = 0, _startY = 0;
 
 	Common::Array<uint16> _cells;
 	Common::Array<byte> _walls;
@@ -347,7 +347,7 @@ void RaycastLevelBuilder::writeTransparentWalls(uint startX, uint startY, uint t
 	const RCLB::Theme &theme = _themeData->themes[themeID];
 	uint numWallsToWrite = (int)((float)theme.objectWallDensity * _objectsBaseDensity);
 
-	for (uint numWrittenWalls = 0; numWrittenWalls < numWallsToWrite;) {
+	for (uint numWrittenWalls = 0; numWrittenWalls < numWallsToWrite; ++numWrittenWalls) {
 		bool vertical = g_nancy->_randomSource->getRandomBit();
 		bool foundWallLocation = false;
 
@@ -444,8 +444,6 @@ void RaycastLevelBuilder::writeTransparentWalls(uint startX, uint startY, uint t
 
 		_wallMap[y * _fullWidth + x] = selectedTransparentWallIDs;
 		_wallMap[otherY * _fullWidth + otherX] = selectedTransparentWallIDs;
-
-		++numWrittenWalls;
 	}
 }
 
@@ -455,7 +453,7 @@ void RaycastLevelBuilder::writeObjectWalls(uint startX, uint startY, uint themeI
 
 	uint textureVerticalHeight = _verticalHeight * 128; // 128 is a constant inside RayCast
 
-	for (uint numWrittenWalls = 0; numWrittenWalls < numWallsToWrite;) {
+	for (uint numWrittenWalls = 0; numWrittenWalls < numWallsToWrite; ++numWrittenWalls) {
 		bool vertical = g_nancy->_randomSource->getRandomBit();
 		bool foundWallLocation = false;
 
@@ -569,8 +567,6 @@ void RaycastLevelBuilder::writeObjectWalls(uint startX, uint startY, uint themeI
 		ceiling = (int)ceiling - 2 < 0 ? 0 : ceiling - 2;
 
 		_floorCeilingLightMap[y * _fullWidth + x] = (lightmapValue & 0xF000) | (ceiling << 4) | floor;
-
-		++numWrittenWalls;
 	}
 }
 
@@ -578,7 +574,7 @@ void RaycastLevelBuilder::writeDoors(uint startX, uint startY, uint themeID) {
 	const RCLB::Theme &theme = _themeData->themes[themeID];
 	uint numDoorsToWrite = (int)((float)theme.doorDensity * _objectsBaseDensity);
 
-	for (uint numWrittenWalls = 0; numWrittenWalls < numDoorsToWrite;) {
+	for (uint numWrittenWalls = 0; numWrittenWalls < numDoorsToWrite; ++numWrittenWalls) {
 		bool vertical = g_nancy->_randomSource->getRandomBit();
 		bool foundDoorLocation = false;
 
@@ -1088,7 +1084,7 @@ void RaycastPuzzle::init() {
 
 void RaycastPuzzle::registerGraphics() {
 	_map.registerGraphics();
-	RenderActionRecord::registerGraphics();
+	PuzzleRecord::registerGraphics();
 }
 
 void RaycastPuzzle::readData(Common::SeekableReadStream &stream) {
@@ -1119,7 +1115,7 @@ void RaycastPuzzle::execute() {
 
 		break;
 	case kActionTrigger:
-		if (g_nancy->_sound->isSoundPlaying(_solveSound)) {
+		if (isSolveSoundPlaying()) {
 			return;
 		}
 
@@ -1132,7 +1128,7 @@ void RaycastPuzzle::execute() {
 }
 
 void RaycastPuzzle::onPause(bool pause) {
-	RenderActionRecord::onPause(pause);
+	PuzzleRecord::onPause(pause);
 	g_nancy->_input->setKeymapEnabled(InputManager::_mazeKeymapID, !pause);
 }
 
@@ -2078,8 +2074,7 @@ void RaycastPuzzle::checkExit() {
 	Common::Point gridPos(((uint)_playerY) >> 7, ((uint)_playerX) >> 7);
 
 	if (_infoMap[gridPos.y * _mapFullWidth + gridPos.x] == 1) {
-		g_nancy->_sound->loadSound(_solveSound);
-		g_nancy->_sound->playSound(_solveSound);
+		playSolveSound();
 
 		_state = kActionTrigger;
 	}

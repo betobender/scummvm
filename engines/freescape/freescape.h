@@ -39,7 +39,7 @@
 #include "freescape/area.h"
 #include "freescape/font.h"
 #include "freescape/gfx.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/variables.h"
 #include "freescape/objects/entrance.h"
 #include "freescape/objects/geometricobject.h"
 #include "freescape/objects/sensor.h"
@@ -341,6 +341,7 @@ public:
 
 	void parseAmigaAtariHeader(Common::SeekableReadStream *file);
 	Common::SeekableReadStream *decryptFileAmigaAtari(const Common::Path &packed, const Common::Path &unpacker, uint32 unpackArrayOffset);
+	Common::SeekableReadStream *decryptFileAmigaAtari(const Common::Path &packed, Common::SeekableReadStream *unpacker, uint32 unpackArrayOffset);
 	Common::SeekableReadStream *decryptFileAtariVirtualWorlds(const Common::Path &filename);
 
 	// Areas
@@ -369,6 +370,19 @@ public:
 	bool _useWASDControls;
 	bool _debugSimulateTouchscreen;
 	bool isTouchscreenActive() const;
+	void setIOSGamepadControllerEnabled(bool enabled);
+	void restoreIOSGamepadControllerSettings();
+#ifdef IPHONE
+	struct IOSGamepadControllerSetting {
+		bool present;
+		Common::String value;
+	};
+	bool _iosGamepadControllerSettingsSaved;
+	Common::String _iosGamepadControllerDomain;
+	IOSGamepadControllerSetting _iosGamepadController;
+	IOSGamepadControllerSetting _iosGamepadControllerMinimalLayout;
+	IOSGamepadControllerSetting _iosGamepadControllerDirectionalInput;
+#endif
 	// Player movement state
 	bool _moveForward;
 	bool _moveBackward;
@@ -380,6 +394,7 @@ public:
 	virtual void initKeymaps(Common::Keymap *engineKeyMap, Common::Keymap *infoScreenKeyMap, const char *target);
 	EventManagerWrapper *_eventManager;
 	void processInput();
+	virtual bool handleInput(const Common::Event &event) { return false; }
 	void resetInput();
 	void stopMovement();
 	void generateDemoInput();
@@ -387,10 +402,11 @@ public:
 	virtual void releasedKey(const int keycode);
 	Common::Point getNormalizedPosition(Common::Point position);
 	virtual bool onScreenControls(Common::Point mouse);
-	void updatePlayerMovement(float deltaTime);
+	virtual void updatePlayerMovement(float deltaTime);
 	void updatePlayerMovementSmooth(float deltaTime);
 	void updatePlayerMovementClassic(float deltaTime);
 	void resolveCollisions(Math::Vector3d newPosition);
+	virtual Math::Vector3d clipPosition(const Math::Vector3d &position) const { return position; }
 	virtual void checkIfStillInArea();
 	void changePlayerHeight(int index);
 	void increaseStepSize();
@@ -463,21 +479,21 @@ public:
 	Math::Vector3d _objExecutingCodeSize;
 	bool _executingGlobalCode;
 	virtual void executeMovementConditions();
-	bool executeObjectConditions(GeometricObject *obj, bool shot, bool collided, bool activated);
+	virtual bool executeObjectConditions(GeometricObject *obj, bool shot, bool collided, bool activated);
 	void executeEntranceConditions(Entrance *entrance);
-	void executeLocalGlobalConditions(bool shot, bool collided, bool timer);
+	virtual void executeLocalGlobalConditions(bool shot, bool collided, bool timer);
+	virtual void updateScripts() {}
 	bool executeCode(FCLInstructionVector &code, bool shot, bool collided, bool timer, bool activated);
 
 	// Instructions
-	bool checkConditional(FCLInstruction &instruction, bool shot, bool collided, bool timer, bool activated);
+	bool checkConditional(const FCLInstruction &instruction, bool shot, bool collided, bool timer, bool activated);
 	bool checkIfGreaterOrEqual(FCLInstruction &instruction);
 	bool checkIfLessOrEqual(FCLInstruction &instruction);
-	void executeExecute(FCLInstruction &instruction);
+	void executeCall(FCLInstruction &instruction);
 	void executeIncrementVariable(FCLInstruction &instruction);
 	void executeDecrementVariable(FCLInstruction &instruction);
 	void executeSetVariable(FCLInstruction &instruction);
 	void executeGoto(FCLInstruction &instruction);
-	void executeIfThenElse(FCLInstruction &instruction);
 	virtual void executeMakeInvisible(FCLInstruction &instruction);
 	void executeMakeVisible(FCLInstruction &instruction);
 	void executeToggleVisibility(FCLInstruction &instruction);
@@ -499,47 +515,29 @@ public:
 	// Sound
 	Audio::SoundHandle _soundFxHandle;
 	Audio::SoundHandle _musicHandle;
-	Audio::SoundHandle _movementSoundHandle;
-	Freescape::SizedPCSpeaker *_speaker;
+	Sound *_sound;
 
 	bool _syncSound;
 	bool _firstSound;
 	bool _usePrerecordedSounds;
-	void waitForSounds();
-	void stopAllSounds(Audio::SoundHandle &handle);
-	bool isPlayingSound();
-	void playSound(int index, bool sync, Audio::SoundHandle &handle);
+	void waitForSounds(Sound::Type type = Sound::kTypeNormal);
+	void stopAllSounds(Sound::Type type = Sound::kTypeNormal);
+	bool isPlayingSound(Sound::Type type = Sound::kTypeNormal);
+	virtual void playSound(int index, bool sync, Sound::Type type = Sound::kTypeNormal);
 	void playWav(const Common::Path &filename);
 	void playMusic(const Common::Path &filename);
-	void queueSoundConst(double hzFreq, int duration);
-	void playSilence(int duration, bool sync);
-	void playSoundConst(double hzFreq, int duration, bool sync);
-	void playSoundSweepIncWL(double hzFreq1, double hzFreq2, double wlStepPerMS, int resolution, bool sync);
-	uint16 playSoundDOSSpeaker(uint16 startFrequency, soundSpeakerFx *speakerFxInfo);
-	void playSoundDOS(soundSpeakerFx *speakerFxInfo, bool sync, Audio::SoundHandle &handle);
 
-	void playSoundCPC(int index, Audio::SoundHandle &handle);
-	virtual void playSoundC64(int index);
-	virtual void playSoundFx(int index, bool sync);
-	virtual void loadSoundsFx(Common::SeekableReadStream *file, int offset, int number);
-	Common::HashMap<uint16, soundFx *> _soundsFx;
-	void loadSpeakerFxDOS(Common::SeekableReadStream *file, int offsetFreq, int offsetDuration, int numberSounds);
-	void loadSpeakerFxZX(Common::SeekableReadStream *file, int sfxTable, int sfxData);
-	Common::HashMap<uint16, soundSpeakerFx *> _soundsSpeakerFx;
-
-	virtual void playSoundZX(int index, Audio::SoundHandle &handle);
-	void playSoundZX(Common::Array<soundUnitZX> *data, Audio::SoundHandle &handle);
-	Common::HashMap<uint16, Common::Array<soundUnitZX>*> _soundsSpeakerFxZX;
-
-	void loadSoundsCPC(Common::SeekableReadStream *file, int offsetTone, int sizeTone, int offsetEnvelope, int sizeEnvelope, int offsetSoundDef, int sizeSoundDef);
-	Common::Array<byte> _soundsCPCToneTable;
-	Common::Array<byte> _soundsCPCEnvelopeTable;
-	Common::Array<byte> _soundsCPCSoundDefTable;
-
-	void loadSoundsAmigaDemo(Common::SeekableReadStream *file, int offset, int numSounds, int modOffset = 0x3D5A6);
-	void playSoundAmiga(int index, Audio::SoundHandle &handle);
-	Common::Array<AmigaSfxEntry> _amigaSfxTable;
-	Common::Array<AmigaDmaSample> _amigaDmaSamples;
+	virtual void playSoundFx(int index, bool sync, Sound::Type type = Sound::kTypeNormal) {}
+	Sound *loadSoundsFx(Common::SeekableReadStream *file, int offset, int number);
+	Sound *loadSoundsFxDOS(Common::SeekableReadStream *file, int offset, int number);
+	Sound *loadSpeakerFxDOS(Common::SeekableReadStream *file, int offsetFreq, int offsetDuration, int numberSounds);
+	Sound *loadSpeakerFxZX(Common::SeekableReadStream *file, int sfxTable, int sfxData, int numberSounds);
+	Sound *loadSpeakerFxDrillerZX();
+	Sound *loadSoundsCPC(Common::SeekableReadStream *file, int offsetTone, int sizeTone, int offsetEnvelope, int sizeEnvelope, int offsetSoundDef, int sizeSoundDef);
+	// sampleBank names the external PCM bank, modOffset points at the embedded
+	// module used for one extra sample; both are optional (empty path, -1)
+	Sound *loadSoundsAmiga(Common::SeekableReadStream *file, int offset, int numSounds, const Common::Path &sampleBank, int modOffset);
+	Sound *loadSoundsAtariCastle(Common::SeekableReadStream *file, int offset, int numSounds, int bankOffset);
 
 	int _soundIndexShoot;
 	int _soundIndexCollide;
@@ -571,6 +569,7 @@ public:
 	int _shootingFrames;
 	GeometricObject *_delayedShootObject;
 	void drawFrame();
+	Math::Vector3d getCameraRenderPosition();
 	void drawFrameStereo(int farClipPlane);
 
 	// Red/blue anaglyph 3D ("two eyes") effect, toggled with the 3 key.
@@ -578,6 +577,8 @@ public:
 	void flashScreen(int backgroundColor);
 	uint8 _colorNumber;
 	Math::Vector3d _scaleVector;
+	float _fieldOfView;
+	float _viewAspectRatio;
 	float _nearClipPlane;
 	float _farClipPlane;
 
@@ -681,7 +682,8 @@ public:
 	Common::RandomSource *_rnd;
 
 	// C64 specifics
-	byte *decompressC64RLE(byte *buffer, int *size, byte marker);
+	Common::Array<byte> unpackC64Snapshot(const Common::Array<byte> &packed);
+	Common::Array<byte> unpackC64Snapshot(Common::SeekableReadStream *file, const Common::Path &continuation);
 	byte *_extraBuffer;
 };
 
@@ -699,6 +701,7 @@ enum GameReleaseFlags {
 	GF_ATARI_BUDGET = (1 << 10),
 	GF_C64_TAPE = (1 << 11),
 	GF_C64_DISC = (1 << 12),
+	GF_C64_PACKED = (1 << 13),
 };
 
 extern FreescapeEngine *g_freescape;

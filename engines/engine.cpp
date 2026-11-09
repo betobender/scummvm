@@ -60,6 +60,8 @@
 #include "graphics/fontman.h"
 #include "graphics/paletteman.h"
 #include "graphics/pixelformat.h"
+#include "graphics/font.h"
+#include "graphics/hotspot_renderer.h"
 #include "image/bmp.h"
 
 #include "common/text-to-speech.h"
@@ -154,7 +156,10 @@ Engine::Engine(OSystem *syst)
 		_mainMenuDialog(NULL),
 		_debugger(NULL),
 		_autosaveInterval(ConfMan.getInt("autosave_period")),
-		_lastAutosaveTime(_system->getMillis()) {
+		_lastAutosaveTime(_system->getMillis()),
+		_showHotspots(false),
+		_hotspotForceRedraw(false),
+		_hotspotPrevCursorVisible(false) {
 
 	g_engine = this;
 	_quitRequested = false;
@@ -211,11 +216,10 @@ Engine::Engine(OSystem *syst)
 }
 
 Engine::~Engine() {
+	if (_showHotspots)
+		showHotspots(false);
+	delete _hotspotRenderer;
 	_mixer->stopAll();
-
-	// Flush any pending remaining events
-	Common::Event evt;
-	while (g_system->getEventManager()->pollEvent(evt)) {}
 
 	delete _debugger;
 	delete _mainMenuDialog;
@@ -230,7 +234,7 @@ void Engine::initializePath(const Common::FSNode &gamePath) {
 	SearchMan.addDirectory(gamePath, 0, 4);
 }
 
-bool Engine::enhancementEnabled(int32 cls) {
+bool Engine::enhancementEnabled(int32 cls) const {
 	return _activeEnhancements & cls;
 }
 
@@ -311,10 +315,10 @@ void splashScreen() {
 
 	// Print version information
 	const Graphics::Font *font = FontMan.getFontByUsage(Graphics::FontManager::kConsoleFont);
-	int w = font->getStringWidth(gScummVMVersionDate);
+	int w = font->getStringWidth(gScummVMFullVersion);
 	int x = screen.w - w - 5;
 	int y = screen.h - font->getFontHeight() - 5;
-	font->drawString(&screen, gScummVMVersionDate, x, y, w, screen.format.ARGBToColor(0xff, 0, 0, 0));
+	font->drawString(&screen, gScummVMFullVersion, x, y, w, screen.format.ARGBToColor(0xff, 0, 0, 0));
 
 	// Scale if needed and copy to overlay
 	if (screen.w != overlayWidth) {
@@ -710,6 +714,7 @@ PauseToken Engine::pauseEngine() {
 	_pauseLevel++;
 
 	if (_pauseLevel == 1) {
+		suspendHotspots();
 		_pauseStartTime = _system->getMillis();
 		_pauseScreenChangeID = g_system->getScreenChangeID();
 		pauseEngineIntern(true);
@@ -724,6 +729,7 @@ void Engine::resumeEngine() {
 	_pauseLevel--;
 
 	if (_pauseLevel == 0) {
+		_hotspotForceRedraw = true;
 		if (_pauseScreenChangeID != g_system->getScreenChangeID()) {
 			// Inject a screen change event in the event loop for the engine
 			Common::Event ev;
@@ -742,6 +748,83 @@ void Engine::pauseEngineIntern(bool pause) {
 	_mixer->pauseAll(pause);
 }
 
+void Engine::showHotspots(bool show) {
+	_showHotspots = show;
+
+	if (show) {
+		_hotspotForceRedraw = true;
+	} else {
+		suspendHotspots();
+		if (_hotspotRenderer)
+			_hotspotRenderer->releaseResources();
+		_hotspotScratch.resize(0);
+	}
+}
+
+void Engine::suspendHotspots() {
+	if (_hotspotRenderer)
+		_hotspotRenderer->hideOverlay(*_system);
+	if (_hotspotCursorHidden) {
+		CursorMan.showMouse(_hotspotPrevCursorVisible);
+		_hotspotCursorHidden = false;
+	}
+	_hotspotForceRedraw = true;
+}
+
+void Engine::getHotspotPositions(Common::Array<Graphics::HotspotInfo> &hotspots) {
+}
+
+HotspotKeyMode Engine::effectiveHotspotKeyMode() const {
+	const int mode = ConfMan.hasKey("hotspot_key_mode") ? ConfMan.getInt("hotspot_key_mode") : -1;
+	if (mode == kHotspotKeyModeHold || mode == kHotspotKeyModeToggle)
+		return (HotspotKeyMode)mode;
+	return hotspotsKeyMode();
+}
+
+bool Engine::hotspotDirty() const {
+	return true;
+}
+
+Graphics::HotspotRenderer *Engine::createHotspotRenderer() {
+	return new Graphics::HotspotRenderer();
+}
+
+void Engine::drawHotspots() {
+	if (!_showHotspots || isPaused() || g_gui.isActive())
+		return;
+	if (!_hotspotRenderer) {
+		_hotspotRenderer = createHotspotRenderer();
+		_hotspotForceRedraw = true;
+	}
+	if (_system->isOverlayVisible() && !_hotspotRenderer->ownsOverlay())
+		return;
+	if (hotspotDirty() || _hotspotForceRedraw) {
+		_hotspotScratch.resize(0);
+		getHotspotPositions(_hotspotScratch);
+		_hotspotRenderer->exchangeHotspots(_hotspotScratch);
+	}
+	if (_hotspotForceRedraw) {
+		if (!ConfMan.getBool("enable_hotspots")) {
+			showHotspots(false);
+			return;
+		}
+		_hotspotShowText = !ConfMan.hasKey("show_hotspot_text") || ConfMan.getBool("show_hotspot_text");
+		const int marker = ConfMan.hasKey("hotspot_marker") ? ConfMan.getInt("hotspot_marker") : Graphics::kMarkerDefault;
+		_hotspotMarker = marker == Graphics::kMarkerDefault ? Graphics::kMarkerDefault :
+			CLIP(marker, (int)Graphics::kMarkerCrosshair, (int)Graphics::kMarkerPoint);
+	}
+	const bool shouldHideCursor = !_hotspotRenderer->empty() && hideCursorForHotspots();
+	if (shouldHideCursor && !_hotspotCursorHidden) {
+		_hotspotPrevCursorVisible = CursorMan.showMouse(false);
+		_hotspotCursorHidden = true;
+	} else if (!shouldHideCursor && _hotspotCursorHidden) {
+		CursorMan.showMouse(_hotspotPrevCursorVisible);
+		_hotspotCursorHidden = false;
+	}
+	_hotspotRenderer->renderOverlay(*_system, (Graphics::MarkerShape)_hotspotMarker, _hotspotShowText, _hotspotForceRedraw);
+	_hotspotForceRedraw = false;
+}
+
 void Engine::openMainMenuDialog() {
 	if (!_mainMenuDialog)
 		_mainMenuDialog = new MainMenuDialog(this);
@@ -757,7 +840,13 @@ void Engine::openMainMenuDialog() {
 	if (hasVKeyb)
 		g_system->setFeatureState(OSystem::kFeatureVirtualKeyboard, false);
 
+#ifdef ENABLE_EVENTRECORDER
+	g_eventRec.setRecordModalDialog(true);
+#endif
 	runDialog(*_mainMenuDialog);
+#ifdef ENABLE_EVENTRECORDER
+	g_eventRec.setRecordModalDialog(false);
+#endif
 
 	if (hasVKeyb)
 		g_system->setFeatureState(OSystem::kFeatureVirtualKeyboard, true);

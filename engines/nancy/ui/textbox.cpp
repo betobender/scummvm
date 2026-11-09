@@ -31,6 +31,8 @@
 
 #include "engines/nancy/ui/textbox.h"
 #include "engines/nancy/ui/scrollbar.h"
+#include "engines/nancy/ui/taskbar/scrolltextbox.h"
+#include "engines/nancy/ui/ndui/manager.h"
 
 namespace Nancy {
 namespace UI {
@@ -41,47 +43,29 @@ Textbox::Textbox() :
 		_scrollbarPos(0),
 		_highlightRObj(g_nancy->getGameType() >= kGameTypeNancy10 ? 11 : 7),
 		_fontIDOverride(-1),
-		_autoClearTime(0) {}
+		_autoClearTime(0),
+		_scrollTextBox(nullptr) {}
 
 Textbox::~Textbox() {
 	delete _scrollbar;
+	delete _scrollTextBox;
 }
 
 void Textbox::init() {
-	auto *tbox = GetEngineData(TBOX);
-	assert(tbox);
-
+	// Nancy 10+: the game text box is a UIPopupHeader overlay popup (UICO in
+	// Nancy 10, SCTB in Nancy 11). Delegate to a ScrollTextBox; the code below
+	// is the Nancy 1-9 bottom-right flat box.
 	if (g_nancy->getGameType() >= kGameTypeNancy10) {
-		auto *bsum = GetEngineData(BSUM);
-		assert(bsum);
-
-		Common::Rect textRect = bsum->textboxScreenPosition;
-
-		// Clip the bottom of the text strip to sit above the taskbar.
-		const TASK *taskData = GetEngineData(TASK);
-		if (taskData && taskData->dstRect.top > textRect.top &&
-				taskData->dstRect.top < textRect.bottom) {
-			textRect.bottom = taskData->dstRect.top;
-		}
-
-		moveTo(textRect);
-		_highlightRObj.moveTo(textRect);
-
-		// No scrolling for now: the surface is sized to exactly the
-		// visible text rect, so overflow simply clips at the bottom.
-		initSurfaces(textRect.width(), textRect.height(),
-			g_nancy->_graphics->getScreenPixelFormat(),
-			tbox->textBackground, tbox->highlightTextBackground);
-
-		Common::Rect outerBoundingBox = _screenPosition;
-		outerBoundingBox.moveTo(0, 0);
-		_drawSurface.create(_fullSurface, outerBoundingBox);
-
-		RenderObject::init();
-
-		setVisible(false);
+		// Nancy15+ rebuilds the text box whenever the player character changes,
+		// since its description comes out of that character's own data files
+		delete _scrollTextBox;
+		_scrollTextBox = new ScrollTextBox();
+		_scrollTextBox->init();
 		return;
 	}
+
+	auto *tbox = GetEngineData(TBOX);
+	assert(tbox);
 
 	auto *bsum = GetEngineData(BSUM);
 	assert(bsum);
@@ -106,6 +90,11 @@ void Textbox::init() {
 }
 
 void Textbox::registerGraphics() {
+	if (_scrollTextBox) {
+		_scrollTextBox->registerGraphics();
+		return;
+	}
+
 	RenderObject::registerGraphics();
 	if (_scrollbar)
 		_scrollbar->registerGraphics();
@@ -114,6 +103,11 @@ void Textbox::registerGraphics() {
 }
 
 void Textbox::updateGraphics() {
+	if (_scrollTextBox) {
+		// The ScrollTextBox is registered separately and updates itself.
+		return;
+	}
+
 	if (_autoClearTime && g_nancy->getTotalPlayTime() > _autoClearTime)
 		clear();
 
@@ -129,9 +123,36 @@ void Textbox::updateGraphics() {
 	RenderObject::updateGraphics();
 }
 
+bool Textbox::coversTaskbar() const {
+	return _scrollTextBox ? _scrollTextBox->coversTaskbar() : false;
+}
+
+void Textbox::setFullMode(bool open) {
+	if (_scrollTextBox)
+		_scrollTextBox->setFullMode(open);
+}
+
 void Textbox::handleInput(NancyInput &input) {
-	if (_scrollbar)
+	if (_scrollTextBox) {
+		_scrollTextBox->handleInput(input);
+		return;
+	}
+
+	if (!isVisible())
+		return;
+
+	if (_scrollbar) {
+		Common::Rect wheelArea = _screenPosition;
+		wheelArea.extend(_scrollbar->getTrackRect());
+
+		float scrollPos = _scrollbar->getPos();
+		if (scrollWithMouseWheel(input, wheelArea, scrollPos,
+				wheelScrollStep(_screenPosition.height(), getInnerHeight()))) {
+			_scrollbar->setPosition(scrollPos);
+		}
+
 		_scrollbar->handleInput(input);
+	}
 
 	bool hasHighlight = false;
 	for (uint i = 0; i < _hotspots.size(); ++i) {
@@ -170,33 +191,41 @@ void Textbox::drawTextbox() {
 	assert(tbox);
 
 	Common::Rect textBounds = _fullSurface.getBounds();
-	uint16 baseFontID;
 	uint16 highlightFontID = tbox->highlightConversationFontID;
 
-	if (g_nancy->getGameType() >= kGameTypeNancy10) {
-		baseFontID = (_fontIDOverride != -1) ? _fontIDOverride : tbox->conversationFontID;
-	} else {
-		// TODO: These bounds are not right: the right offset is a bit off,
-		// and the left offset takes into account the scrollbar, which doesn't
-		// exist in this widget.
-		textBounds.top += tbox->upOffset;
-		textBounds.bottom -= tbox->downOffset;
-		textBounds.left += tbox->leftOffset;
-		textBounds.right -= tbox->rightOffset;
+	// TODO: These bounds are not right: the right offset is a bit off,
+	// and the left offset takes into account the scrollbar, which doesn't
+	// exist in this widget.
+	textBounds.top += tbox->upOffset;
+	textBounds.bottom -= tbox->downOffset;
+	textBounds.left += tbox->leftOffset;
+	textBounds.right -= tbox->rightOffset;
 
-		baseFontID = (_fontIDOverride != -1) ? _fontIDOverride : tbox->defaultFontID;
+	uint16 baseFontID = (_fontIDOverride != -1) ? _fontIDOverride : tbox->defaultFontID;
 
-		const Font *font = g_nancy->_graphics->getFont(baseFontID);
-		textBounds.top -= font->getFontHeight();
-	}
+	const Font *font = g_nancy->_graphics->getFont(baseFontID);
+	textBounds.top -= font->getFontHeight();
 
 	HypertextParser::drawAllText(textBounds, 0, baseFontID, highlightFontID);
 
+	// The Nancy 1-9 box is always on screen. (Nancy 10+ renders through the
+	// ScrollTextBox and never reaches this path.)
 	setVisible(true);
 }
 
 void Textbox::clear() {
-	if (_textLines.size()) {
+	// Nancy16 shows its captions in the UI instead
+	if (NDUI::Manager *ndui = NancySceneState.getNDUI()) {
+		ndui->setCaption(Common::String());
+		return;
+	}
+
+	if (_scrollTextBox) {
+		_scrollTextBox->clear();
+		return;
+	}
+
+	if (!_textLines.empty()) {
 		HypertextParser::clear();
 		if (_scrollbar) {
 			_scrollbar->resetPosition();
@@ -205,12 +234,14 @@ void Textbox::clear() {
 		_fontIDOverride = -1;
 		_needsRedraw = true;
 		_autoClearTime = 0;
-
-		// Nancy 10+: the text strip overlaps the taskbar buttons, so
-		// hide it whenever it has no content to show.
-		if (g_nancy->getGameType() >= kGameTypeNancy10)
-			setVisible(false);
 	}
+}
+
+bool Textbox::hasBeenDrawn() const {
+	if (_scrollTextBox)
+		return !_scrollTextBox->needsRedraw();
+
+	return Misc::HypertextParser::hasBeenDrawn();
 }
 
 void Textbox::addTextLine(const Common::String &text, uint32 autoClearTime) {
@@ -221,6 +252,16 @@ void Textbox::addTextLine(const Common::String &text, uint32 autoClearTime) {
 	Common::String debugString = Common::String::format("%d *** ", NancySceneState.getSceneInfo().sceneID);
 	if (text.contains(debugString))
 		return;
+
+	if (NDUI::Manager *ndui = NancySceneState.getNDUI()) {
+		ndui->setCaption(text);
+		return;
+	}
+
+	if (_scrollTextBox) {
+		_scrollTextBox->addTextLine(text, autoClearTime);
+		return;
+	}
 
 	HypertextParser::addTextLine(text);
 
@@ -237,6 +278,11 @@ void Textbox::addTextLine(const Common::String &text, uint32 autoClearTime) {
 }
 
 void Textbox::setOverrideFont(const uint fontID) {
+	if (_scrollTextBox) {
+		_scrollTextBox->setOverrideFont(fontID);
+		return;
+	}
+
 	auto *bsum = GetEngineData(BSUM);
 	assert(bsum);
 

@@ -254,7 +254,7 @@ void ScummEngine::resetPalette(bool isBootUp) {
 			if (_game.id == GID_INDY4 || _game.id == GID_MONKEY2)
 				_townsClearLayerFlag = 0;
 #ifdef USE_RGB_COLOR
-			else if (_game.id == GID_LOOM || _game.id == GID_MONKEY) // Setting a default for MI1 as well!
+			else if (_game.id == GID_LOOM)
 				towns_setTextPaletteFromPtr(tableTownsLoomPalette);
 			else if (_game.version == 3)
 				towns_setTextPaletteFromPtr(tableTownsV3Palette);
@@ -1489,9 +1489,11 @@ void ScummEngine::setCurrentPalette(int palindex) {
 			// Might be glitchy, though...
 			const byte *p = getPalettePtr(_curPalIndex, _roomResource);
 			for (int i = 0; i < 256; ++i) {
-				byte col = egaFindBestMatch(p[0], p[1], p[2]);
-				_egaColorMap[0][i] = col & 0x0F;
-				_egaColorMap[1][i] = col >> 4;
+				if (_game.version < 6 || i == 15 || p[0] < 252 || p[1] < 252 || p[2] < 252) {
+					byte col = egaFindBestMatch(p[0], p[1], p[2]);
+					_egaColorMap[0][i] = col & 0x0F;
+					_egaColorMap[1][i] = col >> 4;
+				}
 				p += 3;
 			}
 		} else {
@@ -1501,6 +1503,8 @@ void ScummEngine::setCurrentPalette(int palindex) {
 				_egaColorMap[1][i] = *pals++ >> 4;
 			}
 		}
+		_virtscr[kMainVirtScreen].setDirtyRange(0, _virtscr[kMainVirtScreen].h);
+		_virtscr[kVerbVirtScreen].setDirtyRange(0, _virtscr[kVerbVirtScreen].h);
 	} else {
 		setPaletteFromPtr(pals);
 	}

@@ -40,8 +40,6 @@
 #include "image/codecs/indeo3.h"
 #endif
 
-#ifdef VIDEO_COKTELDECODER_H
-
 #include "audio/audiostream.h"
 #include "audio/decoders/raw.h"
 #include "audio/decoders/adpcm_intern.h"
@@ -1621,10 +1619,10 @@ public:
 		delete _stream;
 	}
 
-	int readBuffer(int16 *buffer, const int numSamples);
-	bool isStereo() const { return _channels == 2; }
-	int getRate() const { return _rate; }
-	bool endOfData() const { return _stream->pos() >= _stream->size() || _stream->eos() || _stream->err(); }
+	int readBuffer(int16 *buffer, const int numSamples) override;
+	bool isStereo() const override { return _channels == 2; }
+	int getRate() const override { return _rate; }
+	bool endOfData() const override { return _stream->pos() >= _stream->size() || _stream->eos() || _stream->err(); }
 
 private:
 	Common::SeekableReadStream *_stream;
@@ -2373,7 +2371,7 @@ void VMDDecoder::processFrame() {
 					byte r = _stream->readByte() << 2;
 					byte g = _stream->readByte() << 2;
 					byte b = _stream->readByte() << 2;
-					_palette.set(index + j, r, g, b); 
+					_palette.set(index + j, r, g, b);
 				}
 
 				_stream->skip((255 - count) * 3);
@@ -2797,7 +2795,7 @@ public:
 	}
 
 protected:
-	virtual void reset() {
+	void reset() override {
 		Audio::DVI_ADPCMStream::reset();
 		_status.ima_ch[0].last = _startPredictorValue;
 		_status.ima_ch[0].stepIndex = _startIndexValue;
@@ -3032,5 +3030,3 @@ Audio::AudioStream *AdvancedVMDDecoder::VMDAudioTrack::getAudioStream() const {
 }
 
 } // End of namespace Video
-
-#endif // VIDEO_COKTELDECODER_H

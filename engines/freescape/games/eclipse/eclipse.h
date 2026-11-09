@@ -19,6 +19,9 @@
  *
  */
 
+#ifndef FREESCAPE_ECLIPSE_H
+#define FREESCAPE_ECLIPSE_H
+
 #include "common/file.h"
 
 #include "freescape/music.h"
@@ -109,21 +112,27 @@ public:
 	Common::String getScoreString(int score);
 	void drawScoreString(int score, int x, int y, uint32 front, uint32 back, Graphics::Surface *surface);
 
-	soundFx *load1bPCM(Common::SeekableReadStream *file, int offset);
 	void loadHeartFramesCPC(Common::SeekableReadStream *file, int restOffset, int beatOffset);
 	void loadHeartFramesZX(Common::SeekableReadStream *file, int restOffset, int beatOffset);
 	void loadHeartFramesDOS(Common::SeekableReadStream *file, int restOffset, int beatOffset);
 	void drawHeartIndicator(Graphics::Surface *surface, int x, int y);
 
-	// CPC heart frames stored as indexed (CLUT8) for per-area re-paletting
-	Common::Array<Graphics::ManagedSurface *> _heartFramesCPCIndexed;
+	// Heart frames stored as indexed (CLUT8) for per-area re-paletting (CPC, CGA)
+	Common::Array<Graphics::ManagedSurface *> _heartFramesIndexed;
 	void updateHeartFramesCPC();
+	void updateHeartFrames(const byte *palette);
+
+	// No CGA ankh in the bundle, so the masks are built at load time
+	Graphics::ManagedSurface *_ankhIndicatorMask;
+	Graphics::ManagedSurface *_ankhCollectedMask;
+	void loadAnkhIndicatorMask();
+	void loadAnkhCollectedMask();
+	void updateAnkhIndicator(const byte *palette);
 
 	Common::Array<byte> _musicData; // TEMUSIC.ST TEXT segment (Atari ST)
 	Common::Array<byte> _c64MusicData;
 	EclipseC64SFXPlayer *_playerC64Sfx;
 	bool _c64UseSFX;
-	void playSoundC64(int index) override;
 	void toggleC64Sound();
 
 	MusicPlayer *_playerMusic;
@@ -181,11 +190,15 @@ public:
 	bool triggerWinCondition() override;
 	bool checkIfGameEnded() override;
 	void endGame() override;
-	void loadSoundsFx(Common::SeekableReadStream *file, int offset, int number) override;
-	void playSoundFx(int index, bool sync) override;
+	void playSoundFx(int index, bool sync, Sound::Type type = Sound::kTypeNormal) override;
 
 	Common::Error saveGameStreamExtended(Common::WriteStream *stream, bool isAutosave = false) override;
 	Common::Error loadGameStreamExtended(Common::SeekableReadStream *stream) override;
+
+private:
+	Sound *_soundFx;
 };
 
 }
+
+#endif // FREESCAPE_ECLIPSE_H

@@ -29,7 +29,7 @@
 #include "math/utils.h"
 
 #include "freescape/freescape.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/variables.h"
 #include "freescape/objects/sensor.h"
 #include "freescape/sweepAABB.h"
 #include "freescape/doodle.h"
@@ -38,6 +38,36 @@
 namespace Freescape {
 
 FreescapeEngine *g_freescape;
+
+#ifdef IPHONE
+static const char *const kIOSGamepadControllerKey = "gamepad_controller";
+static const char *const kIOSGamepadControllerMinimalLayoutKey = "gamepad_controller_minimal_layout";
+static const char *const kIOSGamepadControllerDirectionalInputKey = "gamepad_controller_directional_input";
+static const int kIOSGamepadControllerDirectionalInputDpad = 1;
+
+static void clearIOSGamepadControllerSetting(FreescapeEngine::IOSGamepadControllerSetting &setting) {
+	setting.present = false;
+	setting.value.clear();
+}
+
+static void saveIOSGamepadControllerSetting(FreescapeEngine::IOSGamepadControllerSetting &setting,
+		const Common::ConfigManager::Domain *domain, const char *key) {
+	setting.present = domain && domain->contains(key);
+	setting.value = setting.present ? domain->getVal(key) : Common::String();
+}
+
+static void restoreIOSGamepadControllerSettingValue(const FreescapeEngine::IOSGamepadControllerSetting &setting,
+		const Common::String &domainName, const char *key) {
+	Common::ConfigManager::Domain *domain = ConfMan.getDomain(domainName);
+	if (!domain)
+		return;
+
+	if (setting.present)
+		ConfMan.set(key, setting.value, domainName);
+	else if (domain->contains(key))
+		ConfMan.removeKey(key, domainName);
+}
+#endif
 
 bool isEncodedCPCDirectColor(uint8 index) {
 	return index >= 64 && index < 96;
@@ -92,7 +122,7 @@ byte getCPCPixel(byte cpc_byte, int index, bool mode1) {
 }
 
 FreescapeEngine::FreescapeEngine(OSystem *syst, const ADGameDescription *gd)
-	: Engine(syst), _gameDescription(gd), _gfx(nullptr) {
+	: Engine(syst), _gameDescription(gd), _gfx(nullptr), _sound(nullptr) {
 	if (!ConfMan.hasKey("render_mode") || ConfMan.get("render_mode").empty())
 		_renderMode = Common::kRenderEGA;
 	else
@@ -228,6 +258,8 @@ FreescapeEngine::FreescapeEngine(OSystem *syst, const ADGameDescription *gd)
 	// close-up detail. Other games need a smaller value to avoid clipping of nearby objects
 	_nearClipPlane = (isDriller() || isDark()) ? 2 : 0.5;
 	_farClipPlane = 8192 + 1802; // Added some extra distance to avoid flickering
+	_fieldOfView = 75.0f;
+	_viewAspectRatio = isCastle() ? 1.6f : 2.18f;
 
 	// These depends on the specific game
 	_playerHeight = 0;
@@ -258,7 +290,6 @@ FreescapeEngine::FreescapeEngine(OSystem *syst, const ADGameDescription *gd)
 	_viewArea = _fullscreenViewArea;
 	_rnd = new Common::RandomSource("freescape");
 	_gfx = nullptr;
-	_speaker = nullptr;
 	_savedScreen = nullptr;
 
 	_timerStarted = false;
@@ -285,13 +316,11 @@ FreescapeEngine::FreescapeEngine(OSystem *syst, const ADGameDescription *gd)
 	_gameStateBits = 0;
 	_eventManager = new EventManagerWrapper(g_system->getEventManager());
 
-	// Workaround to make the game playable on iOS: remove when there
-	// is a better way to hint the best controls
 #ifdef IPHONE
-	const Common::String &gameDomain = ConfMan.getActiveDomainName();
-	ConfMan.setBool("gamepad_controller", true, gameDomain);
-	ConfMan.setBool("gamepad_controller_minimal_layout", true, gameDomain);
-	ConfMan.setInt("gamepad_controller_directional_input", 1 /* kDirectionalInputDpad */, gameDomain);
+	_iosGamepadControllerSettingsSaved = false;
+	clearIOSGamepadControllerSetting(_iosGamepadController);
+	clearIOSGamepadControllerSetting(_iosGamepadControllerMinimalLayout);
+	clearIOSGamepadControllerSetting(_iosGamepadControllerDirectionalInput);
 #endif
 	g_freescape = this;
 	g_debugger = new Debugger(g_freescape);
@@ -302,9 +331,58 @@ bool FreescapeEngine::isTouchscreenActive() const {
 	return _debugSimulateTouchscreen || g_system->hasFeature(OSystem::kFeatureTouchscreen);
 }
 
+void FreescapeEngine::setIOSGamepadControllerEnabled(bool enabled) {
+#ifdef IPHONE
+	if (!_iosGamepadControllerSettingsSaved) {
+		_iosGamepadControllerDomain = ConfMan.getActiveDomainName();
+		if (_iosGamepadControllerDomain.empty())
+			return;
+
+		const Common::ConfigManager::Domain *domain = ConfMan.getDomain(_iosGamepadControllerDomain);
+		saveIOSGamepadControllerSetting(_iosGamepadController, domain, kIOSGamepadControllerKey);
+		saveIOSGamepadControllerSetting(_iosGamepadControllerMinimalLayout, domain, kIOSGamepadControllerMinimalLayoutKey);
+		saveIOSGamepadControllerSetting(_iosGamepadControllerDirectionalInput, domain, kIOSGamepadControllerDirectionalInputKey);
+		_iosGamepadControllerSettingsSaved = true;
+	}
+
+	if (_iosGamepadControllerDomain.empty())
+		return;
+
+	ConfMan.setBool(kIOSGamepadControllerKey, enabled, _iosGamepadControllerDomain);
+	if (enabled) {
+		ConfMan.setBool(kIOSGamepadControllerMinimalLayoutKey, true, _iosGamepadControllerDomain);
+		ConfMan.setInt(kIOSGamepadControllerDirectionalInputKey, kIOSGamepadControllerDirectionalInputDpad, _iosGamepadControllerDomain);
+	}
+	g_system->applyBackendSettings();
+#else
+	(void)enabled;
+#endif
+}
+
+void FreescapeEngine::restoreIOSGamepadControllerSettings() {
+#ifdef IPHONE
+	if (!_iosGamepadControllerSettingsSaved)
+		return;
+
+	restoreIOSGamepadControllerSettingValue(_iosGamepadController, _iosGamepadControllerDomain, kIOSGamepadControllerKey);
+	restoreIOSGamepadControllerSettingValue(_iosGamepadControllerMinimalLayout, _iosGamepadControllerDomain, kIOSGamepadControllerMinimalLayoutKey);
+	restoreIOSGamepadControllerSettingValue(_iosGamepadControllerDirectionalInput, _iosGamepadControllerDomain, kIOSGamepadControllerDirectionalInputKey);
+	g_system->applyBackendSettings();
+
+	clearIOSGamepadControllerSetting(_iosGamepadController);
+	clearIOSGamepadControllerSetting(_iosGamepadControllerMinimalLayout);
+	clearIOSGamepadControllerSetting(_iosGamepadControllerDirectionalInput);
+	_iosGamepadControllerDomain.clear();
+	_iosGamepadControllerSettingsSaved = false;
+#endif
+}
+
 FreescapeEngine::~FreescapeEngine() {
+	restoreIOSGamepadControllerSettings();
+
 	removeTimers();
 	delete _rnd;
+	delete _sound;
 
 	if (_title && _title != _border) {
 		_title->free();
@@ -334,18 +412,10 @@ FreescapeEngine::~FreescapeEngine() {
 
 	delete _gfx;
 	delete _dataBundle;
-	delete _speaker;
 
 	for (auto &it : _indicators) {
 		it->free();
 		delete it;
-	}
-
-	for (auto &it : _soundsFx) {
-		if (it._value) {
-			free(it._value->data);
-			free(it._value);
-		}
 	}
 
 	if (_savedScreen) {
@@ -635,6 +705,13 @@ static float getStereoSeparation(FreescapeEngine *engine, float fov, float aspec
 	return MIN(maxSeparation, maxDisparity / denominator);
 }
 
+Math::Vector3d FreescapeEngine::getCameraRenderPosition() {
+	// Keep the eye off wall surfaces so the near plane never crosses them; collisions still use _position.
+	if (isCastle() && !_noClipMode)
+		return _currentArea->separateCameraFromWall(_position, _nearClipPlane + 1.0f);
+	return _position;
+}
+
 void FreescapeEngine::drawFrame() {
 	_gfx->updateColorCycling();
 	int farClipPlane = _farClipPlane;
@@ -646,10 +723,13 @@ void FreescapeEngine::drawFrame() {
 		return;
 	}
 
-	const float fov = 75.0f;
-	float aspectRatio = isCastle() ? 1.6 : 2.18;
+	const float fov = _fieldOfView;
+	float aspectRatio = _viewAspectRatio;
+
+	Math::Vector3d renderPosition = getCameraRenderPosition();
+
 	_gfx->updateProjectionMatrix(fov, aspectRatio, _nearClipPlane, farClipPlane);
-	_gfx->positionCamera(_position, _position + _cameraFront, _roll);
+	_gfx->positionCamera(renderPosition, renderPosition + _cameraFront, _roll);
 
 	if (_underFireFrames > 0) {
 		int underFireColor = _currentArea->_underFireBackgroundColor;
@@ -669,7 +749,8 @@ void FreescapeEngine::drawFrame() {
 
 	drawBackground();
 	if (_avoidRenderingFrames == 0) { // Avoid rendering inside objects
-		_currentArea->draw(_gfx, _ticks / 10, _position, _cameraFront, false, fov, aspectRatio, _nearClipPlane, farClipPlane);
+		if (_currentArea->hasDrawableObjects())
+			_currentArea->draw(_gfx, _ticks / 10, renderPosition, _cameraFront, _roll, false, fov, aspectRatio, _nearClipPlane, farClipPlane);
 		if (_gameStateControl == kFreescapeGameStatePlaying &&
 		    _currentArea->hasActiveGroups() && _ticks % 50 == 0) {
 			executeMovementConditions();
@@ -709,8 +790,11 @@ void FreescapeEngine::drawFrame() {
 }
 
 void FreescapeEngine::drawFrameStereo(int farClipPlane) {
-	const float fov = 75.0f;
-	float aspectRatio = isCastle() ? 1.6 : 2.18;
+	const float fov = _fieldOfView;
+	float aspectRatio = _viewAspectRatio;
+
+	Math::Vector3d renderPosition = getCameraRenderPosition();
+
 	const float stereoConvergence = getStereoConvergence(this);
 	const float stereoMaxSeparation = getStereoMaxSeparation(this, stereoConvergence);
 	const float stereoForegroundDistance = getStereoForegroundDistance(this, stereoConvergence);
@@ -736,21 +820,21 @@ void FreescapeEngine::drawFrameStereo(int farClipPlane) {
 	_gfx->clear(0, 0, 0, true);
 	_gfx->setStereoEye(Renderer::kStereoEyeFlatAnaglyph);
 	_gfx->updateProjectionMatrix(fov, aspectRatio, _nearClipPlane, farClipPlane);
-	_gfx->positionCamera(_position, _position + _cameraFront, _roll);
+	_gfx->positionCamera(renderPosition, renderPosition + _cameraFront, _roll);
 
 	drawBackground();
-	if (_avoidRenderingFrames == 0)
-		_currentArea->drawDepthLayer(_gfx, _ticks / 10, _position, _cameraFront, false, Area::kRenderDepthBackground, stereoForegroundDistance, fov, aspectRatio, _nearClipPlane, farClipPlane);
+	if (_avoidRenderingFrames == 0 && _currentArea->hasDrawableObjects())
+		_currentArea->drawDepthLayer(_gfx, _ticks / 10, renderPosition, _cameraFront, _roll, false, Area::kRenderDepthBackground, stereoForegroundDistance, fov, aspectRatio, _nearClipPlane, farClipPlane);
 
 	for (int pass = 0; pass < 2; pass++) {
 		_gfx->setStereoEye(pass == 0 ? Renderer::kStereoEyeLeft : Renderer::kStereoEyeRight);
 		_gfx->updateProjectionMatrix(fov, aspectRatio, _nearClipPlane, farClipPlane);
-		_gfx->positionCamera(_position, _position + _cameraFront, _roll);
+		_gfx->positionCamera(renderPosition, renderPosition + _cameraFront, _roll);
 
 		_gfx->clearDepthBuffer();
 
-		if (_avoidRenderingFrames == 0) // Avoid rendering inside objects
-			_currentArea->drawDepthLayer(_gfx, _ticks / 10, _position, _cameraFront, false, Area::kRenderDepthForeground, stereoForegroundDistance, fov, aspectRatio, _nearClipPlane, farClipPlane);
+		if (_avoidRenderingFrames == 0 && _currentArea->hasDrawableObjects()) // Avoid rendering inside objects
+			_currentArea->drawDepthLayer(_gfx, _ticks / 10, renderPosition, _cameraFront, _roll, false, Area::kRenderDepthForeground, stereoForegroundDistance, fov, aspectRatio, _nearClipPlane, farClipPlane);
 
 		if (_underFireFrames > 0) {
 			for (auto &it : _sensors) {
@@ -857,6 +941,9 @@ void FreescapeEngine::processInput() {
 				continue;
 		}
 
+		if (handleInput(event))
+			continue;
+
 		switch (event.type) {
 		case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
 			if (_hasFallen || _playerWasCrushed)
@@ -914,7 +1001,7 @@ void FreescapeEngine::processInput() {
 				_savedScreen = nullptr;
 				break;
 			case kActionChangeMode:
-				playSound(_soundIndexCollide, false, _movementSoundHandle);
+				playSound(_soundIndexCollide, false, Sound::kTypeMovement);
 				_shootMode = !_shootMode;
 				centerCrossair();
 				if (!_shootMode) {
@@ -1082,19 +1169,21 @@ void FreescapeEngine::beforeStarting() {}
 
 Common::Error FreescapeEngine::run() {
 	_vsyncEnabled = g_system->getFeatureState(OSystem::kFeatureVSync);
+	setIOSGamepadControllerEnabled(false);
 	_frameLimiter = new Graphics::FrameLimiter(g_system, ConfMan.getInt("engine_speed"));
 	// Initialize graphics
 	//_screenW = g_system->getWidth();
 	//_screenH = g_system->getHeight();
 	_gfx = createRenderer(_screenW, _screenH, _renderMode, ConfMan.getBool("authentic_graphics"));
-	_speaker = new SizedPCSpeaker();
 	_crossairPosition.x = _screenW / 2;
 	_crossairPosition.y = _screenH / 2;
 
 	// The following error code will force return to launcher
 	// but it will not force any other GUI message to be displayed
-	if (!_gfx)
+	if (!_gfx) {
+		restoreIOSGamepadControllerSettings();
 		return Common::kUserCanceled;
+	}
 
 	_gfx->init();
 
@@ -1136,6 +1225,7 @@ Common::Error FreescapeEngine::run() {
 			debugC(1, kFreescapeDebugMove, "Starting area %d", _currentArea->getAreaID());
 			beforeStarting();
 			_gameStateControl = kFreescapeGameStatePlaying;
+			setIOSGamepadControllerEnabled(true);
 		} else if (_gameStateControl == kFreescapeGameStateEnd)
 			endGame();
 
@@ -1147,6 +1237,7 @@ Common::Error FreescapeEngine::run() {
 
 		checkSensors();
 		checkIfPlayerWasCrushed();
+		updateScripts();
 		drawFrame();
 
 		if (_shootingFrames == 0) {
@@ -1174,6 +1265,7 @@ Common::Error FreescapeEngine::run() {
 	_eventManager->clearExitEvents();
 	CursorMan.showMouse(true);
 	g_system->lockMouse(false);
+	restoreIOSGamepadControllerSettings();
 	return Common::kNoError;
 }
 
@@ -1240,32 +1332,32 @@ bool FreescapeEngine::checkIfGameEnded() {
 		return false;
 
 	if (_gameStateVars[k8bitVariableShield] == 0) {
-		playSound(_soundIndexNoShield, true, _soundFxHandle);
+		playSound(_soundIndexNoShield, true);
 
 		if (!_noShieldMessage.empty())
 			insertTemporaryMessage(_noShieldMessage, _countdown - 2);
 		_gameStateControl = kFreescapeGameStateEnd;
 	} else if (_gameStateVars[k8bitVariableEnergy] == 0 && isDriller()) {
-		playSound(_soundIndexNoEnergy, true, _soundFxHandle);
+		playSound(_soundIndexNoEnergy, true);
 
 		if (!_noEnergyMessage.empty())
 			insertTemporaryMessage(_noEnergyMessage, _countdown - 2);
 		_gameStateControl = kFreescapeGameStateEnd;
 	} else if (_hasFallen) {
 		_hasFallen = false;
-		playSound(_soundIndexFallen, false, _soundFxHandle);
+		playSound(_soundIndexFallen, false);
 
 		if (!_fallenMessage.empty())
 			insertTemporaryMessage(_fallenMessage, _countdown - 4);
 		_gameStateControl = kFreescapeGameStateEnd;
 	} else if (_countdown <= 0) {
-		playSound(_soundIndexTimeout, false, _soundFxHandle);
+		playSound(_soundIndexTimeout, false);
 
 		if (!_timeoutMessage.empty())
 			insertTemporaryMessage(_timeoutMessage, _countdown - 4);
 		_gameStateControl = kFreescapeGameStateEnd;
 	} else if (_playerWasCrushed) {
-		playSound(_soundIndexCrushed, true, _soundFxHandle);
+		playSound(_soundIndexCrushed, true);
 
 		_playerWasCrushed = false;
 		if (!_crushedMessage.empty())
@@ -1275,7 +1367,7 @@ bool FreescapeEngine::checkIfGameEnded() {
 		// so no need to wait for the end of the game
 		_endGameDelayTicks = 0;
 	} else if (_forceEndGame) {
-		playSound(_soundIndexForceEndGame, true, _soundFxHandle);
+		playSound(_soundIndexForceEndGame, true);
 
 		_forceEndGame = false;
 		if (!_forceEndGameMessage.empty())
@@ -1469,6 +1561,7 @@ Common::Error FreescapeEngine::loadGameStream(Common::SeekableReadStream *stream
 	}
 	assert(_playerHeight > 0);
 	_gameStateControl = kFreescapeGameStatePlaying;
+	setIOSGamepadControllerEnabled(true);
 	return loadGameStreamExtended(stream);
 }
 

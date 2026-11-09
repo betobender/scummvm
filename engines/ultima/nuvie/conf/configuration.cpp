@@ -36,7 +36,7 @@ Configuration::Configuration() : _configChanged(false) {
 	_localKeys["GameType"] = "";
 	_localKeys["GameName"] = "";
 	_localKeys["GameID"] = "";
-	_localKeys["datadir"] = "data";		// This maps to ultima6/ in ultima.dat
+	_localKeys["datadir"] = "";		// ultima.dat ultima6/ subfolder mapped into local filesystem root
 	_localKeys["quit"] = "no";
 }
 
@@ -301,7 +301,7 @@ void Configuration::load(GameId gameId, bool isEnhanced) {
 	const Common::ConfigManager::Domain &domain = *ConfMan.getActiveDomain();
 	Common::ConfigManager::Domain::const_iterator it;
 	for (it = domain.begin(); it != domain.end(); ++it) {
-		_settings[(*it)._key] = (*it)._value;
+		_settings[it->_key] = it->_value;
 	}
 }
 

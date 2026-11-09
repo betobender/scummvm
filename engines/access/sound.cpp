@@ -84,13 +84,14 @@ void SoundManager::loadSoundTable(int idx, int fileNum, int subfile, int priorit
 	_soundTable[idx] = SoundEntry(soundResource, priority, fileNum, subfile);
 }
 
-void SoundManager::loadAndAddSound(const FileIdent &ident, int priority) {
-	loadAndAddSound(ident._fileNum, ident._subFile);
+int SoundManager::loadAndAddSound(const FileIdent &ident, int priority) {
+	return loadAndAddSound(ident._fileNum, ident._subFile);
 }
 
-void SoundManager::loadAndAddSound(int fileNum, int subfile, int priority) {
+int SoundManager::loadAndAddSound(int fileNum, int subfile, int priority) {
 	Resource *res = _vm->_files->loadFile(fileNum, subfile);
 	_soundTable.push_back(SoundEntry(res, priority, fileNum, subfile));
+	return _soundTable.size() - 1;
 }
 
 bool SoundManager::hasLoadedSound(const FileIdent &ident) const {
@@ -107,7 +108,10 @@ void SoundManager::freeSound(int idx) {
 	stopSound();
 	assert(!isSoundQueued(idx));
 	delete _soundTable[idx]._res;
-	_soundTable[idx] = SoundEntry();
+	if (idx == (int)_soundTable.size() - 1)
+		_soundTable.pop_back();
+	else
+		_soundTable[idx] = SoundEntry();
 }
 
 void SoundManager::playSound(int soundIndex, bool loop /* = false */) {
@@ -115,6 +119,12 @@ void SoundManager::playSound(int soundIndex, bool loop /* = false */) {
 	if (isSoundQueued(soundIndex))
 		// Prevent duplicate copies of a sound from being queued
 		return;
+
+	if (soundIndex >= (int)_soundTable.size()) {
+		// Happens in Noctropolis demo 2
+		warning("Request to play sound with invalid index %d.", soundIndex);
+		return;
+	}
 
 	int priority = _soundTable[soundIndex]._priority;
 	playSound(_soundTable[soundIndex]._res, priority, loop, soundIndex);
@@ -245,6 +255,11 @@ void SoundManager::loadSounds(const Common::Array<RoomInfo::SoundIdent> &sounds)
 
 int SoundManager::loadRawSound(const Common::Path &path, int priority) {
 	debugC(1, kDebugSound, "loadRawSound(%s)", path.toString().c_str());
+	if (!_vm->_files->existFile(path)) {
+		// In Noctropolis demo 2 intro sounds are not included
+		warning("Request to load missing sound file '%s'.", path.toString().c_str());
+		return -1;
+	}
 	Resource *soundRes = _vm->_files->loadRawFile(path);
 	_soundTable.push_back(SoundEntry(soundRes, priority));
 	return _soundTable.size() - 1;
@@ -303,8 +318,8 @@ MusicManagerMIDI::MusicManagerMIDI(AccessEngine *vm) : MusicManager(vm), Audio::
 	//
 	switch (musicType) {
 	case MT_ADLIB: {
-		if (_vm->getGameID() == kGameAmazon && !_vm->isDemo()) {
-			Resource   *midiDrvResource = _vm->_files->loadFile(92, 1);
+		if (_vm->gameIs(kGameAmazon) && !_vm->isDemo()) {
+			Resource *midiDrvResource = _vm->_files->loadFile(92, 1);
 			Common::MemoryReadStream *adLibInstrumentStream = new Common::MemoryReadStream(midiDrvResource->data(), midiDrvResource->_size);
 
 			_driver = Audio::MidiDriver_Miles_AdLib_create("", "", adLibInstrumentStream);
@@ -462,7 +477,7 @@ void MusicManagerMIDI::newMusic(int musicId, int mode) {
 		_isLooping = (mode == 2);
 		_tempMusic = _music;
 		stopSong();
-		int musicFile = (_vm->getGameID() == kGameAmazon ? 97 : 98);
+		int musicFile = (_vm->gameIs(kGameAmazon) ? 97 : 98);
 		loadMusic(musicFile, musicId);
 	}
 

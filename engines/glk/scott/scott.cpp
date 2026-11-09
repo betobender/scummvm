@@ -38,6 +38,7 @@
 #include "glk/scott/command_parser.h"
 #include "glk/scott/definitions.h"
 #include "glk/scott/load_game.h"
+#include "glk/scott/load_zx_spectrum.h"
 #include "glk/scott/game_info.h"
 #include "glk/scott/globals.h"
 #include "glk/scott/hulk.h"
@@ -121,6 +122,8 @@ void Scott::runGame() {
 		_topWidth = 80;
 		_topHeight = 10;
 	}
+
+	showZXSpectrumTapeTitleScreen();
 
 	if (CURRENT_GAME == TI994A) {
 		display(_G(_bottomWindow), "In this adventure, you may abbreviate any word \
@@ -1495,7 +1498,7 @@ void Scott::listExits() {
 	writeToRoomDescriptionStream("\n\n%s", _G(_sys)[EXITS].c_str());
 
 	while (ct < 6) {
-		if ((&_G(_rooms)[MY_LOC])->_exits[ct] != 0) {
+		if (_G(_rooms)[MY_LOC]._exits[ct] != 0) {
 			if (f) {
 				writeToRoomDescriptionStream("%s", _G(_sys)[EXITS_DELIMITER].c_str());
 			}
@@ -1515,7 +1518,7 @@ void Scott::listExitsSpectrumStyle() {
 	int f = 0;
 
 	while (ct < 6) {
-		if ((&_G(_rooms)[MY_LOC])->_exits[ct] != 0) {
+		if (_G(_rooms)[MY_LOC]._exits[ct] != 0) {
 			if (f == 0) {
 				writeToRoomDescriptionStream("\n\n%s", _G(_sys)[EXITS].c_str());
 			} else {

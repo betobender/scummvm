@@ -23,7 +23,7 @@
 
 #include "engines/nancy/nancy.h"
 #include "engines/nancy/graphics.h"
-#include "engines/nancy/resource.h"
+#include "engines/nancy/resource/resource.h"
 #include "engines/nancy/sound.h"
 #include "engines/nancy/input.h"
 #include "engines/nancy/util.h"
@@ -38,7 +38,6 @@ namespace Action {
 // Tiles within a color group share their board sprite (srcRow, srcCol); the
 // hidden `value` field disambiguates them, which is visible in the back of
 // each gem, when picking it up.
-// TODO: Use correct cursor type (hand instead of eyeglass) when picking up gems.
 static void packGrid(const SortPuzzle::Cell grid[][SortPuzzle::kMaxCols], uint16 rows, uint16 cols, Common::Array<int16> &out) {
 	out.clear();
 	out.push_back((int16)rows);
@@ -74,6 +73,11 @@ static bool unpackGrid(const Common::Array<int16> &in, SortPuzzle::Cell grid[][S
 }
 
 void SortPuzzle::readData(Common::SeekableReadStream &stream) {
+	if (g_nancy->getGameType() >= kGameTypeNancy12) {
+		readDataNancy12(stream);
+		return;
+	}
+
 	readFilename(stream, _boardImageName);
 	readFilename(stream, _cursorImageName);
 
@@ -99,16 +103,16 @@ void SortPuzzle::readData(Common::SeekableReadStream &stream) {
 	_pickupSound.readNormal(stream);
 	_dropSound.readNormal(stream);
 
-	_winScene.readData(stream);
+	_solveScene._sceneChange.readData(stream);
 	stream.skip(2);
-	_winFlag.label = stream.readSint16LE();
-	_winFlag.flag  = stream.readByte();
-	_winSound.readNormal(stream);
+	_solveScene._flag.label = stream.readSint16LE();
+	_solveScene._flag.flag  = stream.readByte();
+	_solveSound.readNormal(stream);
 
-	_cancelScene.readData(stream);
+	_exitScene._sceneChange.readData(stream);
 	stream.skip(2);
-	_cancelFlag.label = stream.readSint16LE();
-	_cancelFlag.flag  = stream.readByte();
+	_exitScene._flag.label = stream.readSint16LE();
+	_exitScene._flag.flag  = stream.readByte();
 
 	readRect(stream, _exitHotspot);
 	stream.skip(2); // exit cursor type id
@@ -120,6 +124,102 @@ void SortPuzzle::readData(Common::SeekableReadStream &stream) {
 
 	_cellWidth  = _cellSrcRects[0][0].width();
 	_cellHeight = _cellSrcRects[0][0].height();
+}
+
+// Nancy 12 reworked the record: the board layout is computed from a single cell
+// size plus origin/spacing (rather than a per-position rect grid), the solved
+// layout is stored as a preset grid of values, and the win check is configurable
+// through a set of flags.
+void SortPuzzle::readDataNancy12(Common::SeekableReadStream &stream) {
+	readFilename(stream, _boardImageName);  // 0x000
+	readFilename(stream, _cursorImageName); // 0x021
+	_retainState = (stream.readByte() != 0); // 0x042
+	_rows = stream.readUint16LE();           // 0x043
+	_cols = stream.readUint16LE();           // 0x045
+
+	_matchRow          = (stream.readByte() != 0); // 0x047
+	_matchGroup        = (stream.readByte() != 0); // 0x048
+	_matchValue        = (stream.readByte() != 0); // 0x049
+	_allowSwappedPairs = (stream.readByte() != 0); // 0x04a
+	_usePresetBoard    = (stream.readByte() != 0); // 0x04b
+
+	for (uint i = 0; i < (uint)(kPresetStride * kPresetStride); ++i) { // 0x04c
+		_presetBoard[i] = stream.readSint16LE();
+	}
+
+	stream.skip(2);                          // 0x114 unknown
+	_groupDivisor = stream.readUint16LE();   // 0x116
+	_valueRange   = stream.readUint16LE();   // 0x118
+
+	_valueSrcRects.resize(kNumValueRects);   // 0x11a
+	for (uint i = 0; i < (uint)kNumValueRects; ++i) {
+		readRect(stream, _valueSrcRects[i]);
+	}
+
+	_originX  = stream.readUint16LE();        // 0x83a
+	_originY  = stream.readUint16LE();        // 0x83c
+	_spacingY = stream.readUint16LE();        // 0x83e
+	_spacingX = stream.readUint16LE();        // 0x840
+
+	_pickupSound.readNormal(stream);          // 0x842
+	_dropSound.readNormal(stream);            // 0x873
+
+	_solveScene._sceneChange.readData(stream);               // 0x8a4
+	stream.skip(2);
+	_solveScene._flag.label = stream.readSint16LE();
+	_solveScene._flag.flag  = stream.readByte();
+	_solveSound.readNormal(stream);             // 0x8bd
+
+	_exitScene._sceneChange.readData(stream);            // 0x8ee
+	stream.skip(2);
+	_exitScene._flag.label = stream.readSint16LE();
+	_exitScene._flag.flag  = stream.readByte();
+
+	readRect(stream, _exitHotspot);           // 0x907
+	stream.skip(2); // exit cursor type id
+
+	if (_rows > kMaxRows) _rows = kMaxRows;
+	if (_cols > kMaxCols) _cols = kMaxCols;
+	if (_groupDivisor == 0) _groupDivisor = 1;
+	if (_valueRange == 0) _valueRange = 1;
+
+	_cellWidth  = _valueSrcRects[0].width();
+	_cellHeight = _valueSrcRects[0].height();
+}
+
+Common::Rect SortPuzzle::cellSprite(const Cell &cell) const {
+	if (g_nancy->getGameType() >= kGameTypeNancy12) {
+		// A pie is identified by the row it started in (cell.srcRow), its kind
+		// (the group of columns it started in, cell.srcCol) and its size
+		// (cell.value). The source sprites are laid out as a grid over all three,
+		// so the index has to combine them.
+		if (cell.srcRow >= 0 && cell.srcCol >= 0 && cell.value >= 0) {
+			uint idx = ((uint)cell.srcRow * kGroupsPerRow + (uint)cell.srcCol) * kSizesPerKind + (uint)cell.value;
+			if (idx < (uint)kNumBoardRects) {
+				return _valueSrcRects[idx];
+			}
+		}
+		return Common::Rect();
+	}
+
+	if (cell.srcRow >= 0 && cell.srcRow < kMaxSourceRows &&
+			cell.srcCol >= 0 && cell.srcCol < kMaxSourceCols) {
+		return _cellSrcRects[cell.srcRow][cell.srcCol];
+	}
+	return Common::Rect();
+}
+
+// Nancy 12 keeps a second, smaller set of sprites for the piece being carried
+// around. When a size has no such sprite the board one is drawn instead.
+Common::Rect SortPuzzle::heldSprite(const Cell &cell) const {
+	if (cell.value >= 0 && cell.value < kSizesPerKind) {
+		const Common::Rect &src = _valueSrcRects[kNumBoardRects + cell.value];
+		if (!src.isEmpty()) {
+			return src;
+		}
+	}
+
+	return cellSprite(cell);
 }
 
 void SortPuzzle::initState() {
@@ -137,8 +237,18 @@ void SortPuzzle::initState() {
 			Cell &cell = _solved[r][c];
 			cell.srcRow  = (int16)r;
 			cell.srcCol  = (int16)(c / groupSize);
-			cell.value   = (int16)(g_nancy->_randomSource->getRandomNumber(_valueRange - 1));
 			cell.isEmpty = false;
+
+			if (_usePresetBoard) {
+				cell.value = _presetBoard[r * kPresetStride + c];
+				if (cell.value == kEmptyCell) {
+					cell.srcRow  = kEmptyCell;
+					cell.isEmpty = true;
+				}
+				continue;
+			}
+
+			cell.value = (int16)(g_nancy->_randomSource->getRandomNumber(_valueRange - 1));
 
 			int groupStart = (c / groupSize) * groupSize;
 			int k = c;
@@ -171,8 +281,24 @@ void SortPuzzle::persistState() {
 	SortPuzzleData *spd = (SortPuzzleData *)NancySceneState.getPuzzleData(SortPuzzleData::getTag());
 	if (!spd)
 		return;
+
+	// A piece that is being carried is stored back in the slot it came from,
+	// so that it isn't lost when the puzzle is left or a game is saved
+	Cell *heldSlot = nullptr;
+	Cell emptySlot;
+	if (_hasHeld && _heldFromRow >= 0 && _heldFromCol >= 0) {
+		heldSlot = &_current[_heldFromRow][_heldFromCol];
+		emptySlot = *heldSlot;
+		*heldSlot = _held;
+		heldSlot->isEmpty = false;
+	}
+
 	packGrid(_current, _rows, _cols, spd->currentState);
 	packGrid(_solved,  _rows, _cols, spd->solvedState);
+
+	if (heldSlot) {
+		*heldSlot = emptySlot;
+	}
 }
 
 void SortPuzzle::init() {
@@ -186,8 +312,17 @@ void SortPuzzle::init() {
 
 	g_nancy->_resource->loadImage(_boardImageName, _boardImage);
 	_boardImage.setTransparentColor(_drawSurface.getTransparentColor());
-	g_nancy->_resource->loadImage(_cursorImageName, _cursorImage);
-	_cursorImage.setTransparentColor(_drawSurface.getTransparentColor());
+
+	// Nancy 12 has no separate cursor image and draws the held piece from the board one
+	if (!_cursorImageName.empty() && _cursorImageName.baseName() != "NO_FILE") {
+		g_nancy->_resource->loadImage(_cursorImageName, _cursorImage);
+		_cursorImage.setTransparentColor(_drawSurface.getTransparentColor());
+	}
+
+	// Cells only react to clicks well inside their own bounds, so that the
+	// near-contiguous grid doesn't drop a piece into the neighboring slot
+	_hotspotInsetX = (_cellWidth  - 1) / 4;
+	_hotspotInsetY = (_cellHeight - 1) / 4;
 
 	initState();
 
@@ -198,11 +333,19 @@ void SortPuzzle::init() {
 	redraw();
 }
 
+// The held piece has to be registered again too when returning from another
+// state (e.g. the main menu), as that clears all render objects
+void SortPuzzle::registerGraphics() {
+	PuzzleRecord::registerGraphics();
+	_heldObject.registerGraphics();
+}
+
 void SortPuzzle::execute() {
 	switch (_state) {
 	case kBegin:
 		init();
 		registerGraphics();
+		NancySceneState.setNoHeldItem();
 		_state = kRun;
 		// fall through
 
@@ -211,17 +354,16 @@ void SortPuzzle::execute() {
 		case kPlaying:
 			break;
 		case kPlayWinSound:
-			if (_winSound.name != "NO SOUND") {
-				g_nancy->_sound->loadSound(_winSound);
-				g_nancy->_sound->playSound(_winSound);
+			if (hasSolveSound()) {
+				playSolveSound();
 				_subState = kWaitWinSound;
 			} else {
 				_subState = kExitToWin;
 			}
 			break;
 		case kWaitWinSound:
-			if (!g_nancy->_sound->isSoundPlaying(_winSound)) {
-				g_nancy->_sound->stopSound(_winSound);
+			if (!isSolveSoundPlaying()) {
+				g_nancy->_sound->stopSound(_solveSound);
 				_subState = kExitToWin;
 			}
 			break;
@@ -235,22 +377,16 @@ void SortPuzzle::execute() {
 	case kActionTrigger:
 		g_nancy->_sound->stopSound(_pickupSound);
 		g_nancy->_sound->stopSound(_dropSound);
-		g_nancy->_sound->stopSound(_winSound);
+		g_nancy->_sound->stopSound(_solveSound);
 		if (_subState == kExitToWin) {
 			SortPuzzleData *spd = (SortPuzzleData *)NancySceneState.getPuzzleData(SortPuzzleData::getTag());
 			if (spd) {
 				spd->currentState.clear();
 				spd->solvedState.clear();
 			}
-			if (_winFlag.label != -1)
-				NancySceneState.setEventFlag(_winFlag);
-			if (_winScene.sceneID != kNoScene)
-				NancySceneState.changeScene(_winScene);
+			_solveScene.execute();
 		} else {
-			if (_cancelFlag.label != -1)
-				NancySceneState.setEventFlag(_cancelFlag);
-			if (_cancelScene.sceneID != kNoScene)
-				NancySceneState.changeScene(_cancelScene);
+			_exitScene.execute();
 		}
 		finishExecution();
 		break;
@@ -258,15 +394,26 @@ void SortPuzzle::execute() {
 }
 
 Common::Rect SortPuzzle::cellRect(int row, int col) const {
-	int x = (int)_originX + col * ((int)_spacingX + _cellWidth);
-	int y = (int)_originY + row * ((int)_spacingY + _cellHeight);
+	// Original uses inclusive-coordinate width (right_raw - left_raw) for the
+	// per-col / per-row step, which is cellWidth-1 in our exclusive convention.
+	int x = (int)_originX + col * ((int)_spacingX + _cellWidth  - 1);
+	int y = (int)_originY + row * ((int)_spacingY + _cellHeight - 1);
 	return Common::Rect(x, y, x + _cellWidth, y + _cellHeight);
+}
+
+Common::Rect SortPuzzle::cellHotspot(int row, int col) const {
+	Common::Rect rect = cellRect(row, col);
+	rect.left   += _hotspotInsetX;
+	rect.right  -= _hotspotInsetX;
+	rect.top    += _hotspotInsetY;
+	rect.bottom -= _hotspotInsetY;
+	return rect;
 }
 
 bool SortPuzzle::hitTestCell(const Common::Point &p, int &outRow, int &outCol) const {
 	for (int r = 0; r < (int)_rows; ++r) {
 		for (int c = 0; c < (int)_cols; ++c) {
-			if (cellRect(r, c).contains(p)) {
+			if (cellHotspot(r, c).contains(p)) {
 				outRow = r;
 				outCol = c;
 				return true;
@@ -283,34 +430,63 @@ void SortPuzzle::handleInput(NancyInput &input) {
 	Common::Rect vpScreen = NancySceneState.getViewport().getScreenPosition();
 	Common::Point mouseVP = input.mousePos - Common::Point(vpScreen.left, vpScreen.top);
 
-	if (_hasHeld && _heldDrawPos != mouseVP) {
-		_heldDrawPos = mouseVP;
-		redraw();
+	// Cheat: show the grid with the value of each gem in the console
+	if (!input.otherKbdInput.empty() && input.otherKbdInput[0].keycode == Common::KEYCODE_SPACE) {
+		debug("-----");
+		for (int r = 0; r < (int)_rows; ++r) {
+			Common::String line;
+			for (int c = 0; c < (int)_cols; ++c) {
+				const Cell &cur = _current[r][c];
+				line += Common::String::format("%d ", cur.value);
+			}
+			debug("%s", line.c_str());
+		}
+		debug("-----");
 	}
+
+	_heldObject.handleInput(input);
+
+	// The dedicated puzzle hands are used: a closed one over a piece that can be
+	// picked up, an open one over a slot the carried piece can go into. Off the
+	// grid the cursor goes blank, since the carried piece is drawn at the mouse.
+	const bool isNancy12 = g_nancy->getGameType() >= kGameTypeNancy12;
 
 	int row, col;
 	bool hitCell = hitTestCell(mouseVP, row, col);
 
+	// An empty slot is only a target while carrying a piece
+	if (hitCell && !_hasHeld && _current[row][col].isEmpty) {
+		hitCell = false;
+	}
+
 	if (!hitCell) {
-		if (!_exitHotspot.isEmpty() && _exitHotspot.contains(mouseVP)) {
-			g_nancy->_cursor->setCursorType(g_nancy->_cursor->_puzzleExitCursor);
+		// Before Nancy 12, the puzzle can't be left while a piece is carried
+		if (_hasHeld && !isNancy12) {
+			g_nancy->_cursor->setCursorType(CursorManager::kNewBlank);
+		} else if (hoverExitHotspot(input)) {
 			if (input.input & NancyInput::kLeftMouseButtonUp)
 				_subState = kExitToCancel;
+		} else if (_hasHeld) {
+			g_nancy->_cursor->setCursorType(CursorManager::kNewBlank);
 		}
 		return;
 	}
 
-	g_nancy->_cursor->setCursorType(_hasHeld ? CursorManager::kDragHand
-	                                         : CursorManager::kHotspot);
+	if (!_hasHeld) {
+		g_nancy->_cursor->setCursorType(CursorManager::kNewDragHandHotspot);
+	} else {
+		g_nancy->_cursor->setCursorType(isNancy12 ? CursorManager::kNewUseHandHotspot
+		                                          : CursorManager::kNewDropHandHotspot);
+	}
+
 	if (!(input.input & NancyInput::kLeftMouseButtonUp))
 		return;
 
 	if (!_hasHeld) {
-		if (_current[row][col].isEmpty)
-			return;
-		_held = _current[row][col];
-		_hasHeld = true;
+		holdCell(_current[row][col], true, input);
 		_current[row][col].isEmpty = true;
+		_heldFromRow = row;
+		_heldFromCol = col;
 		if (_pickupSound.name != "NO SOUND") {
 			g_nancy->_sound->loadSound(_pickupSound);
 			g_nancy->_sound->playSound(_pickupSound);
@@ -324,10 +500,10 @@ void SortPuzzle::handleInput(NancyInput &input) {
 			g_nancy->_sound->playSound(_dropSound);
 		}
 		if (target.isEmpty) {
-			_hasHeld = false;
+			holdCell(_held, false, input);
 			checkSolved();
 		} else {
-			_held = target;
+			holdCell(target, true, input);
 		}
 	}
 
@@ -336,18 +512,97 @@ void SortPuzzle::handleInput(NancyInput &input) {
 	redraw();
 }
 
+bool SortPuzzle::cellsMatch(const Cell &cur, const Cell &sol) const {
+	if (cur.isEmpty || sol.isEmpty) {
+		return cur.isEmpty && sol.isEmpty;
+	}
+
+	if (_matchRow && cur.srcRow != sol.srcRow) {
+		return false;
+	}
+
+	if (_matchGroup && cur.srcCol != sol.srcCol) {
+		return false;
+	}
+
+	if (_matchValue && cur.value != sol.value) {
+		return false;
+	}
+
+	return true;
+}
+
 void SortPuzzle::checkSolved() {
+	const int groupSize = _groupDivisor ? (int)_cols / (int)_groupDivisor : 0;
+
 	for (int r = 0; r < (int)_rows; ++r) {
-		for (int c = 0; c < (int)_cols; ++c) {
-			const Cell &cur = _current[r][c];
-			const Cell &sol = _solved[r][c];
-			if (cur.isEmpty || cur.srcRow != sol.srcRow ||
-			    cur.srcCol != sol.srcCol || cur.value != sol.value)
+		int c = 0;
+		while (c < (int)_cols) {
+			if (cellsMatch(_current[r][c], _solved[r][c])) {
+				++c;
+				continue;
+			}
+
+			// Puzzles that pair their cells up two at a time accept a pair sorted
+			// the other way around
+			if (!_allowSwappedPairs || groupSize != 2 || c >= (int)_cols - 1) {
 				return;
+			}
+
+			if (!cellsMatch(_current[r][c + 1], _solved[r][c]) ||
+					!cellsMatch(_current[r][c], _solved[r][c + 1])) {
+				return;
+			}
+
+			const Cell &first  = _current[r][c];
+			const Cell &second = _current[r][c + 1];
+			bool firstKeepsGroup  = first.isEmpty  || first.srcCol  == _solved[r][c].srcCol;
+			bool secondKeepsGroup = second.isEmpty || second.srcCol == _solved[r][c + 1].srcCol;
+
+			if (firstKeepsGroup && secondKeepsGroup) {
+				c += 2;
+			} else if (!_matchGroup || firstKeepsGroup) {
+				c += 1;
+			} else {
+				return;
+			}
 		}
 	}
+
 	_isSolved = true;
 	_subState = kPlayWinSound;
+}
+
+// Puts a piece on the cursor, or takes the held one off it when hasHeld is false.
+void SortPuzzle::holdCell(const Cell &cell, bool hasHeld, NancyInput &input) {
+	_held = cell;
+	_hasHeld = hasHeld;
+
+	if (!_hasHeld) {
+		_heldObject.setVisible(false);
+		_heldObject.putDown();
+		return;
+	}
+
+	// Older games carry a separate cursor image with one sprite per value;
+	// Nancy 12 has no cursor image and draws the held gem from the board image.
+	if (g_nancy->getGameType() < kGameTypeNancy12 && _held.value >= 0 && _held.value < kNumCursors &&
+			_cursorImage.getBounds().contains(_cursorSrcRects[_held.value])) {
+		_heldObject._drawSurface.create(_cursorImage, _cursorSrcRects[_held.value]);
+	} else {
+		Common::Rect src = g_nancy->getGameType() >= kGameTypeNancy12 ? heldSprite(_held) : cellSprite(_held);
+		if (!_boardImage.getBounds().contains(src)) {
+			_heldObject.setVisible(false);
+			_heldObject.putDown();
+			return;
+		}
+		_heldObject._drawSurface.create(_boardImage, src);
+	}
+
+	_heldObject.setTransparent(true);
+	_heldObject.setVisible(true);
+	_heldObject.pickUp();
+	_heldObject.handleInput(input);
 }
 
 void SortPuzzle::redraw() {
@@ -358,36 +613,11 @@ void SortPuzzle::redraw() {
 			const Cell &cell = _current[r][c];
 			if (cell.isEmpty)
 				continue;
-			if (cell.srcRow < 0 || cell.srcRow >= kMaxSourceRows ||
-			    cell.srcCol < 0 || cell.srcCol >= kMaxSourceCols)
-				continue;
-			const Common::Rect &src = _cellSrcRects[cell.srcRow][cell.srcCol];
+			Common::Rect src = cellSprite(cell);
 			if (src.isEmpty())
 				continue;
 			Common::Rect dst = cellRect(r, c);
 			_drawSurface.blitFrom(_boardImage, src, Common::Point(dst.left, dst.top));
-		}
-	}
-
-	if (_hasHeld) {
-		bool drawn = false;
-		if (_held.value >= 0 && _held.value < kNumCursors) {
-			const Common::Rect &src = _cursorSrcRects[_held.value];
-			if (!src.isEmpty()) {
-				int x = _heldDrawPos.x - src.width()  / 2;
-				int y = _heldDrawPos.y - src.height() / 2;
-				_drawSurface.blitFrom(_cursorImage, src, Common::Point(x, y));
-				drawn = true;
-			}
-		}
-		if (!drawn && _held.srcRow >= 0 && _held.srcRow < kMaxSourceRows &&
-		    _held.srcCol >= 0 && _held.srcCol < kMaxSourceCols) {
-			const Common::Rect &src = _cellSrcRects[_held.srcRow][_held.srcCol];
-			if (!src.isEmpty()) {
-				int x = _heldDrawPos.x - _cellWidth  / 2;
-				int y = _heldDrawPos.y - _cellHeight / 2;
-				_drawSurface.blitFrom(_boardImage, src, Common::Point(x, y));
-			}
 		}
 	}
 

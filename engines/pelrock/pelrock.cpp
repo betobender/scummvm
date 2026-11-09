@@ -20,23 +20,33 @@
  */
 
 #include "common/config-manager.h"
-#include "common/events.h"
 #include "common/file.h"
-#include "common/scummsys.h"
+
 #include "engines/util.h"
+
 #include "graphics/cursorman.h"
 #include "graphics/paletteman.h"
+#include "graphics/screen.h"
 
 #include "pelrock/actions.h"
+#include "pelrock/chrono.h"
 #include "pelrock/computer.h"
 #include "pelrock/console.h"
-#include "pelrock/detection.h"
+#include "pelrock/dialog.h"
+#include "pelrock/events.h"
+#include "pelrock/fonts/large_font.h"
 #include "pelrock/fonts/small_font.h"
+#include "pelrock/fonts/small_font_double.h"
+#include "pelrock/graphics.h"
+#include "pelrock/menu.h"
 #include "pelrock/offsets.h"
 #include "pelrock/pathfinding.h"
-#include "pelrock/pelrock.h"
+#include "pelrock/resources.h"
+#include "pelrock/room.h"
 #include "pelrock/slidingpuzzle.h"
+#include "pelrock/sound.h"
 #include "pelrock/util.h"
+#include "pelrock/video.h"
 
 namespace Pelrock {
 
@@ -649,10 +659,29 @@ void PelrockEngine::updateAnimations() {
 	// Draw Alfred
 	chooseAlfredStateAndDraw();
 
-	// Second pass: sprites in front of Alfred (sprite zOrder <= alfredZOrder)
-	for (uint i = 0; i < _room->_currentRoomAnims.size(); i++) {
-		if (_room->_currentRoomAnims[i].zOrder <= alfredZOrder && _room->_currentRoomAnims[i].zOrder != 255) {
-			drawNextFrame(&_room->_currentRoomAnims[i]);
+	if (_roomChangedDuringAnimation) {
+		// Room changed mid-frame: re-render both passes for the new room using the
+		// correct z-order. The old alfredZOrder above is stale (old room/position),
+		// and the first-pass sprites were wiped when setScreen() copied the new
+		// background over _compositeBuffer.
+		_roomChangedDuringAnimation = false;
+		sortAnimsByZOrder(_room->_currentRoomAnims);
+		alfredZOrder = calculateAlfredZOrder(_alfredState.y);
+		for (uint i = 0; i < _room->_currentRoomAnims.size(); i++) {
+			if (_room->_currentRoomAnims[i].zOrder > alfredZOrder || _room->_currentRoomAnims[i].zOrder == 255)
+				drawNextFrame(&_room->_currentRoomAnims[i]);
+		}
+		drawIdleFrame();
+		for (uint i = 0; i < _room->_currentRoomAnims.size(); i++) {
+			if (_room->_currentRoomAnims[i].zOrder <= alfredZOrder && _room->_currentRoomAnims[i].zOrder != 255)
+				drawNextFrame(&_room->_currentRoomAnims[i]);
+		}
+	} else {
+		// Second pass: sprites in front of Alfred (sprite zOrder <= alfredZOrder)
+		for (uint i = 0; i < _room->_currentRoomAnims.size(); i++) {
+			if (_room->_currentRoomAnims[i].zOrder <= alfredZOrder && _room->_currentRoomAnims[i].zOrder != 255) {
+				drawNextFrame(&_room->_currentRoomAnims[i]);
+			}
 		}
 	}
 
@@ -825,6 +854,13 @@ void PelrockEngine::chooseAlfredStateAndDraw() {
 					_alfredState.y = exit->targetY;
 					setScreenAndPrepare(exit->targetRoom, exit->dir);
 					_graphics->placeStickersFirstPass();
+					// Signal updateAnimations() to re-render both sprite passes for the
+					// new room. setScreen() wiped _compositeBuffer with the new background,
+					// so the first-pass sprites (already drawn for the old room) are gone.
+					// The second-pass loop below also uses the stale old alfredZOrder,
+					// which would misclassify new-room sprites. The flag triggers a full
+					// re-render with the correct z-order after this function returns.
+					_roomChangedDuringAnimation = true;
 				}
 			}
 		} else {
@@ -2055,6 +2091,7 @@ void PelrockEngine::pyramidCollapse() {
 	pyramidHotspot->index = 7;
 	_room->disableHotspot(21, pyramidHotspot, PERSIST_BOTH);
 
+	delete pyramidHotspot;
 	_dialog->say(_res->_ingameTexts[kTextTaLuegoLucas]);
 
 	// Walk Alfred to right edge exit -> room 21
@@ -2127,7 +2164,7 @@ void PelrockEngine::endingScene() {
 			idleAnim.animData[0] = new byte[sprite->stride];
 			extractSingleFrame(legsAnimData, idleAnim.animData[0], 0, sprite->w, sprite->h);
 			sprite->animData[0] = idleAnim;
-			sprite->animData[1] = mainAnim;
+			sprite->animData[1] = mainAnim; //-V557
 		} else {
 			sprite->animData[0] = mainAnim;
 		}

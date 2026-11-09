@@ -148,7 +148,7 @@ void Screen::loadMouseCursors() {
 	// enable or disable the mouse cursor
 	if (settings._mouseOptions._enabled) {
 		Common::File cursorsFile;
-		if (!cursorsFile.open("data/graphics/cursors.txt"))
+		if (!cursorsFile.open("graphics/cursors.txt"))
 			error("Could not load mouse cursors");
 
 		for (int idx = 0; idx < 5; ++idx)
@@ -157,7 +157,7 @@ void Screen::loadMouseCursors() {
 		// Set the default initial cursor
 		const uint TRANSPARENT = format.RGBToColor(0x80, 0x80, 0x80);
 		MouseCursorSurface *c = _mouseCursors[MC_DEFAULT];
-		CursorMan.pushCursor(*c, c->_hotspot.x, c->_hotspot.y, TRANSPARENT, false);
+		CursorMan.pushCursor(*c, c->_hotspot.x, c->_hotspot.y, TRANSPARENT);
 		CursorMan.showMouse(true);
 
 	} else {
@@ -176,7 +176,7 @@ void Screen::setMouseCursor(MouseCursor cursor) {
 		_currentMouseCursor = cursor;
 
 		const uint TRANSPARENT = format.RGBToColor(0x80, 0x80, 0x80);
-		CursorMan.replaceCursor(*c, c->_hotspot.x, c->_hotspot.y, TRANSPARENT, false);
+		CursorMan.replaceCursor(*c, c->_hotspot.x, c->_hotspot.y, TRANSPARENT);
 	}
 }
 

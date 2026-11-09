@@ -50,7 +50,7 @@ public:
 	void updateFromWidget(Graphics::MacWidget *widget, bool spriteEditable) override;
 	Graphics::TextAlign getAlignment();
 
-	uint32 getBackColor() override { return _bgcolor; }
+	uint32 getBackColor() override;
 	void setBackColor(uint32 bgCol) override;
 	uint32 getForeColor() override { return _fgcolor; }
 	uint32 getForeColor(int start, int end);
@@ -94,6 +94,7 @@ public:
 
 	void writeCastData(Common::SeekableWriteStream *writeStream) override;
 	uint32 getCastDataSize() override;			// This is the size of the data in the 'CASt' resource
+	bool canWriteCastData() override;
 
 	uint32 getSTXTResourceSize();
 	uint32 writeSTXTResource(Common::SeekableWriteStream *writeStream, uint32 offset);
@@ -136,6 +137,7 @@ private:
 
 	uint32 _bgcolor;
 	uint32 _fgcolor;
+	bool _bgColorSet;
 };
 
 } // End of namespace Director

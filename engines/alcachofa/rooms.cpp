@@ -911,6 +911,12 @@ static char *trimTrailing(char *start, char *end) {
 	return end;
 }
 
+static bool isEmptyLine(const char *start, const char *end) {
+	while (start < end && isSpace(*start))
+		start++;
+	return start >= end;
+}
+
 void World::loadLocalizedNames() {
 	const char *filename = g_engine->game().getObjectFileName();
 	char textFileKey = g_engine->game().getTextFileKey();
@@ -946,6 +952,11 @@ void World::loadLocalizedNames() {
 		// key#value
 		while (lineStart < fileEnd) {
 			char *lineEnd = find(lineStart, fileEnd, '\n');
+			if (isEmptyLine(lineStart, lineEnd)) {
+				// empty lines are only in Corvino/Balones/Mamelucos
+				lineStart = lineEnd + 1;
+				continue;
+			}
 			char *keyEnd = find(lineStart, lineEnd, '#');
 			if (keyEnd == lineStart || keyEnd == lineEnd || keyEnd + 1 == lineEnd)
 				error("Invalid localized name line separator");
@@ -1080,8 +1091,7 @@ public:
 			if (lastSep == String::npos)
 				lastSep = 0;
 			auto fileName = String::format("%s.%s", fullPath.c_str() + lastSep, extension.c_str());
-			_members.emplace_back(
-				new EmbeddedArchiveMember(fileName, *this, fileOffset, fileOffset + fileSize)); //-V1023
+			_members.emplace_back(new EmbeddedArchiveMember(fileName, *this, fileOffset, fileOffset + fileSize)); //-V1023
 		}
 
 		if (_file->pos() > endPosition)

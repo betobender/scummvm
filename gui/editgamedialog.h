@@ -91,6 +91,13 @@ protected:
 	CheckboxWidget *_globalMT32Override;
 	CheckboxWidget *_globalVolumeOverride;
 
+	CheckboxWidget *_enableHotspotsCheckbox;
+	StaticTextWidget *_hotspotMarkerPopUpDesc;
+	PopUpWidget *_hotspotMarkerPopUp;
+	CheckboxWidget *_showHotspotTextCheckbox;
+	StaticTextWidget *_hotspotKeyModePopUpDesc;
+	PopUpWidget *_hotspotKeyModePopUp;
+
 	ScrollContainerWidget *_gameContainer;
 	OptionsContainerWidget *_engineOptions;
 };

@@ -35,11 +35,11 @@ MODULE_OBJS := \
 	decoders/adpcm.o \
 	decoders/aiff.o \
 	decoders/apc.o \
-	decoders/asf.o \
 	decoders/flac.o \
 	decoders/g711.o \
 	decoders/iff_sound.o \
 	decoders/mac_snd.o \
+	decoders/mac_snd_mace.o \
 	decoders/mp3.o \
 	decoders/qdm2.o \
 	decoders/quicktime.o \
@@ -50,6 +50,7 @@ MODULE_OBJS := \
 	decoders/wma.o \
 	decoders/xa.o \
 	decoders/xan_dpcm.o \
+	mac/halestorm.o \
 	mods/universaltracker.o \
 	mods/infogrames.o \
 	mods/maxtrax.o \
@@ -71,6 +72,21 @@ MODULE_OBJS := \
 	softsynth/eas.o \
 	softsynth/pcspk.o \
 	softsynth/ay8912.o
+
+ifdef USE_HMI_AUDIO
+MODULE_OBJS += \
+	effects/hmi/interfaces/envelope.o \
+	effects/hmi/interfaces/filter1.o \
+	effects/hmi/hmifxfp.o \
+	effects/hmi/hmifxlib.o \
+	effects/hmi/interfaces/mono_delay.o \
+	effects/hmi/interfaces/phasor.o \
+	effects/hmi/interfaces/resonator.o \
+	effects/hmi/interfaces/reverb1.o \
+	effects/hmi/interfaces/reverb2.o \
+	effects/hmi/interfaces/ring_modulator.o \
+	effects/hmi/interfaces/stereo_delay.o
+endif
 
 ifndef DISABLE_NUKED_OPL
 MODULE_OBJS += \
@@ -133,6 +149,11 @@ MODULE_OBJS += \
 	rwopl3.o
 endif
 
+ifdef USE_NFM
+MODULE_OBJS += \
+	nfmopl.o
+endif
+	
 ifdef USE_VGMTRANS_AUDIO
 MODULE_OBJS += \
 	soundfont/rawfile.o \

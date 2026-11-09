@@ -22,7 +22,8 @@
 #ifndef NANCY_ACTION_GRIDMAPPUZZLE_H
 #define NANCY_ACTION_GRIDMAPPUZZLE_H
 
-#include "engines/nancy/action/actionrecord.h"
+#include "engines/nancy/action/puzzlerecord.h"
+#include "engines/nancy/action/mousefollow.h"
 #include "engines/nancy/commontypes.h"
 
 namespace Nancy {
@@ -33,9 +34,9 @@ namespace Action {
 // either. Wins when the items-grid layout matches any of the solutions stored
 // in the action record.
 // Called from scene 6240 in Nancy10.
-class GridMapPuzzle : public RenderActionRecord {
+class GridMapPuzzle : public PuzzleRecord {
 public:
-	GridMapPuzzle() : RenderActionRecord(7) {}
+	GridMapPuzzle() : PuzzleRecord(7) {}
 	virtual ~GridMapPuzzle() {}
 
 	void init() override;
@@ -93,26 +94,21 @@ protected:
 	Common::Rect _itemsItemSrcRects[kMaxItems];
 	Common::Rect _resultSrcRects[kMaxResultRects];
 
-	int16 _leftHalfIdx[kMaxItems];
-	int16 _rightHalfIdx[kMaxItems];
-	int16 _resultSlot[kMaxItems];
+	// Result-letter lookups are indexed by the placed item's MAP coordinates,
+	// not by its item index. _letterByMapCol[mapCol] is rendered as the left
+	// half of the item's letter pair; _letterByMapRow[mapRow] as the right.
+	int16 _letterByMapRow[kMaxItems] = {};
+	int16 _letterByMapCol[kMaxItems] = {};
+	int16 _resultSlot[kMaxItems] = {};
 
-	int16 _autoPlaceFlag[kMaxItems];
+	int16 _autoPlaceFlag[kMaxItems] = {};
 
 	uint16 _numSolutions = 0;
-	int16 _solutionRows[kMaxSolutions][kMaxItems];
-	int16 _solutionCols[kMaxSolutions][kMaxItems];
+	int16 _solutionRows[kMaxSolutions][kMaxItems] = {};
+	int16 _solutionCols[kMaxSolutions][kMaxItems] = {};
 
 	SoundDescription _pickupSound;
 	SoundDescription _placeSound;
-	SoundDescription _winSound;
-
-	SceneChangeDescription _winScene;
-	FlagDescription        _winFlag;
-	SceneChangeDescription _cancelScene;
-	FlagDescription        _cancelFlag;
-
-	Common::Rect _exitHotspot;
 
 	// Runtime state
 
@@ -128,22 +124,25 @@ protected:
 
 	ItemSlot _items[kMaxItems];
 	int      _heldItem = -1;
-	Common::Point _heldDrawPos;
+	MouseFollowObject _heldObject;
 	bool     _isSolved = false;
 
 	Graphics::ManagedSurface _boardImage;
+	Graphics::ManagedSurface _cursorImage; // item sprite atlas (right-side panel)
 
 	void initState();
 	void persistState();
 	void redraw();
+	void holdItem(int item, NancyInput &input);
 	Common::Rect mapCellRect(int row, int col) const;
 	Common::Rect itemsCellRect(int row, int col) const;
+	Common::Rect mapCellHitRect(int row, int col) const;
+	Common::Rect itemsCellHitRect(int row, int col) const;
 	Common::Rect resultsCellRect(int row, int col) const;
 	bool hitTestMap(const Common::Point &p, int &outRow, int &outCol) const;
 	bool hitTestItems(const Common::Point &p, int &outRow, int &outCol) const;
 	int findItemInMap(int row, int col) const;
 	int findItemInItems(int row, int col) const;
-	bool isCorrectMapPlacement(int item, int row, int col) const;
 	void checkSolved();
 };
 

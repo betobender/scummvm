@@ -19,7 +19,9 @@
  *
  */
 
+#include "common/config-manager.h"
 #include "common/error.h"
+#include "common/file.h"
 #include "common/system.h"
 #include "engines/advancedDetector.h"
 #include "engines/util.h"
@@ -30,6 +32,7 @@
 #include "chamber/decompr.h"
 #include "chamber/cga.h"
 #include "chamber/ega.h"
+#include "chamber/amiga.h"
 #include "chamber/ega_resource.h"
 #include "chamber/anim.h"
 #include "chamber/cursor.h"
@@ -111,15 +114,14 @@ uint16 benchmarkCpu(void) {
 }
 
 void randomize(void) {
-	warning("STUB: Randomize()");
-#if 0
-	union REGS reg;
-
-	reg.h.ah = 0;
-	int86(0x1A, &reg, &reg);
-	rand_seed = reg.h.dl;
-	Rand();
-#endif
+	// Original read the low byte of the BIOS timer-tick count (int 0x1A) into
+	// rand_seed, the starting offset into the fixed aleat_data[] table that
+	// getRand() walks. Keep that table (it reproduces the DOS game's exact
+	// random distribution) but derive the offset from ScummVM's RandomSource:
+	// its constructor already honors the "random_seed" config key for
+	// reproducible runs and otherwise seeds from the time/date.
+	rand_seed = (byte)g_vm->_rnd->getRandomNumber(255);
+	getRand();
 }
 
 void TRAP() {
@@ -175,16 +177,29 @@ void gameLoop(byte *target) {
 				continue;
 
 			the_command = Swap16(script_word_vars.next_protozorqs_cmd);
-			if (the_command)
+			if (the_command) {
+				// Consume the queued command so a terminal command (e.g. the
+				// "failed the ordeals" death scene queued by checkGameTimeLimit)
+				// fires once instead of every frame. updateProtozorqs() re-queues
+				// live protozorq AI each frame, but it early-returns once
+				// bvar_26 >= 63 and would otherwise leave this set forever.
+				script_word_vars.next_protozorqs_cmd = 0;
 				goto process;
+			}
 
-			if (Swap16(next_vorts_ticks) < script_word_vars.timer_ticks2) { /*TODO: is this ok? ticks2 is BE, ticks3 is LE*/
+			// next_vorts_ticks is a plain numeric value (always set as
+			// Swap16(timer_ticks2) + 5), but timer_ticks2 is stored big-endian.
+			// Byteswap the timer side so both operands are numeric; the old
+			// Swap16(next_vorts_ticks) compared two BE representations, so the
+			// vort command fired at the wrong times (vorts popping in/out of
+			// rooms and leaving artifacts from the interrupted walk anim).
+			if (next_vorts_ticks < Swap16(script_word_vars.timer_ticks2)) {
 				the_command = next_vorts_cmd;
 				if (the_command)
 					goto process;
 			}
 
-			if (Swap16(next_turkey_ticks) < script_word_vars.timer_ticks2) { /*TODO: is this ok? ticks2 is BE, ticks4 is LE*/
+			if (next_turkey_ticks < Swap16(script_word_vars.timer_ticks2)) {
 				the_command = next_turkey_cmd;
 				if (the_command)
 					goto process;
@@ -196,7 +211,11 @@ process:
 			;
 			updateUndrawCursor(target);
 			refreshSpritesData();
-			runCommand();
+			// Drain priority commands at this main-loop baseline too: a queued
+			// AI command (e.g. the timed "failed the ordeals" death scene) may
+			// fire a priority command, which runCommand now propagates up to a
+			// runCommandKeepSp anchor instead of running it nested.
+			runCommandKeepSp();
 			if (g_vm->_shouldRestart)
 				return;
 			blitSpritesToBackBuffer();
@@ -208,6 +227,7 @@ process:
 			updateUndrawCursor(target);
 			refreshSpritesData();
 			uint16 restart = runCommandKeepSp();
+			clearButtons();
 			if (restart == RUNCOMMAND_RESTART && g_vm->_shouldRestart)
 				return;
 			script_byte_vars.used_commands++;
@@ -237,7 +257,8 @@ Common::Error ChamberEngine::init() {
 
 	// Initialize graphics using following:
 	bool isCustomHerc = false;
-	if (_videoMode == Common::RenderMode::kRenderEGA) {
+	if (isEgaLikeRenderer()) {
+		// EGA and Amiga use the chunky 8bpp pipeline (1 byte/pixel, linear lines)
 		_screenW = 320;
 		_screenH = 200;
 		_screenBits = 8;
@@ -282,7 +303,32 @@ Common::Error ChamberEngine::init() {
 
 	Graphics::Surface *splash = nullptr;
 
-	if (_gameDescription->flags & GF_SPLASH_PRESEGA) {
+	if (getPlatform() == Common::kPlatformAmiga) {
+		// Amiga title: static resources (incl. palette) live in KULT, load them first
+		loadAmigaStaticData();
+		if (getLanguage() == Common::EN_USA) {
+			splash = ega_loadFond("INTRO.PIA");
+			if (splash) {
+				g_vm->_renderer->colorSelect(AMIGA_NUM_PALETTES - 1);
+				g_vm->_renderer->backBufferToRealFull();
+				// Splash wraps ega_backbuffer: the surface does not own its pixels
+				delete splash;
+				splash = nullptr;
+				clearKeyboard();
+				readKeyboardChar();
+				if (_shouldQuit)
+					return Common::kNoError;
+			}
+		}
+		splash = ega_loadFond("PRES.BIN");
+		if (!splash) {
+			_shouldQuit = true;
+			return Common::kNoError;
+		}
+		// Last palette index is the full-brightness end of the title fade ramp
+		g_vm->_renderer->colorSelect(AMIGA_NUM_PALETTES - 1);
+		g_vm->_renderer->backBufferToRealFull();
+	} else if (_videoMode == Common::RenderMode::kRenderEGA) {
 		/* EGA title screen */
 		splash = ega_loadFond("PRESEGA.EGA");
 		if (!splash) {
@@ -337,7 +383,9 @@ Common::Error ChamberEngine::init() {
 	}
 
 	if (splash) {
-		if (g_vm->_videoMode != Common::RenderMode::kRenderEGA)
+		// EGA/Amiga splashes wrap ega_backbuffer; only CGA/Herc own their pixels
+		if (g_vm->_videoMode != Common::RenderMode::kRenderEGA &&
+		    g_vm->_videoMode != Common::kRenderAmiga)
 			splash->free();
 		delete splash;
 	}
@@ -356,10 +404,14 @@ Common::Error ChamberEngine::init() {
 		c = 'E';
 	} else {
 		/* Load language selection screen */
-		if (!loadSplash("DRAP.BIN")) {
+		Graphics::Surface *drap = loadSplash("DRAP.BIN");
+		if (!drap) {
+			warning("File DRAP.BIN not found");
 			_shouldQuit = true;
-			return Common::kNoError;
+			return Common::kReadingFailed;
 		}
+		drap->free();
+		delete drap;
 
 		/* Wait for a keypress and show the language selection screen */
 		clearKeyboard();
@@ -421,9 +473,32 @@ Common::Error ChamberEngine::init() {
 			exitGame();
 		/* fond wraps ega_backbuffer via init() — surface does not own pixel data, safe to delete directly */
 		delete fond;
+	} else if (g_vm->getPlatform() == Common::kPlatformAmiga) {
+		// Amiga sprite banks (appendFromFileAmiga); PUZZL/perso banks are merged here
+		ega_sprit_res = new EgaSpriteResource();
+		ega_sprit_res->appendFromFileAmiga("SPRIT.BIN");
+
+		ega_puzzl_res = new EgaSpriteResource();
+		ega_puzzl_res->appendFromFileAmiga("PUZZL.BIN");
+
+		ega_perso_res = new EgaSpriteResource();
+		ega_perso_res->appendFromFileAmiga("A.BIN");
+		ega_perso_res->appendFromFileAmiga("B.BIN");
+
+		Graphics::Surface *fond = loadFond();
+		if (!fond)
+			exitGame();
+		delete fond;
+
+		// Early intro screens set no palette of their own; apply the room palette now
+		amigaApplyRoomPalette(0);
 	} else {
-		while (!loadFond() || !loadSpritesData() || !loadPersData())
+		Graphics::Surface *fond;
+		while (!(fond = loadFond()) || !loadSpritesData() || !loadPersData()) {
+			delete fond;
 			askDisk2();
+		}
+		delete fond;
 	}
 
 	/*TODO: is this necessary?*/
@@ -466,8 +541,13 @@ Common::Error ChamberEngine::execute() {
 	//ResetInput();
 
 	/* Play introduction sequence and initialize game */
+	// Freeze the ordeal timer during the intro/setup: it is installed before this
+	// point (initTimer), so the non-interactive intro would otherwise start the
+	// player's one-hour ordeal budget early.
+	script_byte_vars.game_paused = 1;
 	the_command = 0xC001;
 	runCommand();
+	script_byte_vars.game_paused = 0;
 
 	if (_shouldQuit)
 		return Common::kNoError;
@@ -477,6 +557,12 @@ Common::Error ChamberEngine::execute() {
 
 	/* Initialize cursor backup */
 	processInput();
+
+	if (ConfMan.hasKey("save_slot") && ConfMan.getInt("save_slot") >= 0) {
+		int slot = ConfMan.getInt("save_slot");
+		ConfMan.set("save_slot", "-1");
+		loadGameState(slot);
+	}
 
 #ifdef DEBUG_ENDING
 	script_byte_vars.game_paused = 5;

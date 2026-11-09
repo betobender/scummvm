@@ -49,12 +49,41 @@ static const int8 kFlagNoLabel						= -1;
 static const int8 kEvNoEvent						= -1;
 static const int8 kFrNoFrame						= -1;
 static const uint16 kNoScene						= 9999;
+static const uint16 kNoSceneNancy17					= 0x7fff;	// what the Nancy17 data has in its place
+
+// Nancy15 alternates between three protagonists (Nancy and the Hardy boys
+// Frank and Joe), each of whom keeps their own UI and journal. The two
+// brothers share their progress: whichever is played second inherits it
+// from the other. Nancy25 has five playable characters: Bess, George, Nancy,
+// Ned and the tutorial's character.
+static const uint kMaxPlayerCharactersNancy15		= 3;	// before Nancy25
+static const uint kMaxPlayerCharacters				= 5;
+static const uint kPlayerCharacterFrank				= 1;
+static const uint kPlayerCharacterJoe				= 2;
+
+// Inventory action records name the character whose inventory they change.
+// This value stands for whoever is being played at the time.
+static const byte kPlayerCharacterActive			= 9;
+
+// Taskbar popup UI types. Shared by ControlUIItems (AR 29), UIPopupPrepScene
+// (AR 32) and the Scene UI-prep-scene machinery.
+enum UIType {
+	kUITypeInventory = 1,
+	kUITypeNotebook  = 2,
+	kUITypeCellphone = 3
+};
 
 // Inventory items use types
 static const byte kInvItemUseThenLose				= 0;
 static const byte kInvItemKeepAlways				= 1;
 static const byte kInvItemReturn					= 2;
 static const byte kInvItemNewSceneView				= 3;
+
+// Nancy15 EnableDisableInventory records can name a whole group of items
+// instead of a single one
+static const uint16 kInvItemGroupAll				= 100;
+static const uint16 kInvItemGroupViewable			= 101;
+static const uint16 kInvItemGroupPortable			= 102;
 
 // Inventory item sound override commands
 static const byte kInvSoundOverrideCommandNoSound	= 0;
@@ -93,12 +122,17 @@ static const byte kPlayerDuskDawn					= 2;
 static const byte kSmallVideoFormat					= 1;
 static const byte kLargeVideoFormat					= 2;
 
+// Video container. Auto picks per game type.
 static const byte kVideoPlaytypeAVF					= 0;
 static const byte kVideoPlaytypeBink				= 1;
+static const byte kVideoPlaytypeAuto				= 2;
 
-// Overlay
+// Overlay transparency mode. 1 = opaque, anything >= kPlayOverlayTransparent is
+// drawn transparent (the original engine is 16bpp color-key, with no alpha/blend
+// path, so every transparent mode - Nancy12 also uses 3 - is a plain color key).
 static const byte kPlayOverlayPlain					= 1;
 static const byte kPlayOverlayTransparent			= 2;
+static const byte kPlayOverlayTransparent2			= 3;
 
 static const byte kPlayOverlaySceneChange			= 1;
 static const byte kPlayOverlayNoSceneChange			= 2;
@@ -121,6 +155,7 @@ static const byte kIncrementTableValue				= 1;
 static const byte kDecrementTableValue				= 2;
 static const uint16 kNoTableIndex					= 99;
 static const int16 kNoTableValue					= 9999;
+static const int16 kTimerDurationIndexBase			= 5000;
 
 // Autotext ordering info
 static const uint16 kListLIFO						= 0;
@@ -140,6 +175,7 @@ enum NancyState {
 	kBoot, kLogo, kCredits, kMap,
 	kMainMenu, kLoadSave, kSetup,
 	kHelp, kScene, kSaveDialog,
+	kDesignSelect,	// Nancy15 only
 
 	// Not real states
 	kNone,
@@ -173,7 +209,7 @@ struct SceneChangeWithFlag {
 	SceneChangeDescription _sceneChange;
 	FlagDescription _flag;
 
-	void readData(Common::SeekableReadStream &stream, bool reverseFormat = false);
+	void readData(Common::SeekableReadStream &stream, bool reverseFormat = false, bool terse = false);
 	void execute();
 };
 
@@ -196,12 +232,29 @@ struct FrameBlitDescription {
 	void readData(Common::SeekableReadStream &stream, bool longFormat = false);
 };
 
-// Describes 10 event flag changes to be executed when an action is triggered
+// Describes event flag changes to be executed when an action is triggered.
+// There are always 10, except in Nancy15+ event flag records, which list any number.
 struct MultiEventFlagDescription {
-	FlagDescription descs[10];
+	MultiEventFlagDescription() : descs(10) {}
+
+	Common::Array<FlagDescription> descs;
 
 	void readData(Common::SeekableReadStream &stream);
 	void execute();
+};
+
+// A Nancy 10+ cellphone list entry: an email message (mode 0) or a web-search
+// link (mode 1). Added at runtime by AR 131 (AddSearchLink); the first entry of
+// each list may instead be embedded in the UICL chunk. Which fields are used
+// depends on the mode (see CellPhonePopup). The byte layout differs per source,
+// so each site fills the fields itself rather than sharing a readData.
+struct SearchLink {
+	Common::String key;       // CVTX key whose looked-up text is the list row
+	Common::String value;     // body CVTX key (email); unused for search
+	int16 extra = 0;          // page index (search); unused for email
+	int16 flag = 0;           // stored by the original but unused; reserved
+	int16 eventFlag = -1;     // event-flag index set when the entry is opened
+	bool read = false;        // email only: set once the message is opened
 };
 
 struct SecondaryVideoDescription {
@@ -210,7 +263,7 @@ struct SecondaryVideoDescription {
 	Common::Rect destRect;
 	// 2 unknown/empty rects
 
-	void readData(Common::SeekableReadStream &stream);
+	void readData(Common::SeekableReadStream &stream, bool hasTrailingRects = false);
 };
 
 // Describes set of effects that can be applied to sounds.
@@ -269,6 +322,21 @@ struct SoundDescription {
 	void readTerse(Common::SeekableReadStream &stream);
 };
 
+// The "random sound" block shared by some Nancy 12 puzzles
+struct RandomSoundBlock {
+	Common::Array<Common::String> names;
+	int16 channel = 0;
+	int32 numLoops = 0;
+	int16 volume = 0;
+
+	void readData(Common::SeekableReadStream &stream);
+
+	// Plays one of the sounds, picked at random, and shows its caption, looked up by the
+	// sound's name, first in AUTOTEXT, then in CONVO. Returns the sound's description,
+	// which is left as "NO SOUND" when there is nothing to play.
+	SoundDescription play() const;
+};
+
 // Structs inside nancy.dat, which contains all the data that was
 // originally stored inside the executable
 
@@ -310,8 +378,8 @@ struct Hint {
 };
 
 struct SoundChannelInfo {
-	byte numChannels;
-	byte numSceneSpecificChannels;
+	byte numChannels = 0;
+	byte numSceneSpecificChannels = 0;
 	Common::Array<byte> speechChannels;
 	Common::Array<byte> musicChannels;
 	Common::Array<byte> sfxChannels;
@@ -349,6 +417,16 @@ struct StaticData {
 	void readData(Common::SeekableReadStream &stream, Common::Language language, uint32 endPos, int8 majorVersion, int8 minorVersion);
 };
 
+// Source-rect order shared by the close button and slider widgets in the
+// Nancy 10+ popup header. The tab/filter strips use a different order, with
+// the active entry at index 0.
+enum UIButtonState {
+	kUIButtonIdle = 0,
+	kUIButtonHover = 1,
+	kUIButtonPressed = 2, // dragging, for sliders
+	kUIButtonDisabled = 3
+};
+
 // Reusable button widget embedded in Nancy 10+ popup UIs.
 struct UIButtonRecord {
 	static const uint kRecordSize = 239;
@@ -363,7 +441,7 @@ struct UIButtonRecord {
 	uint32 hoverCursorFlag = 0; // swap cursor sprite on hover when set
 	uint32 secondaryStateField = 0;
 	uint32 initialState = 0; // 0=idle, 1=hover, 2=pressed, 3/4=disabled
-	uint32 reservedField = 0;
+	uint32 pressedDuration = 0; // milliseconds the pressed sprite stays up after a click
 	SoundDescription clickSound;
 };
 

@@ -39,6 +39,7 @@
 #define FORBIDDEN_SYMBOL_EXCEPTION_time_h
 #define FORBIDDEN_SYMBOL_EXCEPTION_fprintf
 #define FORBIDDEN_SYMBOL_EXCEPTION_exit
+#define FORBIDDEN_SYMBOL_EXCEPTION_getchar
 
 #include "backends/platform/atari/osystem_atari.h"
 
@@ -58,6 +59,7 @@
 #include "common/config-manager.h"
 #include "common/debug.h"
 
+//#define SIDECART_OUTPUT
 #define INPUT_ACTIVE
 
 /*
@@ -78,6 +80,8 @@ extern void nf_print(const char* msg);
 
 static int s_app_id = -1;
 static void (*s_old_procterm)(void) = nullptr;
+
+static char s_lastErrorMessage[1024+1];
 
 static volatile uint32 counter_200hz;
 
@@ -280,6 +284,7 @@ OSystem_Atari::~OSystem_Atari() {
 
 		v_clsvwk(_vdi_handle);
 		appl_exit();
+		s_app_id = -1;
 	}
 
 	// graceful exit
@@ -296,10 +301,11 @@ void OSystem_Atari::initBackend() {
 		_vdi_handle = graf_handle(&dummy, &dummy, &dummy, &dummy);
 		if (_vdi_handle < 1) {
 			appl_exit();
+			s_app_id = -1;
 			error("graf_handle() failed");
 		}
 
-		int16 work_in[16] = {};
+		int16 work_in[16] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 };
 		int16 work_out[57] = {};
 
 		// open a virtual screen workstation
@@ -307,6 +313,7 @@ void OSystem_Atari::initBackend() {
 
 		if (_vdi_handle == 0) {
 			appl_exit();
+			s_app_id = -1;
 			error("v_opnvwk() failed");
 		}
 
@@ -335,25 +342,25 @@ void OSystem_Atari::initBackend() {
 #ifdef DISABLE_FANCY_THEMES
 	// On the lite build force "None" as the opl driver, i.e. do not attempt
 	// to emulate anything by default.
-	if (!ConfMan.hasKey("opl_driver")) {
-		ConfMan.set("opl_driver", "null");
+	if (!ConfMan.hasKey("opl_driver", Common::ConfigManager::kApplicationDomain)) {
+		ConfMan.set("opl_driver", "null", Common::ConfigManager::kApplicationDomain);
 	}
 	// On the lite build force "STMIDI" as the audio driver, i.e. do not attempt
 	// to emulate anything by default.
-	if (!ConfMan.hasKey("music_driver")) {
-		ConfMan.set("music_driver", "stmidi");
+	if (!ConfMan.hasKey("music_driver", Common::ConfigManager::kApplicationDomain)) {
+		ConfMan.set("music_driver", "stmidi", Common::ConfigManager::kApplicationDomain);
 	}
-	if (!ConfMan.hasKey("gm_device")) {
-		ConfMan.set("gm_device", "auto");
+	if (!ConfMan.hasKey("gm_device", Common::ConfigManager::kApplicationDomain)) {
+		ConfMan.set("gm_device", "auto", Common::ConfigManager::kApplicationDomain);
 	}
-	if (!ConfMan.hasKey("mt32_device")) {
-		ConfMan.set("mt32_device", "auto");
+	if (!ConfMan.hasKey("mt32_device", Common::ConfigManager::kApplicationDomain)) {
+		ConfMan.set("mt32_device", "auto", Common::ConfigManager::kApplicationDomain);
 	}
 #endif
 	// This produces hard pause even in most optimised engines
 	// and even on CT60...
-	if (!ConfMan.hasKey("autosave_period")) {
-		ConfMan.setInt("autosave_period", 0);
+	if (!ConfMan.hasKey("autosave_period", Common::ConfigManager::kApplicationDomain)) {
+		ConfMan.setInt("autosave_period", 0, Common::ConfigManager::kApplicationDomain);
 	}
 
 	_mixerManager = new AtariMixerManager();
@@ -438,7 +445,16 @@ void OSystem_Atari::fatalError() {
 	if (!s_dtor_already_called)
 		destroy();
 
-	// let exit_restore() and critical_restore() handle the recovery
+	// unlike the crash path via VEC_PROCTERM, give the user a chance to read
+	// the error message on the restored screen (keyboard vectors are restored
+	// by now, too)
+	if (s_lastErrorMessage[0] != '\0') {
+		fprintf(stderr, "%s", s_lastErrorMessage);
+		fprintf(stderr, "Press Enter to exit.\n");
+		fflush(stderr);
+		getchar();
+	}
+
 	exit(1);
 }
 
@@ -448,9 +464,18 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 	static char str[1024+1];
 	snprintf(str, sizeof(str), "[%08d] %s", getMillis(), message);
 
+	if (type == LogMessageType::kError && !nf_stderr_id) {
+		// remember the message for fatalError(): at this point the screen is
+		// usually still in a game video mode, so it has to be reprinted after
+		// the VDI/GEM state is restored (with nf_stderr it is already visible
+		// on the host console)
+		snprintf(s_lastErrorMessage, sizeof(s_lastErrorMessage), "%s", message);
+	}
+
 	if (nf_stderr_id) {
 		nf_print(str);
 	} else {
+#ifndef SIDECART_OUTPUT
 		FILE *output = 0;
 
 		if (type == LogMessageType::kInfo || type == LogMessageType::kDebug)
@@ -460,6 +485,11 @@ void OSystem_Atari::logMessage(LogMessageType::Type type, const char *message) {
 
 		fputs(str, output);
 		fflush(output);
+#else
+#define CARTRIDGE_ROM3 0xFB0000ul
+		for (const char *s = str; *s; s++)
+			(void)(*((volatile uint16 *)(CARTRIDGE_ROM3 + ((*s & 0xFF)<<1))));
+#endif
 	}
 }
 

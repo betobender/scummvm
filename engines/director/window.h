@@ -134,8 +134,18 @@ public:
 	DirectorEngine *getVM() const { return _vm; }
 	Graphics::MacWindow *getMacWindow() const { return _window; }
 	Movie *getCurrentMovie() const { return _currentMovie; }
+	// Temporarily retarget the current movie when stepping an embedded movie
+	// so getCurrentMovie()-based context (go, globals, events) points at it.
+	void setCurrentMovie(Movie *movie) { _currentMovie = movie; }
 	Common::String getCurrentPath() const { return _currentPath; }
-	DirectorSound *getSoundManager() const { return _soundManager; }
+	// Sound channels are shared by the Stage and every MIAW (Director in a Nutshell),
+	// so route every window through the Stage's manager.
+	DirectorSound *getSoundManager() const {
+		Window *stage = g_director->getStage();
+		if (stage && stage != this)
+			return stage->getSoundManager();
+		return _soundManager;
+	}
 
 	void setVisible(bool visible, bool silent = false);
 	bool setNextMovie(Common::String &movieFilenameRaw);
@@ -182,12 +192,20 @@ public:
 	LingoState *getLastFrozenLingoState() { return _frozenLingoStates.empty() ? nullptr : _frozenLingoStates[_frozenLingoStates.size() - 1]; }
 	void moveLingoState(Window *target);
 
+	// Swap the window's Lingo state (current + frozen stack) with an external
+	// one, so an embedded movie runs isolated and its go()/freeze does not
+	// block the host's scripts.
+	void swapLingoState(LingoState *&state, Common::Array<LingoState *> &frozen) {
+		SWAP(_lingoState, state);
+		SWAP(_frozenLingoStates, frozen);
+	}
+
 	Common::String formatWindowInfo();
 
 	static void inkBlitFrom(Channel *channel, Common::Rect destRect, Graphics::ManagedSurface *blitTo = nullptr);
 
 	// events.cpp
-	bool processEvent(Common::Event &event);
+	bool processSysEvent(Common::Event &event);
 	bool processWMEvent(Graphics::WindowClick click, Common::Event &event);
 	void sendWindowEvent(LEvent event);
 
@@ -229,6 +247,7 @@ public:
 	bool _newMovieFirstDraw;
 	bool _skipFrameAdvance;
 	bool _resetScreen;
+	bool _playbackPaused;
 
 private:
 	uint32 _stageColor;

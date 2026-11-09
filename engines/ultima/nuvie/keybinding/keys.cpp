@@ -300,7 +300,7 @@ KeyBinder::KeyBinder(const Configuration *config) : enable_joystick(false) {
 	if (keyfilename != "(default)" && !key_file_exists)
 		::error("Couldn't find the default key setting at %s - trying defaultkeys.txt in the data directory\n", keyfilename.c_str());
 	if (keyfilename == "(default)" || !key_file_exists) {
-		config->value("config/datadir", dir, "./data");
+		config->value("config/datadir", dir, ".");
 		keyfilename = dir + "/defaultkeys.txt";
 	}
 	LoadFromFile(keyfilename.c_str());
@@ -393,7 +393,7 @@ ActionType KeyBinder::get_ActionType(const Common::KeyState &key) {
 		ActionType actionType = {&doNothingAction, 0};
 		return actionType;
 	}
-	return (*sdlkey_index)._value;
+	return sdlkey_index->_value;
 }
 
 ActionKeyType KeyBinder::GetActionKeyType(ActionType a) {
@@ -426,7 +426,7 @@ bool KeyBinder::HandleEvent(const Common::Event *ev) {
 	key.flags &= ~Common::KBD_STICKY;
 	KeyMap::iterator sdlkey_index = get_sdlkey_index(key);
 	if (sdlkey_index != _bindings.end())
-		return DoAction((*sdlkey_index)._value);
+		return DoAction(sdlkey_index->_value);
 	// Avoid modifier keys being detected as invalid input
 	if (ev->kbd.keycode != Common::KEYCODE_LALT && ev->kbd.keycode != Common::KEYCODE_RALT
 	        && ev->kbd.keycode != Common::KEYCODE_LCTRL && ev->kbd.keycode != Common::KEYCODE_RCTRL
@@ -501,8 +501,8 @@ Common::Array<Common::U32String> KeyBinder::buildKeyHelp() const {
 			if (inputs.size() > 0) {
 				Common::U32String desc;
 				// The * can't be bolded easily in markdown..
-				if (inputs[0].description == "*")
-					desc = "*";
+				if (inputs[0].description == Common::U32String('*'))
+					desc = Common::U32String('*');
 				else
 					desc = Common::U32String("**") + inputs[0].description + Common::U32String("**");
 				desc += Common::U32String(" - ") + action->description;
@@ -599,7 +599,7 @@ void KeyBinder::ParseLine(const char *line) {
 				ParseKeyMap::iterator key_index;
 				key_index = _keys.find(t);
 				if (key_index != _keys.end()) {
-					k.keycode = (*key_index)._value;
+					k.keycode = key_index->_value;
 				} else {
 					::error("Keybinder: unsupported key: %s", keycode.c_str());
 				}
@@ -676,7 +676,7 @@ void KeyBinder::LoadGameSpecificKeys() {
 	Common::String key_path_str;
 	Common::String default_key_path;
 	const Configuration *config = Game::get_game()->get_config();
-	config->value("config/datadir", default_key_path, "./data");
+	config->value("config/datadir", default_key_path, ".");
 	nuvie_game_t game_type = get_game_type(config);
 
 	if (game_type == NUVIE_GAME_U6)

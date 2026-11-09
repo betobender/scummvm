@@ -500,7 +500,7 @@ public:
 	/**
 	 * Check if the actor is still talking. If it is returns true, otherwise false.
 	 */
-	bool updateTalk(uint frameTime);
+	bool updateTalk();
 	void draw();
 
 	bool isLookAtVectorZero() {
@@ -534,6 +534,7 @@ public:
 
 	bool isAttached() const { return _attachedActor != 0; }
 	Math::Vector3d getWorldPos() const;
+	Grim::Joint *getAttachedJoint(Actor *parent) const;
 	void attachToActor(Actor *other, const char *joint);
 	void detach();
 	Math::Quaternion getRotationQuat() const;
@@ -592,7 +593,7 @@ private:
 	Math::Vector3d getSimplePuckVector() const;
 	void calculateOrientation(const Math::Vector3d &pos, Math::Angle *pitch, Math::Angle *yaw, Math::Angle *roll);
 
-	bool getSphereInfo(bool adjustZ, float &size, Math::Vector3d &pos) const;
+	bool getSphereInfo(float &size, Math::Vector3d &pos) const;
 	EMIModel *findModelWithMesh(const Common::String &mesh);
 
 	Common::String _name;
@@ -613,6 +614,7 @@ private:
 	Common::String _talkSoundName;
 	bool _talking;
 	bool _backgroundTalk;
+	int _talkSoundId;
 	ObjectPtr<LipSync> _lipSync;
 	Common::List<Costume *> _costumeStack;
 
@@ -707,7 +709,6 @@ private:
 	bool _puckOrient;
 
 	static bool _isTalkingBackground;
-	int _talkDelay;
 	int _attachedActor;
 	int _lookAtActor;
 	Common::String _attachedJoint;
@@ -718,6 +719,7 @@ private:
 
 	int _sortOrder;
 	int _sectorSortOrder;
+	bool _hasSectorSortOrder { false };
 	bool _useParentSortOrder;
 
 	bool _fakeUnbound;

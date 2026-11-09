@@ -26,7 +26,7 @@
 #include "freescape/freescape.h"
 #include "freescape/games/eclipse/ay.music.h"
 #include "freescape/games/eclipse/eclipse.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/variables.h"
 
 namespace Freescape {
 
@@ -79,7 +79,7 @@ void EclipseEngine::loadHeartFramesCPC(Common::SeekableReadStream *file, int res
 		auto *indexed = new Graphics::ManagedSurface();
 		indexed->create(widthBytes * 4, height, Graphics::PixelFormat::createFormatCLUT8());
 		loadFrameCPCIndexed(file, indexed, widthBytes, height);
-		_heartFramesCPCIndexed.push_back(indexed);
+		_heartFramesIndexed.push_back(indexed);
 	}
 }
 
@@ -122,12 +122,12 @@ void EclipseEngine::loadAssetsCPCFullGame() {
 		loadFonts(&file, 0x60bc);
 		loadMessagesFixedSize(&file, 0x326, 16, 34);
 		load8bitBinary(&file, 0x62b4, 16);
-		loadSoundsCPC(&file, 0x0879, 104, 0x08E1, 165, 0x07E6, 147);
+		_sound = loadSoundsCPC(&file, 0x0879, 104, 0x08E1, 165, 0x07E6, 147);
 	} else {
 		loadFonts(&file, 0x6076);
 		loadMessagesFixedSize(&file, 0x326, 16, 30);
 		load8bitBinary(&file, 0x626e, 16);
-		loadSoundsCPC(&file, 0x07C9, 104, 0x0831, 165, 0x0736, 147);
+		_sound = loadSoundsCPC(&file, 0x07C9, 104, 0x0831, 165, 0x0736, 147);
 	}
 
 	loadColorPalette();
@@ -169,7 +169,7 @@ void EclipseEngine::loadAssetsCPCDemo() {
 	loadMessagesFixedSize(&file, 0x362, 16, 23);
 	loadMessagesFixedSize(&file, 0x570b, 264, 5);
 	load8bitBinary(&file, 0x65c6, 16);
-	loadSoundsCPC(&file, 0x0805, 104, 0x086D, 165, 0x0772, 147);
+	_sound = loadSoundsCPC(&file, 0x0805, 104, 0x086D, 165, 0x0772, 147);
 	loadColorPalette();
 	swapPalette(1);
 	loadHeartFramesCPC(&file, 0x0D17, 0x0D49);
@@ -191,9 +191,6 @@ void EclipseEngine::loadAssetsCPCDemo() {
 }
 
 void EclipseEngine::updateHeartFramesCPC() {
-	if (_heartFramesCPCIndexed.empty())
-		return;
-
 	uint8 r, g, b;
 	byte palette[4 * 3];
 	for (int c = 0; c < 4; c++) {
@@ -203,15 +200,22 @@ void EclipseEngine::updateHeartFramesCPC() {
 		palette[c * 3 + 2] = b;
 	}
 
+	updateHeartFrames(palette);
+}
+
+void EclipseEngine::updateHeartFrames(const byte *palette) {
+	if (_heartFramesIndexed.empty())
+		return;
+
 	for (auto &sprite : _eclipseSprites) {
 		sprite->free();
 		delete sprite;
 	}
 	_eclipseSprites.clear();
 
-	for (uint i = 0; i < _heartFramesCPCIndexed.size(); i++) {
+	for (uint i = 0; i < _heartFramesIndexed.size(); i++) {
 		Graphics::ManagedSurface clut8;
-		clut8.copyFrom(*_heartFramesCPCIndexed[i]);
+		clut8.copyFrom(*_heartFramesIndexed[i]);
 		clut8.setPalette(palette, 0, 4);
 
 		Graphics::Surface *converted = _gfx->convertImageFormatIfNecessary(&clut8);

@@ -23,7 +23,8 @@
 #define NANCY_UI_VIEWPORT_H
 
 #include "engines/nancy/time.h"
-#include "engines/nancy/video.h"
+#include "engines/nancy/commontypes.h"
+#include "engines/nancy/movieplayer.h"
 
 #include "engines/nancy/renderobject.h"
 
@@ -48,10 +49,9 @@ public:
 		_videoFormat(kLargeVideoFormat),
 		_stickyCursorPos(-1, -1),
 		_panningType(kPanNone),
-		_decoder(new AVFDecoder(AVFDecoder::kLoadBidirectional)),
 		_autoMove(false) {}
 
-	virtual ~Viewport() { _decoder->close(); _fullFrame.free(); }
+	virtual ~Viewport() { _decoder.close(); _fullFrame.free(); }
 
 	void init() override;
 	void handleInput(NancyInput &input);
@@ -66,10 +66,14 @@ public:
 	void scrollUp(uint delta);
 	void scrollDown(uint delta);
 
-	uint16 getFrameCount() const { return _decoder->isVideoLoaded() ? _decoder->getFrameCount() : 0; }
+	uint16 getFrameCount() const { return _decoder.getFrameCount(); }
 	uint16 getCurFrame() const { return _currentFrame; }
 	uint16 getCurVerticalScroll() const { return _drawSurface.getOffsetFromOwner().y; }
 	uint16 getMaxScroll() const;
+
+	// The currently-visible scene background, in viewport-local coords. Used by
+	// puzzles that blend over the background (e.g. MirrorLight).
+	const Graphics::ManagedSurface &getBackground() const { return _drawSurface; }
 
 	Common::Rect convertViewportToScreen(const Common::Rect &viewportRect) const;
 	Common::Rect convertScreenToViewport(const Common::Rect &viewportRect) const;
@@ -78,6 +82,9 @@ public:
 	void enableEdges(byte edges);
 
 protected:
+	// Whether the frames of the loaded video need their alpha flattened, see setFrame()
+	enum FrameAlpha { kAlphaUnchecked, kAlphaOpaque, kAlphaNeedsFlattening };
+
 	void setEdgesSize(uint16 upSize, uint16 downSize, uint16 leftSize, uint16 rightSize);
 
 	Common::Rect _nonScrollZone;
@@ -88,11 +95,11 @@ protected:
 
 	byte _panningType;
 
-	Common::ScopedPtr<Video::VideoDecoder> _decoder;
-	uint16 _videoType = kVideoPlaytypeAVF;
+	MoviePlayer _decoder;
 	uint16 _currentFrame;
 	uint16 _videoFormat;
 	Graphics::ManagedSurface _fullFrame;
+	FrameAlpha _frameAlpha = kAlphaUnchecked;
 	Common::Rect _format1Bounds;
 	Common::Rect _format2Bounds;
 	Common::Point _stickyCursorPos;

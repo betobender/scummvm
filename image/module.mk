@@ -4,6 +4,7 @@ MODULE_OBJS := \
 	ani.o \
 	bmp.o \
 	cel_3do.o \
+	cgbi.o \
 	cicn.o \
 	icocur.o \
 	iff.o \
@@ -40,6 +41,11 @@ endif
 ifdef USE_MPEG2
 MODULE_OBJS += \
 	codecs/mpeg.o
+endif
+
+ifdef USE_MSMPEG4
+MODULE_OBJS += \
+	codecs/msmpeg4.o
 endif
 
 ifdef USE_CDTOONS
@@ -82,9 +88,23 @@ MODULE_OBJS += \
 	codecs/truemotion1.o
 endif
 
+ifdef USE_VC1
+MODULE_OBJS += \
+	codecs/vc1.o
+endif
+
 ifdef USE_XAN
 MODULE_OBJS += \
 	codecs/xan.o
+endif
+
+# Shared tables are needed by either decoder, independently of the other.
+ifdef USE_MSMPEG4
+MODULE_OBJS += codecs/msmpeg4_vc1.o
+else
+ifdef USE_VC1
+MODULE_OBJS += codecs/msmpeg4_vc1.o
+endif
 endif
 
 # Include common rules

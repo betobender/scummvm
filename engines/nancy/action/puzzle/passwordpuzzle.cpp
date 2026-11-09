@@ -84,7 +84,7 @@ void PasswordPuzzle::readData(Common::SeekableReadStream &stream) {
 
 	_maxStringLength = g_nancy->getGameType() < kGameTypeNancy6 ? 12 : 31;
 
-	_solveExitScene.readData(stream);
+	_solveScene.readData(stream);
 	_solveSound.readNormal(stream);
 	_failExitScene.readData(stream);
 	_failSound.readNormal(stream);
@@ -118,8 +118,15 @@ void PasswordPuzzle::execute() {
 
 				bool solvedCurrentInput = false;
 				if (correctAnswers.size()) {
+					// The original accepts the input if a correct answer appears
+					// as a case-insensitive substring of what the player typed
+					// (e.g. answer "Xoc" is matched by typing "Lady Xoc").
+					Common::String inputLower = activeField;
+					inputLower.toLowercase();
 					for (uint i = 0; i < correctAnswers.size(); ++i) {
-						if (activeField.equalsIgnoreCase(correctAnswers[i])) {
+						Common::String answerLower = correctAnswers[i];
+						answerLower.toLowercase();
+						if (inputLower.contains(answerLower)) {
 							solvedCurrentInput = true;
 							break;
 						}
@@ -130,8 +137,7 @@ void PasswordPuzzle::execute() {
 
 				if (solvedCurrentInput) {
 					if (_passwordFieldIsActive || _passwords.size() == 0) {
-						g_nancy->_sound->loadSound(_solveSound);
-						g_nancy->_sound->playSound(_solveSound);
+						playSolveSound();
 						_solveState = kSolved;
 					} else {
 						_passwordFieldIsActive = true;
@@ -163,7 +169,7 @@ void PasswordPuzzle::execute() {
 
 			break;
 		case kSolved:
-			if (!g_nancy->_sound->isSoundPlaying(_solveSound)) {
+			if (!isSolveSoundPlaying()) {
 				g_nancy->_sound->stopSound(_solveSound);
 				_state = kActionTrigger;
 			}
@@ -181,7 +187,7 @@ void PasswordPuzzle::execute() {
 			_failExitScene.execute();
 			break;
 		case kSolved:
-			_solveExitScene.execute();
+			_solveScene.execute();
 			break;
 		}
 
@@ -192,7 +198,7 @@ void PasswordPuzzle::execute() {
 
 void PasswordPuzzle::onPause(bool paused) {
 	g_nancy->_input->setVKEnabled(!paused);
-	RenderActionRecord::onPause(paused);
+	PuzzleRecord::onPause(paused);
 }
 
 void PasswordPuzzle::handleInput(NancyInput &input) {
@@ -200,9 +206,7 @@ void PasswordPuzzle::handleInput(NancyInput &input) {
 		return;
 	}
 
-	if (NancySceneState.getViewport().convertViewportToScreen(_exitHotspot).contains(input.mousePos)) {
-		g_nancy->_cursor->setCursorType(g_nancy->_cursor->_puzzleExitCursor);
-
+	if (hoverExitHotspot(input)) {
 		if (input.input & NancyInput::kLeftMouseButtonUp) {
 			_state = kActionTrigger;
 		}

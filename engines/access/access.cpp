@@ -106,7 +106,6 @@ AccessEngine::AccessEngine(OSystem *syst, const AccessGameDescription *gameDesc)
 	ARRAYCLEAR(_ask);
 	ARRAYCLEAR(_asked);
 	_startAboutItem = _startAboutBox = 0;
-	_keepAskPosition = false;
 	_bcnt = 0;
 	_boxDataStart = 0;
 	_boxDataEnd = false;
@@ -122,6 +121,8 @@ AccessEngine::AccessEngine(OSystem *syst, const AccessGameDescription *gameDesc)
 	_stilScaleOff = 0;
 
 	ARRAYCLEAR(_countTbl);
+
+	_lang = Common::UNK_LANG;
 }
 
 AccessEngine::~AccessEngine() {
@@ -172,13 +173,13 @@ void AccessEngine::initialize() {
 
 	// Create sub-objects of the engine
 	_animation = new AnimationManager(this);
-	_bubbleBox = new BubbleBox(this, TYPE_2, 64, 32, 130, 122, 0, 0, 0, 0, "");
+	_bubbleBox = new BubbleBox(this, kBoxTypeNormal, 64, 32, 130, 122, 0, 0, 0, 0, "");
 	if (getGameID() == kGameMartianMemorandum) {
 		// Note: add 1 more pixel to width and height to get the right box size.
-		_helpBox = new BubbleBox(this, TYPE_1, 64, 24, 147, 123, 1, 32, 2, 76, "HELP");
-		_travelBox = new BubbleBox(this, TYPE_1, 64, 32, 195, 123, 1, 24, 2, 74, "TRAVEL");
-		_invBox = new BubbleBox(this, TYPE_1, 64, 32, 147, 123, 1, 32, 2, 76, "INVENTORY");
-		_aboutBox = new BubbleBox(this, TYPE_1, 64, 32, 195, 123, 1, 32, 2, 76, "ASK ABOUT");
+		_helpBox = new BubbleBox(this, kBoxTypeList, 64, 24, 147, 123, 1, 32, 2, 76, "HELP");
+		_travelBox = new BubbleBox(this, kBoxTypeList, 64, 32, 195, 123, 1, 24, 2, 74, "TRAVEL");
+		_invBox = new BubbleBox(this, kBoxTypeList, 64, 32, 147, 123, 1, 32, 2, 76, "INVENTORY");
+		_aboutBox = new BubbleBox(this, kBoxTypeList, 64, 32, 195, 123, 1, 32, 2, 76, "ASK ABOUT");
 	} else {
 		_helpBox = nullptr;
 		_travelBox = nullptr;
@@ -212,8 +213,7 @@ void AccessEngine::initialize() {
 
 const SpriteResource *AccessEngine::getIcons() {
 	if (!_icons) {
-		const char *fname = (getGameID() == kGameNoctropolis) ? "ICONS.AP" : "ICONS.LZ";
-		Resource *iconData = _files->loadRawFile(fname);
+		Resource *iconData = _files->loadRawFile(getIconPath());
 		_icons = new SpriteResource(this, iconData);
 		delete iconData;
 	}
@@ -221,6 +221,11 @@ const SpriteResource *AccessEngine::getIcons() {
 }
 
 Common::Error AccessEngine::run() {
+	if (ConfMan.hasKey("language"))
+		_lang = Common::parseLanguage(ConfMan.get("language"));
+	else
+		_lang = getLanguage();
+
 	_res = Resources::init(this);
 	Common::U32String errorMessage;
 	if (!_res->load(errorMessage)) {
@@ -245,10 +250,8 @@ int AccessEngine::getRandomNumber(int maxNumber) {
 
 void AccessEngine::loadCells(const Common::Array<CellIdent> &cells) {
 	for (const auto &cell : cells) {
-		Resource *spriteData = _files->loadFile(cell);
 		assert(_objectsTable[cell._cell] == nullptr); // ensure no leaks
-		_objectsTable[cell._cell] = new SpriteResource(this, spriteData);
-		delete spriteData;
+		_objectsTable[cell._cell] = new SpriteResource(this, cell._fileNum, cell._subFile);
 	}
 }
 
@@ -360,10 +363,10 @@ void AccessEngine::printText(BaseSurface *s, const Common::String &msg) {
 		bool lastLine = _fonts._font2->getLine(lines, s->_maxChars * 6, line, width);
 
 		// Set font colors
-		_fonts._font2->_fontColors[0] = 0;
-		_fonts._font2->_fontColors[1] = 28;
-		_fonts._font2->_fontColors[2] = 29;
-		_fonts._font2->_fontColors[3] = 30;
+		Font::_fontColors[0] = 0;
+		Font::_fontColors[1] = 28;
+		Font::_fontColors[2] = 29;
+		Font::_fontColors[3] = 30;
 		_fonts._font2->drawString(s, line, s->_printOrg);
 
 		s->_printOrg = Common::Point(s->_printStart.x, s->_printOrg.y + 9);
@@ -453,7 +456,7 @@ void AccessEngine::plotList1() {
 
 void AccessEngine::clearPlotImagesIn(int16 x, int16 y, int16 w, int16 h) {
 	const Common::Rect toClear = Common::Rect(Common::Point(x, y), w, h);
-	for (uint idx = 0; idx < _images.size(); idx++) {
+	for (int idx = 0; idx < (int)_images.size(); idx++) {
 		const SpriteFrame *frame = _images[idx]._spritesPtr->getFrame(_images[idx]._frameNumber);
 		Common::Point topLeft = _images[idx]._position;
 		Common::Rect imgRect(topLeft, frame->w, frame->h);
@@ -613,6 +616,9 @@ bool AccessEngine::readSavegameHeader(Common::InSaveFile *in, AccessSavegameHead
 	if (strncmp(saveIdentBuffer, SAVEGAME_STR, SAVEGAME_STR_SIZE))
 		return false;
 
+	// This legacy header format doesn't include _totalPlayTime
+	header._totalPlayTime = 0;
+
 	header._version = in->readByte();
 	if (header._version > ACCESS_SAVEGAME_VERSION)
 		return false;
@@ -634,10 +640,6 @@ bool AccessEngine::readSavegameHeader(Common::InSaveFile *in, AccessSavegameHead
 
 	// Read Totalframes
 	header._totalFrames = in->readUint32LE();
-
-	// Read the Total PlayTime (if available)
-	if (header._version > 1)
-		header._totalPlayTime = in->readUint32LE();
 
 	return true;
 }

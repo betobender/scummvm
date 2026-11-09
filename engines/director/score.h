@@ -37,6 +37,7 @@ namespace Common {
 	class MemoryReadStreamEndian;
 	class SeekableReadStreamEndian;
 	class SeekableWriteStream;
+	class MemoryWriteStreamDynamic;
 }
 
 namespace Director {
@@ -78,6 +79,7 @@ public:
 
 	void writeVWSCResource(Common::SeekableWriteStream *writeStream, uint32 offset);
 	uint32 getVWSCResourceSize();
+	bool buildD6Score(Common::MemoryWriteStreamDynamic &out);
 
 	void loadLabels(Common::SeekableReadStreamEndian &stream);
 	void loadActions(Common::SeekableReadStreamEndian &stream);
@@ -86,7 +88,7 @@ public:
 	static int compareLabels(const void *a, const void *b);
 	uint16 getLabel(Common::String &label);
 	Common::String *getLabelList();
-	Common::String *getFrameLabel(uint id);
+	Common::String getFrameLabel(uint id);
 	void setStartToLabel(Common::String &label);
 	void gotoLoop();
 	void gotoNext();
@@ -198,7 +200,8 @@ public:
 	uint16 _spriteRecordSize;
 	uint16 _numChannels;
 	int16 _numChannelsDisplayed;  // D7+, no-op in earlier versions
-	//  20 bytes in total
+	int32 _scoreWrapperVer = 0;	// D6+ wrapper header version (e.g. -3)
+	bool _spriteDetailIndexValid = false;	// D6+ index had the trailing sentinel
 
 	int16 _maxChannelsUsed; // max channel number used in the score, used to optimize rendering
 
@@ -208,6 +211,7 @@ public:
 	Common::MemoryReadStreamEndian *_framesStream;
 
 	byte _currentFrameRate;
+	int _currentDigitalVideoTimeScale;
 	byte _puppetTempo;
 
 	bool _puppetPalette;
@@ -230,6 +234,7 @@ public:
 	Cursor _defaultCursor;
 	CursorRef _currentCursor;
 	bool _skipTransition;
+	bool _skipIdle;
 
 	Common::Array<uint32> _spriteDetailOffsets;
 	Common::Array<bool> _spriteDetailAccessed;
@@ -247,6 +252,13 @@ private:
 	uint16 _nextFrame;
 	int _currentLabel;
 	DirectorSound *_soundManager;
+
+	// score frame number at the last film loop advance
+	uint32 _filmLoopsLastFrame = 0;
+
+	// true when the current frame is held by an explicit jump (e.g. go the
+	// frame) rather than natural playback; in D4 this freezes film loops.
+	bool _frameHeldByJump = false;
 
 	int _previousBuildBotBuild = -1;
 	bool _firstRun = true;

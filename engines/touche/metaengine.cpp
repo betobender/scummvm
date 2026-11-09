@@ -24,6 +24,7 @@
 #include "common/savefile.h"
 #include "common/system.h"
 #include "common/translation.h"
+#include "common/events.h"
 
 #include "backends/keymapper/action.h"
 #include "backends/keymapper/keymapper.h"
@@ -130,6 +131,8 @@ Common::KeymapArray ToucheMetaEngine::initKeymaps(const char *target) const {
 	act->addDefaultInputMapping("MOUSE_RIGHT");
 	act->addDefaultInputMapping("JOY_B");
 	engineKeyMap->addAction(act);
+
+	gameKeyMap->addAction(createHotspotAction());
 
 	{
 		act = new Action("SKIPORQUIT", _("Skip sequence / open quit dialog"));

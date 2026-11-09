@@ -20,6 +20,7 @@
  */
 
 #include "access/noctropolis/noctropolis_comicviewer.h"
+#include "access/noctropolis/noctropolis_resources.h"
 
 namespace Access {
 
@@ -72,13 +73,27 @@ void ComicViewer::run(const ComicResource *comic) {
 PageResult ComicViewer::runPage(const ComicPage *page) {
 	PageResult result = kPageResultNone;
 
-	_vm->_files->loadScreen(Common::Path(page->filename));
+	Common::Path pagePath = ((NoctropolisResources *)_vm->_res)->translatePath(page->filename);
 
-	Resource *bubbleData = _vm->_files->loadRawFile("COMDATA/comic.ap");
+	if (!_vm->_files->existFile(pagePath)) {
+		// Happens in Demo 2 - no comic files
+		warning("Request to load missing comic page '%s'.", pagePath.toString().c_str());
+		return kPageResultExit;
+	}
+
+	_vm->_files->loadScreen(pagePath);
+
+	Common::Path bubbleDataPath = ((NoctropolisResources *)_vm->_res)->translatePath("DARK/COMDATA/comic.ap");
+
+	// Original does not have DARK or DEMO etc, try without.
+	if (!_vm->_files->existFile(bubbleDataPath))
+		bubbleDataPath = Common::Path("COMDATA/comic.ap");
+
+	Resource *bubbleData = _vm->_files->loadRawFile(bubbleDataPath);
 	_bubbleSprites = new SpriteResource(_vm, bubbleData);
 	delete bubbleData;
 
-	bool playedSound = false;
+	int loadedSoundIdx = -1;
 
 	while (result == kPageResultNone) {
 		_vm->_events->pollEvents();
@@ -115,7 +130,7 @@ PageResult ComicViewer::runPage(const ComicPage *page) {
 		int hotspotIndex = -1;
 		for (int i = 0; i < page->numBlocks; i++) {
 			const ComicBlock &hotspot = page->blocks[i];
-			if (hotspot.polygon->pointInside(_vm->_events->_mousePos.x, _vm->_events->_mousePos.y)) {
+			if (Polygon::pointInside(hotspot.polygon, _vm->_events->_mousePos.x, _vm->_events->_mousePos.y)) {
 				hotspotIndex = i;
 				break;
 			}
@@ -128,11 +143,12 @@ PageResult ComicViewer::runPage(const ComicPage *page) {
 				const ComicBlock &hotspot = page->blocks[hotspotIndex];
 
 				if (hotspot.soundFileIndex >= 0) {
-					_vm->_sound->loadSoundTable(1, hotspot.soundFileIndex, hotspot.soundResIndex);
-					_vm->_sound->playSound(1);
-					playedSound = true;
+					if (loadedSoundIdx >= 0)
+						_vm->_sound->freeSound(loadedSoundIdx);
+					loadedSoundIdx = _vm->_sound->loadAndAddSound(hotspot.soundFileIndex, hotspot.soundResIndex);
+					_vm->_sound->playSound(loadedSoundIdx);
 				}
-				// TODO: Play hotspot sound
+
 				for (int bubbleIndex = 0; bubbleIndex < hotspot.numBoxes; bubbleIndex++) {
 					const ComicBox &bubble = hotspot.boxes[bubbleIndex];
 					// Slightly lazy, just save/restore whole screen when
@@ -157,9 +173,8 @@ PageResult ComicViewer::runPage(const ComicPage *page) {
 		}
 	}
 
-	if (playedSound) {
-		_vm->_sound->freeSound(1);
-	}
+	if (loadedSoundIdx >= 0)
+		_vm->_sound->freeSound(loadedSoundIdx);
 
 	delete _bubbleSprites;
 
@@ -181,8 +196,8 @@ static void drawString(const char *str, const Font *font, Screen *screen, int x,
 }
 
 bool ComicViewer::drawBubble(const ComicBox &bubble) {
-	static const struct {
-		struct { int16 px, py; } positions[4];
+	static constexpr struct {
+		Common::Point positions[4];
 		int16 sprites[3];
 	} kBubbleDef[] = {
 		{{{-43, -13}, {+159, -9}, {-44, +63}, {+150, +61}}, {3, 6, 0}},
@@ -245,8 +260,8 @@ bool ComicViewer::drawBubble(const ComicBox &bubble) {
 		else
 			defIndex = 2;
 
-		bubbleX += kBubbleDef[defIndex].positions[style].px;
-		bubbleY += kBubbleDef[defIndex].positions[style].py;
+		bubbleX += kBubbleDef[defIndex].positions[style].x;
+		bubbleY += kBubbleDef[defIndex].positions[style].y;
 
 		if (color == 246) {
 			textColor = 255;

@@ -100,11 +100,11 @@ void CastSpell::draw() {
 		return;
 
 	escToGoBack(0);
-	writeString(7, 0, STRING["dialogs.character.cast_spell"]);
+	writeString(7, 0, "cast spell:  level=");
 	if (_state >= SELECT_NUMBER) {
 		writeChar(' ');
 		writeNumber(_spellLevel);
-		writeString(19, 1, STRING["dialogs.character.number"]);
+		writeString(19, 1, "number=");
 	}
 
 	if (_state > SELECT_NUMBER) {
@@ -125,13 +125,12 @@ void CastSpell::draw() {
 
 	case SELECT_CHAR:
 		writeString(22, 3, Common::String::format(
-			STRING["spells.cast_on_char"].c_str(),
-			(int)g_globals->_party.size()
-		));
+			"Cast on character (F1-F%d)",
+			(int)g_globals->_party.size()));
 		break;
 
 	case PRESS_ENTER:
-		writeString(24, 4, STRING["spells.enter_to_cast"]);
+		writeString(24, 4, "'Enter' to cast");
 		break;
 
 	case ENDING:
@@ -183,7 +182,8 @@ bool CastSpell::msgAction(const ActionMessage &msg) {
 
 	} else if (msg._action == KEYBIND_SELECT) {
 		// Time to execute the spell
-		performSpell();
+		if (_state == PRESS_ENTER)
+			performSpell();
 
 	} else if (_state == SELECT_CHAR &&
 		msg._action >= KEYBIND_VIEW_PARTY1 &&
@@ -210,7 +210,7 @@ void CastSpell::performSpell(Character *chr) {
 	c._gems = MAX((int)c._gems - _requiredGems, 0);
 
 	if (!isMagicAllowed()) {
-		spellDone(STRING["spells.magic_doesnt_work"], 5);
+		spellDone("Magic doesn't work here", 5);
 	} else {
 		// Cast the spell
 		switch (Game::SpellsParty::cast(_spellIndex, chr)) {
@@ -241,16 +241,20 @@ void CastSpell::spellDone() {
 }
 
 void CastSpell::spellDone(const Common::String &msg, int xp) {
+	Common::String result = msg.hasPrefix("*** ") ? msg :
+		spellResultMessage(msg);
+	xp = 20 - (result.size() / 2);
+
 	if (isInCombat()) {
 		close();
 
-		GameMessage gameMsg("SPELL_RESULT", msg);
+		GameMessage gameMsg("SPELL_RESULT", result);
 		gameMsg._value = xp;
 		g_events->focusedView()->send(gameMsg);
 
 	} else {
 		Sound::sound(SOUND_2);
-		_spellResult = msg;
+		_spellResult = result;
 		_spellResultX = xp;
 		setState(ENDING);
 	}

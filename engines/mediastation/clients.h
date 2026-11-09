@@ -22,9 +22,14 @@
 #ifndef MEDIASTATION_CLIENTS_H
 #define MEDIASTATION_CLIENTS_H
 
+#include "common/array.h"
+#include "common/hashmap.h"
+
 #include "mediastation/datafile.h"
 
 namespace MediaStation {
+
+class ScreenActor;
 
 class ParameterClient {
 public:
@@ -39,12 +44,44 @@ enum DeviceOwnerSectionType {
 	kDeviceOwnerAllowMultipleStreams = 0x36,
 };
 
+enum ImtDeviceType {
+	kImtDeviceTypeSound = 2,
+	kImtDeviceTypeStream = 3,
+};
+
+class ImtDeviceUser {
+public:
+	virtual ~ImtDeviceUser() {};
+	virtual bool giveUpDevice() = 0;
+
+	void grantDevice(ImtDeviceType type);
+	void releaseDevice(ImtDeviceType type);
+};
+
+// Pooh scripts rely on a sound mutex to stop overlapping sounds/movies.
+// Pooh is the only known title that relies on this behavior, and no known
+// titles rely on the stream mutex behavior, but it is present in the original
+// so is implemnted here.
 class ImtDeviceOwner : public ParameterClient {
 public:
+	ImtDeviceOwner();
 	virtual bool attemptToReadFromStream(Chunk &chunk, uint sectionType) override;
 
-	bool _allowMultipleSounds = false;
-	bool _allowMultipleStreams = false;
+	bool hasExclusiveAccessTo(ImtDeviceType type);
+	bool grantDevice(ImtDeviceUser *user, ImtDeviceType type);
+	void releaseDevice(ImtDeviceUser *user, ImtDeviceType type);
+	bool releaseAll();
+
+	void setMultipleSounds(bool allowMultipleSounds);
+	void setMultipleStreams(bool allowMultipleStreams);
+
+private:
+	bool _exclusiveAccessToSounds = true;
+	bool _exclusiveAccessToStreams = true;
+
+	void forceReleaseDevice(ImtDeviceType type);
+
+	Common::HashMap<uint, Common::Array<ImtDeviceUser *>> _deviceUsers;
 };
 
 enum DocumentSectionType {
@@ -53,9 +90,12 @@ enum DocumentSectionType {
 	kDocumentEntryScreen = 0x2f,
 };
 
-class Document : public ParameterClient {
+class Document : public ParameterClient, public ImtDeviceUser {
+friend class Debugger;
+
 public:
 	virtual bool attemptToReadFromStream(Chunk &chunk, uint sectionType) override;
+	virtual bool giveUpDevice() override;
 	void readStartupInformation(Chunk &chunk);
 	void readContextLoadComplete(Chunk &chunk);
 
@@ -77,6 +117,8 @@ public:
 	bool isContextLoadQueued(uint contextId);
 	void contextReleaseComplete(uint contextId);
 	void contextAlreadyReleased(uint contextId);
+
+	Common::String getDebugString();
 
 private:
 	uint _currentScreenActorId = 0;

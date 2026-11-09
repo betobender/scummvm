@@ -24,7 +24,6 @@
 
 #include "common/rect.h"
 #include "access/noctropolis/noctropolis_game.h"
-#include "access/resources.h"
 #include "access/polygon.h"
 
 namespace Access {
@@ -42,18 +41,18 @@ struct ComicBox {
 };
 
 struct ComicBlock {
-	const struct Polygon *polygon;
+	const Common::Point *polygon;
 	int32 soundFileIndex, soundResIndex;
-	const struct ComicBox *boxes;
+	const ComicBox *boxes;
 	int32 numBoxes;
 };
 
 struct ComicPage {
-	Common::Path filename;
+	const char *filename;
 	int32 musicFileIndex, musicResIndex;
 	bool musicRepeat;
 	int unk;
-	const struct ComicBlock *blocks;
+	const ComicBlock *blocks;
 	int32 numBlocks;
 };
 

@@ -21,11 +21,8 @@
 #ifndef PELROCK_TYPES_H
 #define PELROCK_TYPES_H
 
-#include "common/debug.h"
 #include "common/rect.h"
-#include "common/scummsys.h"
 #include "common/system.h"
-#include "common/types.h"
 
 namespace Pelrock {
 
@@ -502,7 +499,7 @@ struct RoomPasserBys {
  * Structure to hold a parsed choice option
  */
 struct ChoiceOption {
-	byte room = -1;
+	byte room = static_cast<byte>(-1);
 	int choiceIndex;
 	Common::String text;
 	uint32 dataOffset;

@@ -132,15 +132,12 @@ void ScriptValue::copyFrom(const ScriptValue &other) {
 		break;
 
 	case kScriptValueTypeFloat:
+	case kScriptValueTypeTime:
 		_u.d = other._u.d;
 		break;
 
 	case kScriptValueTypeBool:
 		_u.b = other._u.b;
-		break;
-
-	case kScriptValueTypeTime:
-		_u.d = other._u.d;
 		break;
 
 	case kScriptValueTypeParamToken:
@@ -320,7 +317,7 @@ BuiltInMethod ScriptValue::asMethodId() const {
 	}
 }
 
-Common::String ScriptValue::getDebugString() const {
+Common::String ScriptValue::getDebugString(bool includeDefaultName) const {
 	switch (getType()) {
 	case kScriptValueTypeEmpty:
 		return "empty";
@@ -332,7 +329,7 @@ Common::String ScriptValue::getDebugString() const {
 		return Common::String::format("float: %f", asFloat());
 
 	case kScriptValueTypeActorId: {
-		Common::String actorName = g_engine->formatActorName(asActorId(), true);
+		Common::String actorName = g_engine->formatActorName(asActorId(), true, includeDefaultName);
 		return Common::String::format("actor: %s", actorName.c_str());
 	}
 
@@ -340,7 +337,7 @@ Common::String ScriptValue::getDebugString() const {
 		return Common::String::format("time: %f", asTime());
 
 	case kScriptValueTypeParamToken: {
-		Common::String tokenName = g_engine->formatParamTokenName(asParamToken());
+		Common::String tokenName = g_engine->formatParamTokenName(asParamToken(), includeDefaultName);
 		return Common::String::format("token: %s", tokenName.c_str());
 	}
 
@@ -354,7 +351,7 @@ Common::String ScriptValue::getDebugString() const {
 	}
 
 	case kScriptValueTypeFunctionId: {
-		Common::String functionName = g_engine->formatFunctionName(asFunctionId());
+		Common::String functionName = g_engine->formatFunctionName(asFunctionId(), includeDefaultName);
 		return Common::String::format("function: %s", functionName.c_str());
 	}
 
@@ -368,27 +365,23 @@ Common::String ScriptValue::getDebugString() const {
 }
 
 bool ScriptValue::compare(Opcode op, const ScriptValue &lhs, const ScriptValue &rhs) {
-	if (lhs.getType() != rhs.getType()) {
-		warning("%s: Attempt to compare mismatched values: %s; %s",
-			__func__, lhs.getDebugString().c_str(), rhs.getDebugString().c_str());
-	}
-
 	bool result = false;
 	switch (lhs.getType()) {
 	case kScriptValueTypeEmpty:
+		if (lhs.getType() != rhs.getType()) {
+			warning("%s: Attempt to compare mismatched values: %s; %s",
+				__func__, lhs.getDebugString().c_str(), rhs.getDebugString().c_str());
+		}
 		result = compareEmptyValues(op);
 		break;
 
 	case kScriptValueTypeFloat:
+	case kScriptValueTypeTime:
 		result = compare(op, lhs.asFloatOrTime(), rhs.asFloatOrTime());
 		break;
 
 	case kScriptValueTypeBool:
 		result = compare(op, lhs.asBool(), rhs.asBool());
-		break;
-
-	case kScriptValueTypeTime:
-		result = compare(op, lhs.asFloatOrTime(), rhs.asFloatOrTime());
 		break;
 
 	case kScriptValueTypeParamToken:

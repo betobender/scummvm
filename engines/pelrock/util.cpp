@@ -18,13 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "common/stream.h"
 
-#include "graphics/cursorman.h"
-#include "graphics/font.h"
+#include "graphics/screen.h"
 
 #include "pelrock/pelrock.h"
-#include "pelrock/types.h"
+#include "pelrock/chrono.h"
 #include "pelrock/util.h"
 
 namespace Pelrock {
@@ -189,7 +187,12 @@ void readUntilBuda(Common::SeekableReadStream *stream, uint32 startPos, byte *&b
 		byte b = stream->readByte();
 		if (pos + 1 > bufferSize) {
 			bufferSize *= 2;
-			buffer = (byte *)realloc(buffer, bufferSize);
+			byte *tmp = (byte *)realloc(buffer, bufferSize);
+			if (!tmp) {
+				free(buffer);
+				error("realloc failed in util.cpp");
+			}
+			buffer = tmp;
 		}
 		buffer[pos++] = b;
 

@@ -23,7 +23,7 @@
 
 #include "engines/nancy/nancy.h"
 #include "engines/nancy/graphics.h"
-#include "engines/nancy/resource.h"
+#include "engines/nancy/resource/resource.h"
 #include "engines/nancy/sound.h"
 #include "engines/nancy/input.h"
 #include "engines/nancy/util.h"
@@ -180,9 +180,9 @@ void WhaleSurvivorPuzzle::readData(Common::SeekableReadStream &stream) {
 	_sound5.readNormal(stream);       // 0x9ea (unused/silence)
 
 	// Scenes and remaining sounds
-	_winScene.readData(stream);       // 0xa1b  (25 bytes)
+	_solveScene.readData(stream);       // 0xa1b  (25 bytes)
 	stream.skip(1);                // 0xa34  padding byte
-	_winSound.readNormal(stream);     // 0xa35
+	_solveSound.readNormal(stream);     // 0xa35
 	_lossScene.readData(stream);      // 0xa66  (25 bytes)
 	stream.skip(1);                // 0xa7f  padding byte
 	_gameOverSound.readNormal(stream); // 0xa80
@@ -392,6 +392,7 @@ void WhaleSurvivorPuzzle::execute() {
 	case kBegin:
 		init();
 		registerGraphics();
+		NancySceneState.setNoHeldItem();
 		_state = kRun;
 		// fall through
 
@@ -400,7 +401,10 @@ void WhaleSurvivorPuzzle::execute() {
 
 		switch (_gameState) {
 		case kStartScreen:
-			// Waiting for the player to click – keep start screen visible.
+		case kHitAnimation:
+			// Keep the start screen or the "Oh no! Try again" overlay visible
+			// until the player clicks Start (full restart via kTryAgain) or
+			// Quit (loss scene). Both are handled in handleInput().
 			redraw();
 			break;
 
@@ -411,20 +415,10 @@ void WhaleSurvivorPuzzle::execute() {
 
 		case kRoundWon:
 			// Play win sound once, then start the countdown
-			if (_winSound.name != "NO SOUND") {
-				g_nancy->_sound->loadSound(_winSound);
-				g_nancy->_sound->playSound(_winSound);
-			}
+			playSolveSound();
 			_countdownEndMs = nowMs + _tryAgainDelayMs;
 			_executeWin     = true;
 			_gameState      = kCountdown;
-			redraw();
-			break;
-
-		case kHitAnimation:
-			// Show the "Oh no! Try again" overlay and wait for the player
-			// to click Start (full restart via kTryAgain) or Quit (loss
-			// scene). Both transitions are handled in handleInput().
 			redraw();
 			break;
 
@@ -459,12 +453,12 @@ void WhaleSurvivorPuzzle::execute() {
 		g_nancy->_sound->stopSound(_eatSound);
 		g_nancy->_sound->stopSound(_hurtSound);
 		g_nancy->_sound->stopSound(_breatheSound);
-		g_nancy->_sound->stopSound(_winSound);
+		g_nancy->_sound->stopSound(_solveSound);
 		g_nancy->_sound->stopSound(_tryAgainSound);
 		g_nancy->_sound->stopSound(_gameOverSound);
 
 		if (_executeWin)
-			_winScene.execute();
+			_solveScene.execute();
 		else
 			_lossScene.execute();
 
@@ -759,9 +753,6 @@ void WhaleSurvivorPuzzle::checkCollisions() {
 			--_fishCount;
 			int divisor = _scoreDivisor > 0 ? (int)_scoreDivisor : 500;
 			_score += (int)((float)divisor * _underwaterMultiplier);
-			if (_prevScore != _score)
-				_needsRedraw = true;
-
 			_porpoiseAnim = kPorpoiseEat;
 
 			if (_eatSound.name != "NO SOUND")

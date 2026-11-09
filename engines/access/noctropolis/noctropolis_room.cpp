@@ -77,10 +77,8 @@ void NoctropolisRoom::loadPlayer1() {
 		_vm->_player->loadNoctPalette(fileNum, _palIntensity + palOffset);
 		((NoctropolisPlayer *)_vm->_player)->loadAnimation(fileNum, 0);
 
-		for (int i = subFileBase; i <= numSubFiles; i++) {
-			Resource *data = _vm->_files->loadFile(fileNum, i);
-			_vm->_objectsTable[objBase + i - subFileBase] = new SpriteResource(_vm, data);
-		}
+		for (int i = subFileBase; i <= numSubFiles; i++)
+			_vm->_objectsTable[objBase + i - subFileBase] = new SpriteResource(_vm, fileNum, i);
 	}
 }
 
@@ -201,12 +199,20 @@ void NoctropolisRoom::doCommands() {
 	if (_vm->_events->_interfaceOff) {
 		_vm->_events->setNormalCursor(CURSOR_DARK_ANKH);
 	} else {
+		Common::CustomEventType action;
 		if (_vm->_events->_rightButton) {
 			_vm->_events->debounceRight();
 			roomMenu();
+		} else if (_vm->_events->getAction(action)) {
+			const AccessActionCode *actionCodes = _vm->getActionCodes();
+			for (int i = 0; actionCodes[i]._action != kActionNone; ++i) {
+				if (actionCodes[i]._action == action) {
+					handleCommand(actionCodes[i]._code);
+					break;
+				}
+			}
 		}
 
-		// TODO: Check keyboard commands
 		Common::Point pt = _vm->_events->calcRawMouse();
 		int hotspotIndex = -1;
 
@@ -357,6 +363,7 @@ int NoctropolisRoom::validateBox(int boxId) {
 
 
 void NoctropolisRoom::roomMenu() {
+	_vm->_events->setCursor(CURSOR_ARROW);
 	// Move the mouse to the centre of the menu
 	// see NoctRoomMenu::setPositionFromMouse.
 	Common::Point mousePt = _vm->_events->getMousePos();

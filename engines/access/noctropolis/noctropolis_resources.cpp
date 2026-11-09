@@ -42,30 +42,57 @@ const byte ICON_PALETTE[] = {
 	0xa5, 0xbf, 0xbf, 0xbf, 0xd9, 0xd9, 0xd9, 0xfc, 0xfc, 0xfc,
 };
 
-const int16 MENU_POLYS[] = {
-	 0x3,	0x54,    0x0,   0xA8,
-	 0x0,   0x7E,   0x33,    0x3,
-	 0x0,    0x0,   0x54,    0x0,
-	0x7E,   0x33,    0x3,   0xA8,
-	 0x0,   0xFE,    0x0,   0x7E,
-	0x33,    0x3,   0x3C,   0x1A,
-	0x7E,   0x33,   0x7F,   0x66,
-	 0x4,    0x0,    0x0,   0x3C,
-	0x1A,   0x4F,   0x32,   0x26,
-	0x32,    0x4,   0xAC,   0x33,
-	0xC0,   0x1A,   0xFE,    0x0,
-	0xD3,   0x32,    0x3,   0x7E,
-	0x33,   0xC0,   0x1A,   0x7F,
-	0x66,    0x4,   0x95,   0x4F,
-	0xAC,   0x33,   0xD3,   0x32,
-	0xA8,   0x66,    0x4,   0x26,
-	0x32,   0x4F,   0x32,   0x67,
-	0x4F,   0x54,   0x66,    0x4,
-	0x54,   0x66,   0x67,   0x4F,
-	0x7F,   0x66,   0x7E,   0x96,
-	 0x4,   0x7F,   0x66,   0x95,
-	0x4F,   0xA8,   0x66,   0x7E,
-	0x96,  	-1,
+static constexpr Common::Point MENU_POLYS[] = {
+	{ 0x54,    0x0, },
+	{ 0xA8, 0x0, },
+	{  0x7E,   0x33, },
+	Polygon::LISTEND,
+	{ 0x0,    0x0, },
+	{  0x54,    0x0, },
+	{ 0x7E,   0x33, },
+	Polygon::LISTEND,
+	{ 0xA8,  0x0, },
+	{ 0xFE,  0x0, },
+	{ 0x7E,  0x33, },
+	Polygon::LISTEND,
+	{ 0x3C,   0x1A, },
+	{ 0x7E,   0x33, },
+	{ 0x7F,   0x66, },
+	Polygon::LISTEND,
+	{ 0x0,    0x0, },
+	{ 0x3C,	0x1A, },
+	{ 0x4F,   0x32, },
+	{ 0x26, 0x32, },
+	Polygon::LISTEND,
+	{ 0xAC,   0x33, },
+	{ 0xC0,   0x1A, },
+	{ 0xFE,    0x0, },
+	{ 0xD3,   0x32, },
+	Polygon::LISTEND,
+	{ 0x7E, 0x33, },
+	{ 0xC0,   0x1A, },
+	{ 0x7F, 0x66, },
+	Polygon::LISTEND,
+	{ 0x95,   0x4F, },
+	{ 0xAC,   0x33, },
+	{ 0xD3,   0x32, },
+	{ 0xA8,   0x66, },
+	Polygon::LISTEND,
+	{ 0x26, 0x32, },
+	{ 0x4F,   0x32, },
+	{ 0x67, 0x4F, },
+	{ 0x54,   0x66, },
+	Polygon::LISTEND,
+	{ 0x54,   0x66, },
+	{ 0x67,   0x4F, },
+	{ 0x7F,   0x66, },
+	{ 0x7E,   0x96, },
+	Polygon::LISTEND,
+	{ 0x7F,   0x66, },
+	{ 0x95, 0x4F, },
+	{ 0xA8,   0x66, },
+	{ 0x7E, 0x96, },
+	Polygon::LISTEND,
 };
 
 // Travel rooms
@@ -1793,14 +1820,14 @@ static constexpr const char *INVNAMES[4][76] = {
 {" ", "      MORE ITEMS", "      MORE ITEMS", "      FENCE SPIRE", "     SILVER TOKEN", "      GOLD TOKEN", "       NOTICES", "     TICKET STUB", "    DIVORCE PAPERS", "       POSTCARD", "    BANK STATEMENT", "    LOTTERY LETTER", "       NEWSPAPER", "     BUTTER KNIFE", "         WIRE", "       DETONATOR", "PLASTIC EXPLOSIVE STATUE", "        CHALICE", "       COFFIN KEY", "         BILLS", "     SCRAP OF LACE", "         NOTE", "         DIARY", "   LIQUIDARK GRENADE", "       NEWSPAPERS", "   DARKSHEER HISTORY", "      GLASS CUTTER", "     SHARD OF GLASS", "       CLIPBOARD", "     ELEVATOR PASS", "         CLOCK", "  QUICKGROW SOLUTION", "         BONE", "     SACK OF SEEDS", "    THROWING KNIVES", "      MAGIC WAND", "      SCREWDRIVER", "       LOG BOOK", "        OIL CAN", "          LENS", "       MAKEUP KIT", "        JEWELRY", "        HAMMER", "        CHISEL", "    BUTCHER KNIFE", "      MEAT HOOK", "        BEAKER", "         ACID", "     VALVE WHEEL", "         ROPE", "        RE-BAR", "         NET", "         RAT", "         FORK", "         MATCH", "         PAINT", "      PAINT BRUSH", "        PEPPER", "      DENTAL PICK", "         SPEAR", "       EGG SACK", "       DIAMOND", "        COMIC", "          WEB", "   WROUGHT IRON SHAFT", "   CHALICE WITH WATER", "      BROKEN CHAIR", "       SAUSAGE", "        POSTER", "        BRICK", "      NOCTROGLYPH", "       DUCT TAPE", "         BROOM", "        OIL LAMP", "     BROOM AND HOOK", "    ROPE AND SAUSAGE"},
 {" ", "      AUTRES OBJETS", "      AUTRES OBJETS", "      MONTANT DE GRILLE", "     PIECE D'ARGENT", "      PIECE D'OR", "       AVERTISSEMENTS", "     SOUCHE DE TICKET", "    PAPIERS DE DIVORCE", "    CARTE POSTALE", "    RELEVE BANCAIRE", "    LETTRE DU CONCOURS", "       JOURNAL", "     COUTEAU A BEURRE", "         CABLE", "       DETONATEUR", "STATUETTE EXPLOSIVE", "        CALICE", "   CLEF DE CERCUEIL", "      FACTURES", " MORCEAU DE DENTELLE", "       MESSAGE", "      JOURNAL", "  GRENADE DE LIQUIDARK", "       JOURNAL", " HISTOIRE DE DARKSHEER", "      DIAMANT A VITRES", "     ECLAT DE VERRE", "       BLOC-NOTES", "  CARTE MAGNETIQUE", "         REVEIL", "  ENGRAIS MIRACLE", "         MACHOIRE", "     SAC DE GRAINES", "    COUTEAUX", "  BAGUETTE MAGIQUE", "     TOURNEVIS", "     JOURNAL", "       HUILE", "       LENTILLE", " TROUSSE DE MAQUILLAGE", "      BIJOUX", "      MARTEAU", "       BURIN", "   COUTEAU DE BOUCHER", "     CROCHET A VIANDE", "        FIOLE", "         ACIDE", "     VANNE", "         CORDE", "      FER A BETON", "        FILET", "         RAT", "      FOURCHETTE", "      ALLUMETTE", "         PEINTURE", "      PINCEAU", "        POIVRE", "      CURE-DENTS", "        LANCE", "       OEUFS", "       DIAMANT", "   BANDE DESSINEE", "        TOILE", "   TIGE D'ACIER ROUILLEE", "   CALICE PLEIN D'EAU", "      CHAISE CASSEE", "       SAUCISSE", "       AFFICHE", "        BRIQUE", "      NOCTROGLYPHE", "       TEFLON", "         BALAI", "      LAMPE A HUILE", "     BALAI ET CROCHET", "    CORDE ET SAUCISSE"},
 {" ", "      MAS OBJETOS", "      MAS OBJETOS", "  HIERRO DE VERJA", "  MONEDA PLATEADA", "   MONEDA DORADA", "         NOTAS", "     COMPROBANTE", " DEMANDA DE DIVORCIO", "         POSTAL", "   CARTA DEL BANCO", " CARTA DE LA LOTERIA", "      PERIODICO", " CUCHILLO MANTEQUILLA", "      ALAMBRE", "       DETONADOR", "ESTATUA EXPLOSIVA", "        CALIZ", "   LLAVE DE ATAUD", "      FACTURAS", "  TIRA DE ENCAJE", "         NOTA", "         DIARIO", "  GRANADA DE LIQUIOSCURO", "      PERIODICOS", "  TRATADO DE TINIEBLAS", "  CORTADOR DE CRISTAL", "   PEDAZO DE CRISTAL", "     PORTAPAPELES", "  PASE DE ELEVADOR", "         RELOJ", " SOLUCION DE CRECIMIENTO", "        HUESO", "        SEMILLAS", " CUCHILLOS ARROJADIZOS", "     VARA MAGICA", "    DESTORNILLADOR", "       REGISTRO", "  LATA DE ACEITE", "         LENTE", "      MAQUILLAJE", "          JOYAS", "      MARTILLO", "        CINCEL", " CUCHILLO DE CARNE", "  GANCHO DE CARNE", "         JARRA", "        ACIDO", " RUEDA DE VALVULA", "         SOGA", "      PALANCA", "         RED", "        RATA", "      TENEDOR", "       CERILLA", "      PINTURA", "        BROCHA", "      PIMIENTA", "     PICO DENTAL", "         LANZA", "  SACO DE HUEVOS", "       DIAMANTE", "        COMIC", "         TELA", "   ASTA DE HIERRO", "   CALIZ CON AGUA", "     SILLA ROTA", "    SALCHICHA", "        CARTEL", "     LADRILLO", "      NOCTROGLIFO", " CINTA ADHESIVA", "        ESCOBA", " LAMPARA DE ACEITE", "  ESCOBA CON GANCHO", "  SOGA CON SALCHICHA"},
-{" ", "  WEITERE GEGENST\x8E""NDE", "  WEITERE GEGENST\x8E""NDE", "      ZAUNSTREBE", "   SILBERNES SYMBOL", "   GOLDENES SYMBOL", "       MAHNUNGEN", "     LOSABSCHNITT", "  SCHEIDUNGSPAPIERE", "      POSTKARTE", "     KONTOAUSZUG", "   WETTBEWERBSBRIEF", "       ZEITUNG", "    BUTTERMESSER", "        KABEL", "       Z\x9A""NDER", "STATUE AUS PLASTIKSPRENGSTOFF", "       KELCH", "   SARGSCHL\x9A""SSEL", "     RECHNUNGEN", "       SPITZE", "       ZETTEL", "      TAGEBUCH", "   DUSTER\x99""L-GRANATE", "      ZEITUNG", "DIE GESCHICHTE VON DARKSHEER", "   GLASSCHNEIDER", "      SCHERBE", "     KLEMMBRETT", "     MAGNETKARTE", "       WECKER", "  WUCHSBESCHLEUNIGER", "       KNOCHEN", "     SAMENBEUTEL", "      WURFMESSER", "      ZAUBERSTAB", "   SCHRAUBENDREHER", "       LOGBUCH", "      \x99""LK\x8E""NNCHEN", "        LINSE", "     SCHMINKSET", "        SCHMUCK", "        HAMMER", "        MEISSEL", "        MESSER", "    FLEISCHERHAKEN", "       MESSBECHER", "        S\x8E""URE", "    VENTILSTELLRAD", "         SEIL", "     MONIEREISEN", "         NETZ", "        RATTE", "        GABEL", "     STREICHHOLZ", "         LACK", "        PINSEL", "        PFEFFER", "      ZAHNSTOCHER", "         SPEER", "       EIERSACK", "        DIAMANT", "        COMIC", "         NETZ", "  SCHMIEDEEISERNE STANGE", "    KELCH MIT WASSER", "      STUHLTR\x9A""MMER", "       W\x9A""RSTCHEN", "        PLAKAT", "        ZIEGEL", "      NOCTROGLYPH", "      ISOLIERBAND", "         BESEN", "        \x99""LLAMPE", "     STIEL MIT HAKEN", "    SEIL MIT W\x9A""RSTCHEN"},
+{" ", "  WEITERE GEGENST\x8E""NDE", "  WEITERE GEGENST\x8E""NDE", "      ZAUNSTREBE", "   SILBERNES SYMBOL", "   GOLDENES SYMBOL", "       MAHNUNGEN", "     LOSABSCHNITT", "  SCHEIDUNGSPAPIERE", "      POSTKARTE", "     KONTOAUSZUG", "   WETTBEWERBSBRIEF", "       ZEITUNG", "    BUTTERMESSER", "        KABEL", "       Z\x9A""NDER", "STATUE AUS PLASTIKSPRENGSTOFF", "       KELCH", "   SARGSCHL\x9A""SSEL", "     RECHNUNGEN", "       SPITZE", "       ZETTEL", "      TAGEBUCH", "   DUSTER\x99""L-GRANATE", "      ZEITUNG", "DIE GESCHICHTE VON DARKSHEER", "   GLASSCHNEIDER", "      SCHERBE", "     KLEMMBRETT", "     MAGNETKARTE", "       WECKER", "  WUCHSBESCHLEUNIGER", "       KNOCHEN", "     SAMENBEUTEL", "      WURFMESSER", "      ZAUBERSTAB", "   SCHRAUBENDREHER", "       LOGBUCH", "      \x99""LK\x8E""NNCHEN", "        LINSE", "     SCHMINKSET", "        SCHMUCK", "        HAMMER", "        MEISSEL", "        MESSER", "    FLEISCHERHAKEN", "       MESSBECHER", "        S\x8E""URE", "    VENTILSTELLRAD", "         SEIL", "     MONIEREISEN", "         NETZ", "        RATTE", "        GABEL", "     STREICHHOLZ", "         LACK", "        PINSEL", "        PFEFFER", "      ZAHNSTOCHER", "         SPEER", "       EIERSACK", "        DIAMANT", "        COMIC", "         NETZ", "  SCHMIEDEEISERNE STANGE", "    KELCH MIT WASSER", "      STUHLTR\x9A""MMER", "       W\x9A""RSTCHEN", "        PLAKAT", "        ZIEGEL", "      NOCTROGLYPH", "      ISOLIERBAND", "         BESEN", "        \x99""LLAMPE", "     STIEL MIT HAKEN", "    SEIL MIT W\x9A""RSTCHEN"}, //-V653
 };
 
 static constexpr const char *ASKITEMS[4][33] = {
 {"      NOCTROPOLIS", "       DARKSHEER", "       STILETTO", "    FATHER DESMOND", "       SUCCUBUS", "        CYGNUS", "      SAM JENKINS", "       MS. SHOTO", "      GREENTHUMB", "        TOPHAT", "        BUTCHER", "    MASTER MACABRE", "       DREALMER", "         FLUX", "    SUNSPIRE TOWER", "      LIQUIDARK", "      SHADESKIN", "      SHADOWLAIR", "     OBSERVATORY", "      CATHEDRAL", "     BEN HUTCHINS", "      MAUSOLEUM", "CENTRAL PARK GREENHOUSE", "      WHISPERMAN", "      OPERA- NEX", "      OPERAHOUSE", "     SUBTERRAINIA", "       CREATURE", "        WARDS", "    PETER BORNICK", "  INCARNATE/DYNATEK", "      JIM DRAKE", "      DISASTERS"},
 {"      NOCTROPOLIS", "       DARKSHEER", "       STILETTO", "    PERE DESMOND", "       SUCCUBE", "        CYGNE", "      SAM JENKINS", "       MME SHOTO", "      MAINVERTE", "        TOPHAT", "        BOUCHER", "    MAITRE MACABRE", "       DREALMER", "         FLUX", "    TOUR SUNSPIRE", "      LIQUIDARK", "    PEAU D'OMBRE", "    ANTRE D'OMBRE", "     OBSERVATOIRE", "      CATHEDRALE", "     BEN HUTCHINS", "      MAUSOLEE", " SERRE DE CENTRAL PARK", "      CHUCHOTEUR", "      OPERA-NEX", "         OPERA", "     SUBTERRAINIA", "       CREATURE", "      PUPILLES", "    PETER BORNICK", "  INCARNATE/DYNATEK", "      JIM DRAKE", "     CATASTROPHES"},
 {"      NOCTROPOLIS", "       TENEBROSO", "       STILETTO", "     PADRE DESMOND", "       SUCCUBUS", "        CYGNUS", "      SAM JENKINS", "      SRA. SHOTO", "       DEDOVERDE", "          DIVA", "      CARNICERO", "   MAESTRO MACABRO", "       MORFEICO", "         FLUX", "       TORRE SOLAR", "    LIQUIOSCURO", "   PIEL SOMBRIA", "   CUEVA SOMBRIA", "    OBSERVATORIO", "       CATEDRAL", "     BEN HUTCHINS", "       MAUSOLEO", "        INVERNADERO", "      WHISPERMAN", "      OPERA- NEX", "           OPERA", "      SUBTERRANIA", "       CRIATURA", "   GUARDIANES", "    PETER BORNICK", " ENCARNADAS/DYNATEK", "      JIM DRAKE", "      DESASTRES"},
-{"      NOCTROPOLIS", "       DARKSHEER", "       STILETTO", "    VATER DESMOND", "       SUCCUBUS", "        CYGNUS", "      SAM JENKINS", "      MISS SHOTO", "     GR\x9A""ND\x8E""UMLING", "  MISS ZYLINDERCHEN", "        METZGER", "    DOKTOR MAKABER", "       TR\x8E""UMLER", "         FLUX", "     SONNENNADEL", "       DUSTER\x99""L", "     FINSTERHAUT", "    SCHATTENHORT", "    OBSERVATORIUM", "         DOM", "    BEN HUTCHINS", "     MAUSOLEUM", "CENTRAL PARK TREIBHAUS", "     FL\x9A""STERMANN", "      OPER-NEX", "      OPERNHAUS", "    SUBTERRAINIA", "      GESCH\x99""PF", "      DIE WEHR", "    PETER BORNICK", "  INCARNATE/DYNATEK", "      JIM DRAKE", "    KATASTROPHEN"},
+{"      NOCTROPOLIS", "       DARKSHEER", "       STILETTO", "    VATER DESMOND", "       SUCCUBUS", "        CYGNUS", "      SAM JENKINS", "      MISS SHOTO", "     GR\x9A""ND\x8E""UMLING", "  MISS ZYLINDERCHEN", "        METZGER", "    DOKTOR MAKABER", "       TR\x8E""UMLER", "         FLUX", "     SONNENNADEL", "       DUSTER\x99""L", "     FINSTERHAUT", "    SCHATTENHORT", "    OBSERVATORIUM", "         DOM", "    BEN HUTCHINS", "     MAUSOLEUM", "CENTRAL PARK TREIBHAUS", "     FL\x9A""STERMANN", "      OPER-NEX", "      OPERNHAUS", "    SUBTERRAINIA", "      GESCH\x99""PF", "      DIE WEHR", "    PETER BORNICK", "  INCARNATE/DYNATEK", "      JIM DRAKE", "    KATASTROPHEN"}, //-V653
 };
 
 
@@ -1839,19 +1866,15 @@ static int _langOffset(Common::Language lang) {
 
 void NoctropolisResources::load(Common::SeekableReadStream &s) {
 	// Note: *don't* call the base class here. Noctropolis doesn't have data in access.dat.
-
-	// TODO: For non-EN variants we want to use something other than DARK/ as the path.
 	for (int i = 0; i < ARRAYSIZE(NOCT_FILES_1); i++) {
-		Common::Path filename = Common::Path(NOCT_FILES_1[i]).getLastComponent();
-		FILENAMES.push_back(filename);
+		FILENAMES.push_back(translatePath(NOCT_FILES_1[i]));
 	}
 	// TODO: These last few files are maybe only ever used from hard-coded points,
 	// so maybe we can just hard-code the names in those places and avoid this hack?
 	while (FILENAMES.size() < 256 - ARRAYSIZE(NOCT_FILES_2))
 		FILENAMES.push_back(Common::Path());
 	for (int i = 0; i < ARRAYSIZE(NOCT_FILES_2); i++) {
-		Common::Path filename = Common::Path(NOCT_FILES_2[i]).getLastComponent();
-		FILENAMES.push_back(filename);
+		FILENAMES.push_back(translatePath(NOCT_FILES_2[i]));
 	}
 
 	_fontChaleteu = new NoctropolisFont(0x66, 11, 1, 0xe2, CHALETEU_OFFSETS, CHALETEU_DATA);
@@ -1979,16 +2002,11 @@ void NoctropolisResources::load(Common::SeekableReadStream &s) {
 
 	// Load the menu polys
 	int i = 0;
-	while (MENU_POLYS[i] != -1) {
-		Polygon poly;
-		int pointsCount = MENU_POLYS[i++];
-		while (pointsCount--) {
-			Common::Point point;
-			point.x = MENU_POLYS[i++];
-			point.y = MENU_POLYS[i++];
-			poly.points.push_back(point);
-		}
-		_menus.push_back(poly);
+	while (i < ARRAYSIZE(MENU_POLYS)) {
+		_menus.push_back(MENU_POLYS + i);
+		while (MENU_POLYS[i] != Polygon::LISTEND && i < ARRAYSIZE(MENU_POLYS))
+			i++;
+		i++;
 	}
 
 	// Fill out the inventory
@@ -2000,9 +2018,29 @@ void NoctropolisResources::load(Common::SeekableReadStream &s) {
 	}
 }
 
+Common::Path NoctropolisResources::translatePath(const char *rawPath) const {
+	Common::String path_prefix;
+	switch (_vm->getLanguage()) {
+	case Common::FR_FRA: path_prefix = "FR/"; break;
+	case Common::DE_DEU: path_prefix = "DE/"; break;
+	case Common::ES_ESP: path_prefix = "ES/"; break;
+	default: break;
+	}
+
+	Common::String path = path_prefix + rawPath;
+	if (_vm->isDemo())
+		path.replace(0, 4, "DEMO");  // replace DARK with DEMO.
+
+	if (!path_prefix.empty() && !SearchMan.hasFile(Common::Path(path)))
+		path = path.substr(path_prefix.size());
+
+	return Common::Path(path);
+}
+
+
 int NoctropolisResources::menuAt(int16 x, int16 y) const {
 	for (int i = 0; i < (int)_menus.size(); i++) {
-		if (_menus[i].pointInside(x, y))
+		if (Polygon::pointInside(_menus[i], x, y))
 			return i;
 	}
 	return -1;
@@ -2055,7 +2093,7 @@ static constexpr const char *NOCT_GENERAL_MESSAGES[4][10] = {
 	"\x80""a ne s'ouvre pas.",
 	"\x80""a ne bouge pas.",
 	"Vous ne pouvez pas prendre \x87""a.",
-	"Vous n'obtenez aucune r\x82""ponse.",
+	"Vous n'obtenez aucune r\x82""ponse.", //-V653
 	"\x80""a ne marche pas.",
 	"Vous ne pouvez pas aller l\x85.",
 	"\x80""a ne marche pas.",

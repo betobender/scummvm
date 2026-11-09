@@ -20,12 +20,15 @@
  */
 
 #include "common/file.h"
+
 #include "graphics/paletteman.h"
 #include "graphics/screen.h"
 
 #include "pelrock/chrono.h"
+#include "pelrock/dialog.h"
+#include "pelrock/events.h"
 #include "pelrock/pelrock.h"
-#include "pelrock/util.h"
+#include "pelrock/sound.h"
 #include "pelrock/video.h"
 
 namespace Pelrock {
@@ -39,7 +42,7 @@ VideoManager::VideoManager(
 	SoundManager *sound) : _screen(screen), _events(events), _chrono(chrono), _largeFont(largeFont), _dialog(dialog), _sound(sound) {
 	_videoSurface.create(640, 400, Graphics::PixelFormat::createFormatCLUT8());
 	_textSurface.create(640, 400, Graphics::PixelFormat::createFormatCLUT8());
-	if (!_introSndFile.open("introsnd.dat")) {
+	if (!_introSndFile.open("introsnd.dat") && !_introSndFile.open("DATA/introsnd.dat")) {
 		error("VideoManager::VideoManager(): Could not open introsnd.dat");
 	}
 }
@@ -53,7 +56,7 @@ VideoManager::~VideoManager() {
 void VideoManager::playIntro() {
 	initMetadata();
 	Common::File videoFile;
-	if (!videoFile.open("ESCENAX.SSN")) {
+	if (!videoFile.open("ESCENAX.SSN") && !videoFile.open("DATA/ESCENAX.SSN")) {
 		error("VideoManager::playIntro(): Could not open ESCENAX.SSN");
 		return;
 	}
@@ -264,7 +267,7 @@ void VideoManager::presentFrame() {
 
 void VideoManager::initMetadata() {
 	Common::File metadataFile;
-	if (!metadataFile.open("ESCENAX.SCR")) {
+	if (!metadataFile.open("ESCENAX.SCR") && !metadataFile.open("DATA/ESCENAX.SCR")) {
 		error("VideoManager::initMetadata(): Could not open ESCENAX.SCR");
 		return;
 	}
@@ -312,6 +315,7 @@ void VideoManager::initMetadata() {
 MusicEffect VideoManager::readMusicEffect(Common::File &metadataFile) {
 	MusicEffect music;
 	Common::String buffer;
+	music.startFrame = 0;
 
 	// Skip spaces after "/c"
 	while (!metadataFile.eos() && metadataFile.readByte() == ' ')
@@ -340,6 +344,7 @@ MusicEffect VideoManager::readMusicEffect(Common::File &metadataFile) {
 AudioEffect VideoManager::readAudioEffect(Common::File &metadataFile) {
 	AudioEffect voice;
 	Common::String buffer;
+	voice.startFrame = 0;
 
 	// Skip spaces after "/x"
 	while (!metadataFile.eos() && metadataFile.readByte() == ' ')

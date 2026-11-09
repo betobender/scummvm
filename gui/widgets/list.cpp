@@ -46,7 +46,8 @@ ListWidget::ListWidget(Dialog *boss, const Common::String &name, const Common::U
 	_scrollBar = new ScrollBarWidget(this, _w - _scrollBarWidth, 0, _scrollBarWidth, _h);
 	_scrollBar->setTarget(this);
 
-	setFlags(WIDGET_ENABLED | WIDGET_CLEARBG | WIDGET_RETAIN_FOCUS | WIDGET_WANT_TICKLE | WIDGET_TRACK_MOUSE);
+	// WIDGET_HOOK_DRAG: prevent hooking by a container as we need drag for ourselves
+	setFlags(WIDGET_ENABLED | WIDGET_CLEARBG | WIDGET_WANT_TICKLE | WIDGET_TRACK_MOUSE | WIDGET_HOOK_DRAG);
 	_type = kListWidget;
 	_editMode = false;
 	_numberingMode = kListNumberingOne;
@@ -83,6 +84,7 @@ ListWidget::ListWidget(Dialog *boss, const Common::String &name, const Common::U
 
 	_scrollPos = 0.0f;
 	_fluidScroller = new FluidScroller();
+	_wasAnimating = false;
 	_isMouseDown = false;
 	_isDragging = false;
 	_dragStartY = _dragLastY = 0;
@@ -97,7 +99,8 @@ ListWidget::ListWidget(Dialog *boss, int x, int y, int w, int h, bool scale, con
 	_scrollBar = new ScrollBarWidget(this, _w - _scrollBarWidth, 0, _scrollBarWidth, _h);
 	_scrollBar->setTarget(this);
 
-	setFlags(WIDGET_ENABLED | WIDGET_CLEARBG | WIDGET_RETAIN_FOCUS | WIDGET_WANT_TICKLE | WIDGET_TRACK_MOUSE);
+	// WIDGET_HOOK_DRAG: prevent hooking by a container as we need drag for ourselves
+	setFlags(WIDGET_ENABLED | WIDGET_CLEARBG | WIDGET_WANT_TICKLE | WIDGET_TRACK_MOUSE | WIDGET_HOOK_DRAG);
 	_type = kListWidget;
 	_editMode = false;
 	_numberingMode = kListNumberingOne;
@@ -136,12 +139,14 @@ ListWidget::ListWidget(Dialog *boss, int x, int y, int w, int h, bool scale, con
 
 	_scrollPos = 0.0f;
 	_fluidScroller = new FluidScroller();
+	_wasAnimating = false;
 	_isMouseDown = false;
 	_isDragging = false;
 	_dragStartY = _dragLastY = 0;
 }
 
 ListWidget::~ListWidget() {
+	unregisterTickleWidget(this);
 	delete _fluidScroller;
 }
 
@@ -366,7 +371,13 @@ void ListWidget::handleTickle() {
 
 	if (_fluidScroller->update(g_system->getMillis(), _scrollPos)) {
 		applyScrollPos();
+	} else {
+		unregisterTickleWidget(this);
 	}
+}
+
+void ListWidget::cancelTickle() {
+	_fluidScroller->stopAnimation();
 }
 
 void ListWidget::applyScrollPos() {
@@ -383,6 +394,7 @@ void ListWidget::handleMouseDown(int x, int y, int button, int clickCount) {
 	_isMouseDown = true;
 	_isDragging = false;
 	_dragLastY = 0;
+	_wasAnimating = _fluidScroller->isAnimating();
 	_fluidScroller->stopAnimation();
 
 	if (button == 1) {
@@ -396,10 +408,12 @@ void ListWidget::handleMouseDown(int x, int y, int button, int clickCount) {
 
 void ListWidget::handleMouseUp(int x, int y, int button, int clickCount) {
 	if (button == 1 || button == 2) {
-		if (_isMouseDown && button == 1 && _isDragging)
+		if (_isMouseDown && button == 1 && _isDragging) {
 			_fluidScroller->startFling();
+			registerTickleWidget(this);
+		}
 
-		if (_isMouseDown && !_isDragging) {
+		if (_isMouseDown && !_isDragging && !_wasAnimating) {
 			// Perform selection
 			int newSelectedItem = findItem(x, y);
 			if (newSelectedItem != -1) {
@@ -453,10 +467,20 @@ void ListWidget::handleMouseUp(int x, int y, int button, int clickCount) {
 
 	// If this was a double click and the mouse is still over
 	// the selected item, send the double click command
-	if (clickCount == 2 && (_selectedItem == findItem(x, y)) &&
+	if (!_wasAnimating && clickCount == 2 && (_selectedItem == findItem(x, y)) &&
 		_selectedItem >= 0) {
 		sendCommand(kListItemDoubleClickedCmd, _selectedItem);
 	}
+	_wasAnimating = false;
+}
+
+void ListWidget::cancelDrag() {
+	if (_isDragging) {
+		_fluidScroller->stopAnimation();
+	}
+	_dragStartY = _dragLastY = 0;
+	_isMouseDown = false;
+	_isDragging = false;
 }
 
 void ListWidget::handleMouseWheel(int x, int y, int direction) {
@@ -464,13 +488,14 @@ void ListWidget::handleMouseWheel(int x, int y, int direction) {
 		return;
 
 	_fluidScroller->handleMouseWheel(direction);
+	registerTickleWidget(this);
 }
 
 void ListWidget::handleMouseMoved(int x, int y, int button) {
-	if (!isEnabled() || !_scrollBar->isVisible())
+	if (!isEnabled())
 		return;
 
-	if (_isMouseDown && _dragLastY != 0) {
+	if (_isMouseDown && _dragLastY != 0 && _scrollBar->isVisible()) {
 		if (!_isDragging && ABS(y - _dragStartY) > kDragThreshold)
 			_isDragging = true;
 
@@ -552,10 +577,13 @@ bool ListWidget::handleKeyDown(Common::KeyState state) {
 	bool dirty = false;
 	int oldSelectedItem = _selectedItem;
 
-	if (!_editMode && state.keycode <= Common::KEYCODE_z && Common::isPrint(state.ascii)) {
+	if (!_editMode && !(state.flags & (Common::KBD_CTRL | Common::KBD_ALT)) &&
+			state.keycode <= Common::KEYCODE_z && Common::isPrint(state.ascii)) {
 		// Quick selection mode: Go to first list item starting with this key
 		// (or a substring accumulated from the last couple key presses).
 		// Only works in a useful fashion if the list entries are sorted.
+		// Keys held with Ctrl or Alt are left alone, so that they can still
+		// reach the dialog's hotkey handling.
 		uint32 time = g_system->getMillis();
 		if (_quickSelectTime < time) {
 			_quickSelectStr = (char)state.ascii;
@@ -831,9 +859,6 @@ void ListWidget::receivedFocusWidget() {
 
 void ListWidget::lostFocusWidget() {
 	_inversion = ThemeEngine::kTextInversion;
-	_isMouseDown = _isDragging = false;
-	_dragStartY = _dragLastY = 0;
-
 	// If we lose focus, we simply forget the user changes
 	_editMode = false;
 	g_system->setFeatureState(OSystem::kFeatureVirtualKeyboard, false);
@@ -1132,6 +1157,7 @@ void ListWidget::setFilter(const Common::U32String &filter, bool redraw) {
 	_scrollPos = 0.0f;
 	_fluidScroller->setPosition(_scrollPos);
 	_selectedItem = -1;
+	_lastSelectionStartItem = -1;
 
 	if (redraw) {
 		scrollBarRecalc();
@@ -1166,10 +1192,10 @@ Common::U32String ListWidget::getThemeColor(ThemeEngine::FontColor color) {
 }
 
 ThemeEngine::FontColor ListWidget::getThemeColor(const Common::U32String &color) {
-	if (color == "normal")
+	if (color == U"normal")
 		return ThemeEngine::kFontColorNormal;
 
-	if (color == "alternate")
+	if (color == U"alternate")
 		return ThemeEngine::kFontColorAlternate;
 
 	warning("ListWidget::getThemeColor(): Malformed color (\"%s\")", color.encode().c_str());

@@ -81,6 +81,7 @@ protected:
 
 	float			_scrollPos;
 	FluidScroller	*_fluidScroller;
+	bool			_wasAnimating;
 	bool			_isMouseDown;
 	bool			_isDragging;
 	int				_dragStartY;
@@ -178,6 +179,9 @@ public:
 	bool handleKeyDown(Common::KeyState state) override;
 	bool handleKeyUp(Common::KeyState state) override;
 	void handleCommand(CommandSender *sender, uint32 cmd, uint32 data) override;
+
+	void cancelDrag() override;
+	void cancelTickle() override;
 
 	void reflowLayout() override;
 

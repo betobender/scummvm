@@ -24,7 +24,7 @@
 
 #include "engines/nancy/nancy.h"
 #include "engines/nancy/graphics.h"
-#include "engines/nancy/resource.h"
+#include "engines/nancy/resource/resource.h"
 #include "engines/nancy/sound.h"
 #include "engines/nancy/input.h"
 #include "engines/nancy/util.h"
@@ -37,7 +37,7 @@ namespace Action {
 
 // Wall normals for collision types 0..16.
 // Each entry is {dx, dy, spin} matching original offsets at this+0x188 + type*0xc.
-// Type 0 = paddle center (handled specially by FUN_0044d03d — normal not used here).
+// Type 0 = paddle center (handled specially — normal not used here).
 // Positive dy = up in "math" coords, i.e. y -= dy*speed on screen.
 const float ArcadePuzzle::_wallNormals[17][3] = {
 	{  0.0f,  1.0f, 0.0f }, // 0  paddle center (placeholder — handled separately)
@@ -141,7 +141,7 @@ void ArcadePuzzle::readData(Common::SeekableReadStream &stream) {
 		_sounds[i].readNormal(stream);
 
 	_levelClearSound.readNormal(stream);              // 49 bytes, +0x43b..+0x46b
-	_winScene.readData(stream);                       // 25 bytes, +0x46c..+0x484
+	_solveScene.readData(stream);                       // 25 bytes, +0x46c..+0x484
 	stream.skip(1);                                // 1-byte gap, +0x485
 
 	_gameOverSound.readNormal(stream);                // 49 bytes, +0x486..+0x4b6
@@ -159,8 +159,7 @@ void ArcadePuzzle::init() {
 	setVisible(true);
 	moveTo(vpBounds);
 
-	g_nancy->_resource->loadImage(_imageName, _image);
-	_image.setTransparentColor(_drawSurface.getTransparentColor());
+	loadImage();
 
 	// Determine game field bounds within viewport
 	int vpDataWidth  = (vpBounds.right  - vpBounds.left);
@@ -250,7 +249,7 @@ void ArcadePuzzle::buildAngleTable() {
 		_angleTable[right * 6 + 2] = 0.0f;
 
 		// sub-entry 1: reflect across y-axis: (-dx, dy)
-		// FUN_00447eb9 with no-negate: result = 2*(v·n)*n - v
+		// Reflection with no-negate: result = 2*(v·n)*n - v
 		// n=(0,1), v=(dx,dy): result = (-dx, dy)
 		float dot  = dx * mirrorNx + dy * mirrorNy; // = dy
 		float rdx  = 2.0f * dot * mirrorNx - dx;    // = -dx
@@ -481,6 +480,7 @@ void ArcadePuzzle::execute() {
 	case kBegin:
 		init();
 		registerGraphics();
+		NancySceneState.setNoHeldItem();
 
 		// Load sounds
 		for (int i = 0; i < 6; ++i)
@@ -594,7 +594,7 @@ void ArcadePuzzle::execute() {
 		// forever until they clear the required level(s). So
 		// kActionTrigger is only ever reached via kGameOverWin, and
 		// we just execute the win scene change + flag set.
-		_winScene.execute();
+		_solveScene.execute();
 
 		finishExecution();
 		break;
@@ -662,8 +662,8 @@ void ArcadePuzzle::paddleMovement() {
 		_paddleRight = _paddleLeft + _paddleWidth - 1;
 	}
 
-	if (_paddleLeft  != _paddlePrevLeft  || _paddleRight != _paddlePrevRight ||
-	    _paddleTop   != _paddlePrevTop   || _paddleBottom!= _paddlePrevBottom) {
+	// The paddle only moves horizontally
+	if (_paddleLeft != _paddlePrevLeft || _paddleRight != _paddlePrevRight) {
 		_paddleNeedsRedraw = true;
 	}
 }
@@ -947,7 +947,7 @@ void ArcadePuzzle::wallAndPaddleCollision(int &ballLeft, int &ballTop, int &ball
 	}
 }
 
-// ---- segmentsCross (FUN_00450120 / FUN_0045022b) ----------------------------
+// ---- segmentsCross ----------------------------------------------------------
 // Returns true if segment P1->P2 crosses segment P3->P4 (including touching).
 // Uses the standard 2D cross-product orientation test.
 
@@ -968,10 +968,10 @@ static bool segmentsCross(int p1x, int p1y, int p2x, int p2y,
 	return true;
 }
 
-// ---- brickCollision (FUN_0044cad5) ------------------------------------------
+// ---- brickCollision ---------------------------------------------------------
 // Ball center is inside brick area. Find which brick is hit and set collision type.
 // Direct grid-index lookup (O(1)), neighbor-based face detection with line-segment
-// intersection test (FUN_00450120).
+// intersection test.
 
 bool ArcadePuzzle::brickCollision(int &ballLeft, int &ballTop, int &ballRight, int &ballBottom,
                                    int &ballCenterX, int &ballCenterY) {
@@ -1081,7 +1081,8 @@ void ArcadePuzzle::applyCollision() {
 	}
 
 	case 1: case 2:
-		// Paddle edge: negate both components
+	case 0x10:
+		// Paddle edge or catch-all out-of-bounds: negate both components
 		_ballDX = -_ballDX;
 		_ballDY = -_ballDY;
 		break;
@@ -1123,12 +1124,6 @@ void ArcadePuzzle::applyCollision() {
 		_ballDX = -_ballDX;
 		_ballDY = -_ballDY;
 		playBrickHitSound();
-		break;
-
-	case 0x10:
-		// Catch-all out-of-bounds: negate
-		_ballDX = -_ballDX;
-		_ballDY = -_ballDY;
 		break;
 
 	case -1:

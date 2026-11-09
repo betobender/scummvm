@@ -23,6 +23,7 @@
 #define NANCY_H
 
 #include "common/file.h"
+#include "common/hashmap.h"
 #include "common/str.h"
 #include "common/ptr.h"
 
@@ -43,8 +44,18 @@ class Serializer;
  *
  * Status of this engine:
  * The Vampire Diaries and all Nancy Drew games up to and including
- * Nancy Drew: Danger on Deception Island are fully completable.
+ * Nancy Drew: The Creature of Kapu Cave are fully completable.
  * Every other game is untested but definitely unplayable.
+ *
+ * The engine has the following major versions:
+ * - v1: TVD, Nancy1-9
+ * - v2: Nancy10-11 (revamped interface)
+ * - v2a: Nancy12 (moved hardcoded dialog logic)
+ * - v2b: Nancy13-14 (32bpp graphics, scene include scripts)
+ * - v2c: Nancy15 (multiple characters and UI interfaces)
+ * - v3: Nancy16-17 (revamped interface)
+ * - v3a: Nancy18 (PNG graphics)
+ * - v4: Nancy19 and newer (Lua scripting)
  *
  * Games using this engine:
  *	- The Vampire Diaries (1996)
@@ -54,9 +65,31 @@ class Serializer;
  */
 namespace Nancy {
 
-static const int kSavegameVersion = 4;
+// Save game version history:
+// - 1: Initial version
+// - 2: Conditional dialogue and hints moved to nancy.dat
+// - 3: Puzzle data stored as lazily initialized PuzzleData objects
+// - 4: Journal entries sync their scene ID (Nancy9+)
+// - 5: Nancy10 taskbar notification badges persisted
+// - 6: Nancy12 timers reworked
+// - 7: Nancy10 unnamed notebook task event flags added
+// - 8: Nancy12 DrivingPuzzle fuel state persisted
+// - 9: RippedLetterPuzzle stores its scene ID and tried flag
+// - 10: Nancy14/15 inventory arrays hold 49 items instead of 50
+// - 11: Nancy12+ TableData holds 100 single values instead of 30, and
+//       the Nancy14/15 player clock only holds the time of the current
+//       day, with the day itself stored separately
+// - 12: QuizPuzzle slots are keyed by a 32-bit id, and the Nancy15
+//       protagonists each carry their own cell phone
+static const int kSavegameVersion = 12;
 
-struct NancyGameDescription;
+struct CVTX;
+struct ENVS;
+struct EVNT;
+struct INVD;
+struct PCUI;
+struct VIEW;
+struct ScriptBootData;
 
 class ResourceManager;
 class IFF;
@@ -66,17 +99,22 @@ class GraphicsManager;
 class CursorManager;
 class NancyConsole;
 class DeferredLoader;
+class MoviePlayer;
 
 namespace State {
 class State;
 }
 
+namespace Script {
+class OverrideRecord;
+}
+
 class NancyEngine : public Engine {
 public:
-	NancyEngine(OSystem *syst, const NancyGameDescription *gd);
+	NancyEngine(GameType type, OSystem *syst, const ADGameDescription *gd);
 	~NancyEngine();
 
-	static NancyEngine *create(GameType type, OSystem *syst, const NancyGameDescription *gd);
+	static NancyEngine *create(GameType type, OSystem *syst, const ADGameDescription *gd);
 
 	void errorString(const char *buf_input, char *buf_output, int buf_output_size) override;
 	bool hasFeature(EngineFeature f) const override;
@@ -98,9 +136,30 @@ public:
 
 	const StaticData &getStaticData() const;
 	const EngineData *getEngineData(const Common::String &name) const;
+	const Common::String getEventFlagName(uint flagID) const;
+
+	// Nancy15+ lets the player alternate between several protagonists, each of whom
+	// carries their own copy of the popup UI. Swaps the engine data describing it to
+	// the given PCUI character's, and returns whether anything actually changed.
+	// Scene::reloadPlayerCharacterUI() rebuilds the widgets themselves.
+	bool setPlayerCharacter(uint characterIndex);
+	uint getPlayerCharacter() const { return _playerCharacter; }
+
+	// Adds the texts of a text file to the autotext
+	void addAutotext(const Common::Path &name);
+
+	// A character's "design" is the look their UI wears; it names the CIF tree
+	// everything is loaded from. Nancy's can be changed on the Design Select
+	// screen, and defaults to the character's PCUI entry.
+	Common::String getPlayerCharacterDesign(uint characterIndex) const;
+	void setPlayerCharacterDesign(uint characterIndex, const Common::String &designName);
+
+	// Whether setPlayerCharacter() would actually have to load anything
+	bool playerCharacterNeedsReload(uint characterIndex) const;
 
 	void setState(NancyState::NancyState state, NancyState::NancyState overridePrevious = NancyState::kNone);
 	NancyState::NancyState getState() { return _gameFlow.curState; }
+	NancyState::NancyState getPreviousState() const { return _gameFlow.prevState; }
 	void setToPreviousState();
 
 	void setMouseEnabled(bool enabled);
@@ -121,8 +180,22 @@ public:
 
 	Common::RandomSource *_randomSource;
 
+	// All loaded movies, for MoviePlayer::findLoadedMovie().
+	Common::Array<MoviePlayer *> _loadedMovies;
+
 	// Used to check whether we need to show the SaveDialog
 	bool _hasJustSaved;
+
+	// Nancy22: the records that took a name with SetMessagingName. Each name
+	// goes to one record at a time; records without one go by the
+	// "messagingName" a script stored in them.
+	typedef Common::HashMap<Common::String, Script::OverrideRecord *, Common::IgnoreCase_Hash, Common::IgnoreCase_EqualTo> MessagingNameMap;
+	MessagingNameMap _messagingNames;
+
+	// Nancy21: what the scripts keep apart from the saved games, packed the way
+	// Save:Data packs it. The original writes it to a file of its own; here it
+	// lasts for as long as the game runs.
+	Common::HashMap<Common::String, Common::Array<byte> > _scriptAttic;
 
 protected:
 	Common::Error run() override;
@@ -137,27 +210,41 @@ private:
 	};
 
 	void bootGameEngine();
+#ifdef ENABLE_NANCY_V4
+	void bootScriptedGameEngine();	// Nancy19+
+	void bootScriptedGameData(ScriptBootData *boot, EVNT *flags, INVD *inventory, ENVS *environments, PCUI *players, VIEW *viewport, CVTX *autotext, CVTX *convo);
+#endif
+#ifdef ENABLE_NANCY_V5
+	void bootNancy26Data(ScriptBootData *boot, EVNT *flags, INVD *inventory, ENVS *environments, VIEW *viewport, CVTX *autotext);	// Nancy26+
+#endif
 
 	State::State *getStateObject(NancyState::NancyState state) const;
 	void destroyState(NancyState::NancyState state) const;
 
 	void preloadCals();
 	void readDatFile();
+	// Nancy12 onwards no longer ship their static data in nancy.dat; the values
+	// the engine still needs are provided here instead (see also the EVNT chunk).
+	void populateStaticData();
 
 	Common::Error synchronize(Common::Serializer &serializer);
 
-	bool isCompressed();
-
 	StaticData _staticData;
 	Common::HashMap<Common::String, EngineData *> _engineData;
+
+	// Nancy15+ active player character, the CIF tree their UI came from, and
+	// each character's chosen design (empty = their PCUI default)
+	uint _playerCharacter = 0;
+	Common::String _playerCharacterTree;
+	Common::String _playerCharacterDesigns[kMaxPlayerCharacters];
 
 	const byte _datFileMajorVersion;
 	const byte _datFileMinorVersion;
 
 	GameFlow _gameFlow;
-	OSystem *_system;
 
-	const NancyGameDescription *_gameDescription;
+	const ADGameDescription *_gameDescription;
+	const GameType _gameType;
 
 	Common::Array<Common::WeakPtr<DeferredLoader>> _deferredLoaderObjects;
 };

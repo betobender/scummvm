@@ -20,6 +20,7 @@
  */
 
 #include "access/noctropolis/noctropolis_inventory.h"
+#include "access/noctropolis/noctropolis_resources.h"
 #include "access/access.h"
 #include "access/resources.h"
 #include "access/asurface.h"
@@ -49,6 +50,8 @@ int NoctropolisInventory::displayInv() {
 
 	setUseItem(-1);
 
+	_vm->_events->setCursor(CURSOR_ARROW);
+
 	if (!_keepInventoryPosition) {
 		int16 warpMouseX, warpMouseY;
 		_inventoryBase.x = _vm->_events->clipMouseCenter(_vm->_events->_mousePos.x, 252, 640, warpMouseX);
@@ -58,8 +61,8 @@ int NoctropolisInventory::displayInv() {
 			g_system->warpMouse(warpMouseX, warpMouseY);
 	}
 
-	// TODO: Maybe move/load these globally?
-	Resource *iconData = _vm->_files->loadRawFile("INV.AP");
+	Common::Path path = ((NoctropolisResources *)_vm->_res)->translatePath("DARK/INV.AP");
+	Resource *iconData = _vm->_files->loadRawFile(path);
 	SpriteResource *inventorySprites = new SpriteResource(_vm, iconData);
 	delete iconData;
 
@@ -83,6 +86,10 @@ int NoctropolisInventory::displayInv() {
 	while (selectedItem == -1 && !_vm->shouldQuitOrRestart()) {
 		int x = _vm->_events->_mousePos.x - _inventoryBase.x - 23;
 		int y = _vm->_events->_mousePos.y - _inventoryBase.y - 26;
+
+		Common::CustomEventType action;
+		if (_vm->_events->getAction(action) && action == kActionSkip)
+			break;
 
 		if (prevTopItemIndex != _topItemIndex) {
 

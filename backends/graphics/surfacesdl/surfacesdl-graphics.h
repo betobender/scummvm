@@ -117,8 +117,8 @@ public:
 	int16 getOverlayHeight() const override { return _videoMode.overlayHeight; }
 	int16 getOverlayWidth() const override { return _videoMode.overlayWidth; }
 
-	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale = false, const Graphics::PixelFormat *format = NULL, const byte *mask = NULL) override;
-	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, bool dontScale, const Graphics::PixelFormat *format, const byte *mask, bool disableKeyColor);
+	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, const Graphics::PixelFormat *format, const byte *mask, frac_t scaleX, frac_t scaleY) override;
+	void setMouseCursor(const void *buf, uint w, uint h, int hotspotX, int hotspotY, uint32 keycolor, const Graphics::PixelFormat *format, const byte *mask, frac_t scaleX, frac_t scaleY, bool disableKeyColor);
 	void setCursorPalette(const byte *colors, uint start, uint num) override;
 
 #ifdef USE_OSD
@@ -203,8 +203,6 @@ protected:
 	virtual SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags);
 	virtual void SDL_UpdateRects(SDL_Surface *screen, int numrects, SDL_Rect *rects);
 	int SDL_SetColors(SDL_Surface *surface, SDL_Color *colors, int firstcolor, int ncolors);
-	int SDL_SetAlpha(SDL_Surface *surface, Uint32 flag, Uint8 alpha);
-	int SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key);
 #endif
 
 	/** Unseen game screen */
@@ -384,7 +382,8 @@ protected:
 	uint32 _mouseKeyColor;
 	bool _disableMouseKeyColor;
 	byte _mappedMouseKeyColor;
-	bool _cursorDontScale;
+	frac_t _cursorScaleX;
+	frac_t _cursorScaleY;
 	bool _cursorPaletteDisabled;
 	SDL_Surface *_mouseOrigSurface;
 	SDL_Surface *_mouseSurface;

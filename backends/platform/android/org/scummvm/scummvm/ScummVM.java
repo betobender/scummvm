@@ -23,9 +23,11 @@ package org.scummvm.scummvm;
 
 import android.content.res.AssetManager;
 import android.graphics.PixelFormat;
+import android.media.midi.MidiDevice;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import java.util.LinkedHashMap;
@@ -67,6 +69,7 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 	                           boolean assetsUpdated);
 	private native void destroy();
 	private native void setSurface(int width, int height, int bpp);
+	@SuppressWarnings("ConfusingMainMethod")
 	private native int main(String[] args);
 
 	// pause the engine and all native threads
@@ -90,32 +93,64 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 	final public native void systemInsetsUpdated(int[] gestureInsets, int[] systemInsets, int[] cutoutInsets);
 
 	// Callbacks from C++ peer instance
+	/** @noinspection unused */ @Keep
 	abstract protected void getDPI(float[] values);
+	/** @noinspection unused */ @Keep
 	abstract protected void displayMessageOnOSD(String msg);
+	/** @noinspection unused */ @Keep
 	abstract protected void openUrl(String url);
+	/** @noinspection unused */ @Keep
 	abstract protected boolean hasTextInClipboard();
+	/** @noinspection unused */ @Keep
 	abstract protected String getTextFromClipboard();
+	/** @noinspection unused */ @Keep
 	abstract protected boolean setTextInClipboard(String text);
+	/** @noinspection unused */ @Keep
 	abstract protected boolean isConnectionLimited();
+	/** @noinspection unused */ @Keep
 	abstract protected void setWindowCaption(String caption);
+	/** @noinspection unused */ @Keep
 	abstract protected void showVirtualKeyboard(boolean enable);
+	/** @noinspection unused */ @Keep
 	abstract protected void showOnScreenControls(int enableMask);
+	/** @noinspection unused */ @Keep
 	abstract protected void setTouchMode(int touchMode);
+	/** @noinspection unused */ @Keep
 	abstract protected int getTouchMode();
+	/** @noinspection unused */ @Keep
 	abstract protected void setOrientation(int orientation);
+	/** @noinspection unused */ @Keep
 	abstract protected String getScummVMBasePath();
+	/** @noinspection unused */ @Keep
 	abstract protected String getScummVMConfigPath();
+	/** @noinspection unused */ @Keep
 	abstract protected String getScummVMLogPath();
+	/** @noinspection unused */ @Keep
 	abstract protected void setCurrentGame(String target);
+	/** @noinspection unused */ @Keep
+	abstract protected void notifyHTTPService(int localPort, boolean minimal);
+	/** @noinspection unused */ @Keep
+	abstract protected TextToSpeechManager getTTSManager();
+	/** @noinspection unused */ @Keep
+	abstract protected String[] getMIDIDevices();
+	/** @noinspection unused */ @Keep
+	abstract protected MidiDevice openMIDIDevice(int device, int[] portId);
+	/** @noinspection unused */ @Keep
 	abstract protected String[] getSysArchives();
+	/** @noinspection unused */ @Keep
 	abstract protected String[] getAllStorageLocations();
-	abstract protected String[] getAllStorageLocationsNoPermissionRequest();
+	/** @noinspection unused */ @Keep
 	abstract protected SAFFSTree getNewSAFTree(boolean write, String initialURI, String prompt);
+	/** @noinspection unused */ @Keep
 	abstract protected SAFFSTree[] getSAFTrees();
+	/** @noinspection unused */ @Keep
 	abstract protected SAFFSTree findSAFTree(String name);
+	/** @noinspection unused */ @Keep
 	abstract protected int exportBackup(String prompt);
+	/** @noinspection unused */ @Keep
 	abstract protected int importBackup(String prompt, String path);
 
+	@SuppressWarnings("ClassEscapesDefinedScope")
 	public ScummVM(AssetManager asset_manager, SurfaceHolder holder, final MyScummVMDestroyedCallback scummVMDestroyedCallback) {
 		_asset_manager = asset_manager;
 		_sem_surface = new Object();
@@ -128,14 +163,14 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 	}
 
 	// SurfaceHolder callback
-	final public void surfaceCreated(SurfaceHolder holder) {
+	final public void surfaceCreated(@NonNull SurfaceHolder holder) {
 		Log.d(LOG_TAG, "surfaceCreated");
 
 		// no need to do anything, surfaceChanged() will be called in any case
 	}
 
 	// SurfaceHolder callback
-	final public void surfaceChanged(SurfaceHolder holder, int format,
+	final public void surfaceChanged(@NonNull SurfaceHolder holder, int format,
 										int width, int height) {
 
 		PixelFormat pixelFormat = new PixelFormat();
@@ -157,7 +192,7 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 	}
 
 	// SurfaceHolder callback
-	final public void surfaceDestroyed(SurfaceHolder holder) {
+	final public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
 		Log.d(LOG_TAG, "surfaceDestroyed");
 
 		synchronized(_sem_surface) {
@@ -245,7 +280,10 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 												_egl.eglGetError()));
 	}
 
-	// Callback from C++ peer instance
+	/** @noinspection unused
+	 * Callback from C++ peer instance
+	 */
+	@Keep
 	final protected EGLSurface initSurface() throws Exception {
 		_egl_surface = _egl.eglCreateWindowSurface(_egl_display, _egl_config,
 													_surface_holder, null);
@@ -269,7 +307,10 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 		return _egl_surface;
 	}
 
-	// Callback from C++ peer instance
+	/** @noinspection unused
+	 * Callback from C++ peer instance
+	 */
+	@Keep
 	final protected void deinitSurface() {
 		if (_egl_display != EGL10.EGL_NO_DISPLAY) {
 			_egl.eglMakeCurrent(_egl_display, EGL10.EGL_NO_SURFACE,
@@ -282,7 +323,10 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 		_egl_surface = EGL10.EGL_NO_SURFACE;
 	}
 
-	// Callback from C++ peer instance
+	/** @noinspection unused
+	 * Callback from C++ peer instance
+	 */
+	@Keep
 	final protected int eglVersion() {
 		String version = _egl.eglQueryString(_egl_display, EGL10.EGL_VERSION);
 		if (version == null) {
@@ -507,7 +551,7 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 
 				int score = attr.weight();
 
-				Log.d(LOG_TAG, String.format(Locale.ROOT, "%s (%d, %s)", attr.toString(), score, good ? "OK" : "NOK"));
+				Log.d(LOG_TAG, String.format(Locale.ROOT, "%s (%d, %s)", attr, score, good ? "OK" : "NOK"));
 
 				if (!good) {
 					continue;
@@ -525,21 +569,29 @@ public abstract class ScummVM implements SurfaceHolder.Callback,
 					"Unable to find an acceptable EGL config, expect badness.");
 
 		Log.d(LOG_TAG, String.format(Locale.ROOT, "Chosen EGL config: %s",
-										new EglAttribs(res).toString()));
+										new EglAttribs(res)));
 
 		return res;
 	}
 
-	static {
-//		// For grabbing with gdb...
-//		final boolean sleep_for_debugger = false;
-//		if (sleep_for_debugger) {
-//			try {
-//				Thread.sleep(20 * 1000);
-//			} catch (InterruptedException ignored) {
-//			}
-//		}
+	public static class Reloader {
+		public native static boolean reload();
 
-		System.loadLibrary("scummvm");
-	}
+		static {
+	//		// For grabbing with gdb...
+	//		final boolean sleep_for_debugger = false;
+	//		if (sleep_for_debugger) {
+	//			try {
+	//				Thread.sleep(20 * 1000);
+	//			} catch (InterruptedException ignored) {
+	//			}
+	//		}
+
+			// The loader will load the real libscummvm.so and resolve the Reloader native
+			// This will allow us to reset ScummVM global variables
+
+			Log.i(LOG_TAG, "Loading ScummVM loader");
+			System.loadLibrary("loader");
+		}
+	};
 }

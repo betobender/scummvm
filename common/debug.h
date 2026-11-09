@@ -167,9 +167,11 @@ enum GlobalDebugLevels {
 	kDebugLevelEventRec,
 	kDebugLevelMainGUI,
 	kDebugLevelMacGUI,
+	kDebugLevelMacToolbox,
 	kDebugLevelGGraphics,
 	kDebugLevelGVideo,
 	kDebugLevelGAudio,
+	kDebugImGui,
 };
 
 /** @} */

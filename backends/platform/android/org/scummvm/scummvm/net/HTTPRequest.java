@@ -25,6 +25,8 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import androidx.annotation.Keep;
+
 import org.scummvm.scummvm.SAFFSTree;
 
 import java.io.ByteArrayInputStream;
@@ -71,6 +73,7 @@ public class HTTPRequest implements Runnable {
 	/** @noinspection unused
 	 * Called from JNI
 	 */
+	@Keep
 	public HTTPRequest(long nativePointer, String url, String[] requestHeaders, byte[] uploadBuffer, boolean uploading, boolean usingPatch, boolean post) {
 		init(nativePointer, url);
 		setupUploadBuffer(uploadBuffer, uploading, usingPatch, post);
@@ -80,6 +83,7 @@ public class HTTPRequest implements Runnable {
 	/** @noinspection unused
 	 * Called from JNI
 	 */
+	@Keep
 	public HTTPRequest(long nativePointer, String url, String[] requestHeaders, String[] formFields, String[] formFiles) {
 		init(nativePointer, url);
 		setupMultipartForm(formFields, formFiles);
@@ -221,12 +225,17 @@ public class HTTPRequest implements Runnable {
 	/** @noinspection unused
 	 * Called from JNI
 	 */
+	@Keep
 	public void cancel() {
 		_cancelled.set(true);
 		// Don't notify the native object if we got cancelled: it may have been reused
 		_nativePointer = 0;
 	}
 
+	/** @noinspection unused
+	 * Called from JNI
+	 */
+	@Keep
 	public String getURL() {
 		return _url.get();
 	}
@@ -373,7 +382,7 @@ public class HTTPRequest implements Runnable {
 			final int responseCode = urlConnection.getResponseCode();
 			_manager.enqueue(() -> finished(_nativePointer, responseCode, null));
 		} catch (FileNotFoundException e) {
-			// The server returned an error, and we didn't managed to get the error stream:
+			// The server returned an error, and we didn't manage to get the error stream:
 			// return the error code and no data
 			int responseCode = -1;
 			try {

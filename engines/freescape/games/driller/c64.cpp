@@ -19,15 +19,46 @@
  *
  */
 
+#include "common/endian.h"
 #include "common/file.h"
 
 #include "freescape/freescape.h"
 #include "freescape/games/driller/driller.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/variables.h"
 
 namespace Freescape {
 
 extern byte kC64Palette[16][3];
+
+static Common::Array<byte> loadDrillerC64PackedProgram(Common::SeekableReadStream *file) {
+	static const struct {
+		uint16 loadAddress;
+		uint16 address;
+		uint16 size;
+	} parts[] = {
+		{0x0400, 0x0400, 2112},
+		{0x0c40, 0x0c40, 43276},
+		{0xb54c, 0xb54c, 4788},
+		{0xc800, 0xc800, 2047},
+		// The tape loader moves this block to $d000 before loading the title.
+		{0x4000, 0xd000, 4096}
+	};
+
+	if (file->size() != 56329)
+		error("Invalid packed Driller C64 program size");
+
+	Common::Array<byte> packed;
+	packed.resize(0xe000 - 0x0400 + 2);
+	WRITE_LE_UINT16(packed.data(), 0x0400);
+	// Concatenated PRGs retain their two-byte load addresses.
+	for (const auto &part : parts) {
+		if (file->readUint16LE() != part.loadAddress)
+			error("Invalid Driller C64 tape block at $%04x", part.loadAddress);
+		if (file->read(packed.data() + part.address - 0x0400 + 2, part.size) != part.size)
+			error("Truncated Driller C64 tape block at $%04x", part.loadAddress);
+	}
+	return packed;
+}
 
 void DrillerEngine::initC64() {
 	_viewArea = Common::Rect(32, 16, 288, 120);
@@ -42,18 +73,22 @@ void DrillerEngine::loadAssetsC64FullGame() {
 		load8bitBinary(&file, 0x8e02, 4);
 		loadGlobalObjects(&file, 0x1855, 8);
 	} else if (_targetName.hasPrefix("driller")) {
-		file.open("driller.c64.data");
+		if (!file.open("driller.c64.data"))
+			error("Unable to open driller.c64.data");
 
-		if (_variant) {
+		if (_variant & GF_C64_PACKED) {
+			Common::Array<byte> packed = loadDrillerC64PackedProgram(&file);
+			Common::Array<byte> data = unpackC64Snapshot(packed);
+			Common::MemoryReadStream stream(data.data(), data.size(), DisposeAfterUse::NO);
+			loadMessagesFixedSize(&stream, 0x1a78, 14, 20);
+			loadGlobalObjects(&stream, 0x1c53, 8);
+			loadFonts(&stream, 0x0800);
+			load8bitBinary(&stream, 0x9200, 16);
+		} else if (_variant & (GF_C64_TAPE | GF_C64_DISC)) {
 			loadMessagesFixedSize(&file, 0x167a, 14, 20);
 			loadGlobalObjects(&file, 0x1855, 8);
 			loadFonts(&file, 0x402);
 			load8bitBinary(&file, 0x8b04, 16);
-		/*} else if (_variant & GF_C64_BUDGET) {
-			//loadFonts(&file, 0x402);
-			load8bitBinary(&file, 0x7df7, 16);
-			loadMessagesFixedSize(&file, 0x1399, 14, 20);
-			loadGlobalObjects(&file, 0x150a, 8);*/
 		} else
 			error("Unknown C64 variant %x", _variant);
 
@@ -185,14 +220,10 @@ void DrillerEngine::loadAssetsC64FullGame() {
 	_soundIndexMissionComplete = 14; // SFX #14 - 3-step chord
 }
 
-void DrillerEngine::playSoundC64(int index) {
-	debugC(1, kFreescapeDebugMedia, "Playing C64 SFX %d", index);
-	if (_playerC64Sfx && _c64UseSFX)
-		_playerC64Sfx->playSfx(index);
-}
-
 void DrillerEngine::toggleC64Sound() {
 	if (_c64UseSFX) {
+		if (_sound == _playerC64Sfx)
+			_sound = nullptr;
 		if (_playerC64Sfx)
 			_playerC64Sfx->destroySID();
 		if (_playerMusic)
@@ -203,6 +234,8 @@ void DrillerEngine::toggleC64Sound() {
 			_playerMusic->stopMusic();
 		if (_playerC64Sfx)
 			_playerC64Sfx->initSID();
+		if (_sound == nullptr)
+			_sound = _playerC64Sfx;
 		_c64UseSFX = true;
 	}
 }

@@ -408,14 +408,14 @@ Common::List<Math::Line3d> Sector::getBridgesTo(Sector *sector) const {
 			//
 			// The value of at least 0.1 was chosen to fix a path finding issue
 			// in set pac when guybrush tried to reach the pile of rocks.
-			if (fabs(getProjectionToPlane((*it).begin()).y() - sector->getProjectionToPlane((*it).begin()).y()) > 0.1f ||
-			    fabs(getProjectionToPlane((*it).end()).y() - sector->getProjectionToPlane((*it).end()).y()) > 0.1f) {
+			if (fabs(getProjectionToPlane(it->begin()).y() - sector->getProjectionToPlane(it->begin()).y()) > 0.1f ||
+			    fabs(getProjectionToPlane(it->end()).y() - sector->getProjectionToPlane(it->end()).y()) > 0.1f) {
 				it = bridges.erase(it);
 				continue;
 			}
 		} else {
-			if (fabs(getProjectionToPlane((*it).begin()).z() - sector->getProjectionToPlane((*it).begin()).z()) > 0.01f ||
-			    fabs(getProjectionToPlane((*it).end()).z() - sector->getProjectionToPlane((*it).end()).z()) > 0.01f) {
+			if (fabs(getProjectionToPlane(it->begin()).z() - sector->getProjectionToPlane(it->begin()).z()) > 0.01f ||
+			    fabs(getProjectionToPlane(it->end()).z() - sector->getProjectionToPlane(it->end()).z()) > 0.01f) {
 				it = bridges.erase(it);
 				continue;
 			}
@@ -515,6 +515,14 @@ void Sector::getExitInfo(const Math::Vector3d &s, const Math::Vector3d &dirVec, 
 	if (!d)
 		d = 1.f;
 	result->exitPoint = start + (Math::Vector3d::dotProduct(_vertices[i] - start, edgeNormal) / d) * dir;
+}
+
+int Sector::getSortplane(int setup) {
+	// An unkown sortplane is 0
+	if (setup < 0 || setup >= _numSortplanes) {
+		return 0;
+	}
+	return _sortplanes[setup];
 }
 
 Sector &Sector::operator=(const Sector &other) {

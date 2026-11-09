@@ -49,17 +49,18 @@ FilmLoopCastMember::FilmLoopCastMember(Cast *cast, uint16 castId, Common::Seekab
 	_center = false;
 	_index = -1;
 	_score = nullptr;
+	_flags = 0;
 
-	if (cast->_version >= kFileVer400) {
+	if (cast->_version >= kFileVer300) {
 		_initialRect = Movie::readRect(stream);
-		uint32 flags = stream.readUint32BE();
+		_flags = stream.readUint32BE();
 		uint16 unk1 = stream.readUint16BE();
-		_looping = flags & 32 ? 0 : 1;
-		_enableSound = flags & 8 ? 1 : 0;
-		_crop = flags & 2 ? 0 : 1;
-		_center = flags & 1 ? 1 : 0;
+		_looping = _flags & 32 ? 0 : 1;
+		_enableSound = _flags & 8 ? 1 : 0;
+		_crop = _flags & 2 ? 0 : 1;
+		_center = _flags & 1 ? 1 : 0;
 
-		debugC(5, kDebugLoading, "FilmLoopCastMember::FilmLoopCastMember(): flags: %d, unk1: %d, looping: %d, enableSound: %d, crop: %d, center: %d", flags, unk1, _looping, _enableSound, _crop, _center);
+		debugC(5, kDebugLoading, "FilmLoopCastMember::FilmLoopCastMember(): initialRect: %s, flags: %d, unk1: %d, looping: %d, enableSound: %d, crop: %d, center: %d", _initialRect.toString().c_str(), _flags, unk1, _looping, _enableSound, _crop, _center);
 	}
 }
 
@@ -75,20 +76,26 @@ FilmLoopCastMember::FilmLoopCastMember(Cast *cast, uint16 castId, FilmLoopCastMe
 	if (cast == source._cast)
 		_children = source._children;
 
+	_flags = source._flags;
 	_enableSound = source._enableSound;
 	_crop = source._crop;
 	_center = source._center;
-	_score = source._score;
+	_score = nullptr;
+	if (source._score)
+		_score = new Score(*source._score);
 	_subchannels = source._subchannels;
 	_looping = source._looping;
 }
 
 FilmLoopCastMember::~FilmLoopCastMember() {
-
+	if (_score) {
+		delete _score;
+		_score = nullptr;
+	}
 }
 
 bool FilmLoopCastMember::isModified() {
-	if (_score->_scoreCache.size())
+	if (_score && _score->_scoreCache.size())
 		return true;
 
 	if (_initialRect.width() && _initialRect.height())
@@ -98,12 +105,11 @@ bool FilmLoopCastMember::isModified() {
 }
 
 Common::Array<Channel> *FilmLoopCastMember::getSubChannels(Common::Rect &bbox, uint frame) {
-	Common::Rect widgetRect(bbox.width() ? bbox.width() : _initialRect.width(), bbox.height() ? bbox.height() : _initialRect.height());
 
 	_subchannels.clear();
 
-	if (frame >= _score->_scoreCache.size()) {
-		warning("FilmLoopCastMember::getSubChannels(): Film loop frame %d requested, only %d available", frame, _score->_scoreCache.size());
+	if (!_score || frame >= _score->_scoreCache.size()) {
+		warning("FilmLoopCastMember::getSubChannels(): Film loop frame %d requested, only %d available", frame, _score ? _score->_scoreCache.size() : 0);
 		return &_subchannels;
 	}
 
@@ -139,26 +145,27 @@ Common::Array<Channel> *FilmLoopCastMember::getSubChannels(Common::Rect &bbox, u
 			continue;
 
 		if (src._cast == nullptr && _cast != nullptr)
-			src._cast = _cast->getCastMember(src._castId.member, true);
+			src.setCast(src._castId);
 
 		debugCN(5, kDebugImages, "FilmLoopCastMember::getSubChannels(): sprite: %d - cast: %s, orig: %d,%d %dx%d",
 				iter, src._castId.asString().c_str(),
 				src._startPoint.x, src._startPoint.y, src._width, src._height);
 
 		// translate sprite relative to the global bounding box
+		Common::Point widgetDelta(src._startPoint.x - _initialRect.left, src._startPoint.y - _initialRect.top);
 		if (needToScale) {
-			src._startPoint.x = (src._startPoint.x - _initialRect.left) * scaleX + bbox.left;
-			src._startPoint.y = (src._startPoint.y - _initialRect.top) * scaleY + bbox.top;
-			src._width = widgetRect.width();
-			src._height = widgetRect.height();
+			src._startPoint.x = widgetDelta.x * scaleX + bbox.left;
+			src._startPoint.y = widgetDelta.y * scaleY + bbox.top;
+			src._width = src._width * scaleX;
+			src._height = src._height * scaleY;
 			src._stretch = true;
 
-			debugCN(5, kDebugImages, ", scaled: %d,%d %dx%d", src._startPoint.x, src._startPoint.y, src._width, src._height);
+			debugC(5, kDebugImages, ", scaled: %d,%d %dx%d", src._startPoint.x, src._startPoint.y, src._width, src._height);
 		} else {
-			src._startPoint.x = (src._startPoint.x - _initialRect.left) + bbox.left;
-			src._startPoint.y = (src._startPoint.y - _initialRect.top) + bbox.top;
+			src._startPoint.x = widgetDelta.x + bbox.left;
+			src._startPoint.y = widgetDelta.y + bbox.top;
 
-			debugCN(5, kDebugImages, ", no scaling");
+			debugC(5, kDebugImages, ", no scaling");
 		}
 
 		// Film loop frames are constructed as a series of Channels, much like how a normal frame
@@ -180,8 +187,8 @@ Common::Array<Channel> *FilmLoopCastMember::getSubChannels(Common::Rect &bbox, u
 }
 
 CastMemberID FilmLoopCastMember::getSubChannelSound1(uint frame) {
-	if (frame >= _score->_scoreCache.size()) {
-		warning("FilmLoopCastMember::getSubChannelSound1(): Film loop frame %d requested, only %d available", frame, _score->_scoreCache.size());
+	if (!_score || frame >= _score->_scoreCache.size()) {
+		warning("FilmLoopCastMember::getSubChannelSound1(): Film loop frame %d requested, only %d available", frame, _score ? _score->_scoreCache.size() : 0);
 		return CastMemberID();
 	}
 
@@ -189,8 +196,8 @@ CastMemberID FilmLoopCastMember::getSubChannelSound1(uint frame) {
 }
 
 CastMemberID FilmLoopCastMember::getSubChannelSound2(uint frame) {
-	if (frame >= _score->_scoreCache.size()) {
-		warning("FilmLoopCastMember::getSubChannelSound2(): Film loop frame %d requested, only %d available", frame, _score->_scoreCache.size());
+	if (!_score || frame >= _score->_scoreCache.size()) {
+		warning("FilmLoopCastMember::getSubChannelSound2(): Film loop frame %d requested, only %d available", frame, _score ? _score->_scoreCache.size() : 0);
 		return CastMemberID();
 	}
 
@@ -237,6 +244,11 @@ void FilmLoopCastMember::load() {
 		warning("STUB: FilmLoopCastMember::load(): Film loops not yet supported for version v%d (%d)", humanVersion(_cast->_version), _cast->_version);
 	}
 
+	if (_score) {
+		delete _score;
+		_score = nullptr;
+	}
+
 	if (loop) {
 		debugC(2, kDebugLoading, "****** FilmLoopCastMember::load(): Loading '%s' id: %d, %d bytes", tag2str(tag), filmLoopId, (int)loop->size());
 		_score = new Score(g_director->getCurrentMovie(), false);
@@ -261,13 +273,17 @@ Common::Point FilmLoopCastMember::getRegistrationOffset(int16 currentWidth, int1
 	return Common::Point(currentWidth / 2, currentHeight / 2);
 }
 
+bool FilmLoopCastMember::canWriteCastData() {
+	return _cast->_version >= kFileVer400 && _cast->_version < kFileVer700;
+}
+
 uint32 FilmLoopCastMember::getCastDataSize() {
 	// We're only reading the _initialRect and _vflags from the Cast Data
 	// _initialRect : 8 bytes + flags : 4 bytes + 2 bytes unk1 + 2 bytes (castType and _flags1 (see Cast::loadCastData() for Director 4 only)
 	if (_cast->_version >= kFileVer400 && _cast->_version < kFileVer500) {
 		// It has been observed that the FilmCastMember has _flags as 0x00
 		return 8 + 4 + 2 + 2;
-	} else if (_cast->_version >= kFileVer500 && _cast->_version < kFileVer600) {
+	} else if (_cast->_version >= kFileVer500 && _cast->_version < kFileVer700) {
 		return 8 + 4 + 2;
 	}
 
@@ -294,6 +310,10 @@ void FilmLoopCastMember::writeSCVWResource(Common::SeekableWriteStream *writeStr
 	// Load it before writing
 	if (!_loaded) {
 		load();
+	}
+	if (!_score) {
+		warning("FilmLoopCastMember::writeSCVWResource: Film loop has no score, skipping");
+		return;
 	}
 
 	uint32 channelSize = 0;
@@ -360,7 +380,8 @@ void FilmLoopCastMember::writeSCVWResource(Common::SeekableWriteStream *writeStr
 
 	}
 
-	if (debugChannelSet(7, kDebugSaving)) {
+	// FIXME: can't dereference SeekableWriteStream
+	/*if (debugChannelSet(7, kDebugSaving)) {
 		// Adding +8 because the stream doesn't include the header and the entry for the size itself
 		byte *dumpData = (byte *)calloc(filmloopSize + 8, sizeof(byte));
 
@@ -374,7 +395,7 @@ void FilmLoopCastMember::writeSCVWResource(Common::SeekableWriteStream *writeStr
 		dumpFile("FilmLoopData", 0, MKTAG('V', 'W', 'C', 'F'), dumpData, filmloopSize);
 		free(dumpData);
 		delete dumpStream;
-	}
+	}*/
 }
 
 uint32 FilmLoopCastMember::getSCVWResourceSize() {
@@ -388,6 +409,8 @@ uint32 FilmLoopCastMember::getSCVWResourceSize() {
 	}
 
 	uint32 framesSize = 0;
+	if (!_score)
+		return 0;
 	for (Frame *frame : _score->_scoreCache) {
 		// Frame size
 		framesSize += 2;

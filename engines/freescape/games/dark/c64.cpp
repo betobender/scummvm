@@ -24,7 +24,7 @@
 
 #include "freescape/freescape.h"
 #include "freescape/games/dark/dark.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/variables.h"
 
 namespace Freescape {
 
@@ -215,22 +215,16 @@ void DarkEngine::loadAssetsC64FullGame() {
 	file.open("darkside.c64.data");
 
 	if (_variant & GF_C64_TAPE) {
-		int size = file.size();
+		Common::Array<byte> data = unpackC64Snapshot(&file, "darkside.c64.data2");
+		Common::MemoryReadStream dfile(data.data(), data.size(), DisposeAfterUse::NO);
 
-		byte *buffer = (byte *)malloc(size * sizeof(byte));
-		file.read(buffer, file.size());
-
-		_extraBuffer = decompressC64RLE(buffer, &size, 0xdf);
-		// size should be the size of the decompressed data
-		Common::MemoryReadStream dfile(_extraBuffer, size, DisposeAfterUse::NO);
-
-		loadMessagesFixedSize(&dfile, 0x1edf, 16, 27);
-		loadFonts(&dfile, 0xc3e);
-		loadGlobalObjects(&dfile, 0x20bd, 23);
-		load8bitBinary(&dfile, 0x9b3e, 16);
-		loadDarkC64CompassTable(&dfile, 0x7e37, _c64CompassTable);
-		loadDarkC64Indicators(&dfile, 0xadba, _indicators, _gfx->_texturePixelFormat);
-		loadDarkC64ModeFrames(&dfile, 0xd2f6, _c64ModeFrames, _gfx->_texturePixelFormat);
+		loadMessagesFixedSize(&dfile, 0x1aa1, 16, 27);
+		loadFonts(&dfile, 0x0800);
+		loadGlobalObjects(&dfile, 0x1c7f, 23);
+		load8bitBinary(&dfile, 0x9700, 16);
+		loadDarkC64CompassTable(&dfile, 0x79f9, _c64CompassTable);
+		loadDarkC64Indicators(&dfile, 0xa97c, _indicators, _gfx->_texturePixelFormat);
+		loadDarkC64ModeFrames(&dfile, 0xceb8, _c64ModeFrames, _gfx->_texturePixelFormat);
 	} else if (_variant & GF_C64_DISC) {
 		loadMessagesFixedSize(&file, 0x16a3, 16, 27);
 		loadFonts(&file, 0x402);
@@ -353,14 +347,10 @@ void DarkEngine::loadAssetsC64FullGame() {
 	_playerMusic = new DarkSideC64MusicPlayer();
 }
 
-void DarkEngine::playSoundC64(int index) {
-	debugC(1, kFreescapeDebugMedia, "Playing Dark Side C64 SFX %d", index);
-	if (_playerC64Sfx && _c64UseSFX)
-		_playerC64Sfx->playSfx(index);
-}
-
 void DarkEngine::toggleC64Sound() {
 	if (_c64UseSFX) {
+		if (_sound == _playerC64Sfx)
+			_sound = nullptr;
 		if (_playerC64Sfx)
 			_playerC64Sfx->destroySID();
 		if (_playerMusic)
@@ -371,6 +361,8 @@ void DarkEngine::toggleC64Sound() {
 			_playerMusic->stopMusic();
 		if (_playerC64Sfx)
 			_playerC64Sfx->initSID();
+		if (_sound == nullptr)
+			_sound = _playerC64Sfx;
 		_c64UseSFX = true;
 	}
 }

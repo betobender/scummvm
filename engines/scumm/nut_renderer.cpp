@@ -47,7 +47,8 @@ NutRenderer::NutRenderer(ScummEngine *vm, const char *filename) :
 		memset(_2byteColorTable, 0, _2byteSteps);
 		_2byteMainColor = &_2byteColorTable[_2byteSteps - 1];
 		memset(_chars, 0, sizeof(_chars));
-		loadFont(filename);
+		if (filename)
+			loadFont(filename);
 }
 
 NutRenderer::~NutRenderer() {
@@ -120,18 +121,37 @@ void NutRenderer::loadFont(const char *filename) {
 	// whole of the undecoded font file.
 
 	_numChars = READ_LE_UINT16(dataSrc + 10);
-	assert(_numChars <= ARRAYSIZE(_chars));
+	if (_numChars > ARRAYSIZE(_chars)) {
+		warning("NutRenderer::loadFont(%s) numChars (%d) exceeds max, clamping", filename, _numChars);
+		_numChars = ARRAYSIZE(_chars);
+	}
 
 	uint32 offset = 0;
 	uint32 decodedLength = 0;
 	int l;
 
 	for (l = 0; l < _numChars; l++) {
-		offset += READ_BE_UINT32(dataSrc + offset + 4) + 16;
+		if (offset + 8 > length) {
+			warning("NutRenderer::loadFont(%s) truncated before char %d (offset %x), clamping", filename, l, offset);
+			break;
+		}
+		uint32 chunkSize = READ_BE_UINT32(dataSrc + offset + 4);
+		uint64 nextOffset = (uint64)offset + chunkSize + 16 + (chunkSize & 1);
+		if (nextOffset + 18 > length) {
+			warning("NutRenderer::loadFont(%s) font chunk exceeds file at char %d (offset %x), clamping", filename, l, offset);
+			break;
+		}
+		offset = (uint32)nextOffset;
 		int width = READ_LE_UINT16(dataSrc + offset + 14);
 		_fontHeight = READ_LE_UINT16(dataSrc + offset + 16);
 		decodedLength += width * _fontHeight;
 	}
+
+	if (l < _numChars)
+		_numChars = l;
+
+	if (_numChars <= 0 || decodedLength == 0)
+		error("NutRenderer::loadFont(%s) no decodable characters", filename);
 
 	debug(1, "NutRenderer::loadFont('%s') - decodedLength = %d", filename, decodedLength);
 
@@ -140,19 +160,33 @@ void NutRenderer::loadFont(const char *filename) {
 
 	offset = 0;
 	for (l = 0; l < _numChars; l++) {
-		offset += READ_BE_UINT32(dataSrc + offset + 4) + 8;
+		if (offset + 8 > length) {
+			warning("NutRenderer::loadFont(%s) invalid font chunk header %d (offset %x), stopping decode", filename, l, offset);
+			break;
+		}
+		uint32 chunkSize = READ_BE_UINT32(dataSrc + offset + 4);
+		uint64 nextOffset = (uint64)offset + chunkSize + 8 + (chunkSize & 1);
+		if (nextOffset + 8 > length) {
+			warning("NutRenderer::loadFont(%s) FRME chunk exceeds file %d (offset %x), stopping decode", filename, l, offset);
+			break;
+		}
+		offset = (uint32)nextOffset;
 		if (READ_BE_UINT32(dataSrc + offset) != MKTAG('F','R','M','E')) {
-			error("NutRenderer::loadFont(%s) there is no FRME chunk %d (offset %x)", filename, l, offset);
+			warning("NutRenderer::loadFont(%s) no FRME chunk %d (offset %x), stopping decode", filename, l, offset);
 			break;
 		}
 		offset += 8;
+		if (offset + 22 > length) {
+			warning("NutRenderer::loadFont(%s) FOBJ chunk exceeds file %d (offset %x), stopping decode", filename, l, offset);
+			break;
+		}
 		if (READ_BE_UINT32(dataSrc + offset) != MKTAG('F','O','B','J')) {
-			error("NutRenderer::loadFont(%s) there is no FOBJ chunk in FRME chunk %d (offset %x)", filename, l, offset);
+			warning("NutRenderer::loadFont(%s) no FOBJ chunk in FRME chunk %d (offset %x), stopping decode", filename, l, offset);
 			break;
 		}
 		int codec = READ_LE_UINT16(dataSrc + offset + 8);
-		// _chars[l].xoffs = READ_LE_UINT16(dataSrc + offset + 10);
-		// _chars[l].yoffs = READ_LE_UINT16(dataSrc + offset + 12);
+		_chars[l].xoffs = READ_LE_INT16(dataSrc + offset + 10);
+		_chars[l].yoffs = READ_LE_INT16(dataSrc + offset + 12);
 		_chars[l].width = READ_LE_UINT16(dataSrc + offset + 14);
 		_chars[l].height = READ_LE_UINT16(dataSrc + offset + 16);
 		_chars[l].src = decodedPtr;
@@ -187,12 +221,130 @@ void NutRenderer::loadFont(const char *filename) {
 	delete[] dataSrc;
 }
 
+void NutRenderer::loadFontFromData(const byte *data, int32 dataSize) {
+	if (!data || dataSize < 8) {
+		warning("NutRenderer::loadFontFromData: data too small (%d bytes)", dataSize);
+		return;
+	}
+
+	uint32 tag = READ_BE_UINT32(data);
+	if (tag != MKTAG('A','N','I','M')) {
+		warning("NutRenderer::loadFontFromData: no ANIM chunk (got %08x)", tag);
+		return;
+	}
+
+	uint32 length = READ_BE_UINT32(data + 4);
+	if (length > (uint32)(dataSize - 8)) {
+		warning("NutRenderer::loadFontFromData: ANIM size (%d) exceeds data size (%d)", length, dataSize);
+		length = dataSize - 8;
+	}
+
+	const byte *dataSrc = data + 8;
+
+	if (READ_BE_UINT32(dataSrc) != MKTAG('A','H','D','R')) {
+		warning("NutRenderer::loadFontFromData: no AHDR chunk in font data");
+		return;
+	}
+
+	// Parse the font data (same logic as loadFont)
+	_numChars = READ_LE_UINT16(dataSrc + 10);
+	if (_numChars > ARRAYSIZE(_chars)) {
+		warning("NutRenderer::loadFontFromData: numChars (%d) exceeds max", _numChars);
+		_numChars = ARRAYSIZE(_chars);
+	}
+
+	delete[] _decodedData;
+	_decodedData = nullptr;
+	memset(_chars, 0, sizeof(_chars));
+
+	uint32 offset = 0;
+	uint32 decodedLength = 0;
+	int l;
+
+	for (l = 0; l < _numChars; l++) {
+		if (offset + 8 > length)
+			break;
+		uint32 chunkSize = READ_BE_UINT32(dataSrc + offset + 4);
+		uint64 nextOffset = (uint64)offset + chunkSize + 16 + (chunkSize & 1);
+		if (nextOffset + 18 > length)
+			break;
+		offset = (uint32)nextOffset;
+		// Unsigned: the dimensions come straight from the file, and uint16 * uint16
+		// would otherwise be multiplied as int and sign-extended when used as a size.
+		const uint32 width = READ_LE_UINT16(dataSrc + offset + 14);
+		_fontHeight = READ_LE_UINT16(dataSrc + offset + 16);
+		decodedLength += width * (uint32)_fontHeight;
+	}
+
+	debug(1, "NutRenderer::loadFontFromData() - numChars=%d decodedLength=%d", _numChars, decodedLength);
+
+	_decodedData = new byte[decodedLength];
+	byte *decodedPtr = _decodedData;
+
+	offset = 0;
+	for (l = 0; l < _numChars; l++) {
+		if (offset + 8 > length)
+			break;
+		uint32 chunkSize = READ_BE_UINT32(dataSrc + offset + 4);
+		uint64 nextOffset = (uint64)offset + chunkSize + 8 + (chunkSize & 1);
+		if (nextOffset + 8 > length)
+			break;
+		offset = (uint32)nextOffset;
+		if (offset + 8 > length)
+			break;
+		if (READ_BE_UINT32(dataSrc + offset) != MKTAG('F','R','M','E')) {
+			warning("NutRenderer::loadFontFromData: no FRME chunk %d (offset %x)", l, offset);
+			break;
+		}
+		offset += 8;
+		if (offset + 22 > length)
+			break;
+		if (READ_BE_UINT32(dataSrc + offset) != MKTAG('F','O','B','J')) {
+			warning("NutRenderer::loadFontFromData: no FOBJ chunk in FRME chunk %d (offset %x)", l, offset);
+			break;
+		}
+		int codec = READ_LE_UINT16(dataSrc + offset + 8);
+		_chars[l].xoffs = READ_LE_INT16(dataSrc + offset + 10);
+		_chars[l].yoffs = READ_LE_INT16(dataSrc + offset + 12);
+		_chars[l].width = READ_LE_UINT16(dataSrc + offset + 14);
+		_chars[l].height = READ_LE_UINT16(dataSrc + offset + 16);
+		_chars[l].src = decodedPtr;
+
+		const uint32 charSize = (uint32)_chars[l].width * _chars[l].height;
+		decodedPtr += charSize;
+
+		if (codec == 44) {
+			memset(_chars[l].src, kSmush44TransparentColor, charSize);
+			_chars[l].transparency = kSmush44TransparentColor;
+		} else {
+			memset(_chars[l].src, kDefaultTransparentColor, charSize);
+			_chars[l].transparency = kDefaultTransparentColor;
+		}
+
+		const uint8 *fobjptr = dataSrc + offset + 22;
+		switch (codec) {
+		case 1:
+			codec1(_chars[l].src, fobjptr, _chars[l].width, _chars[l].height, _chars[l].width);
+			break;
+		case 21:
+		case 44:
+			codec21(_chars[l].src, fobjptr, _chars[l].width, _chars[l].height, _chars[l].width);
+			break;
+		default:
+			warning("NutRenderer::loadFontFromData: unknown codec: %d", codec);
+		}
+	}
+}
+
 int NutRenderer::getCharWidth(byte c) const {
 	if (c >= 0x80 && _vm->_useCJKMode)
 		return _vm->_2byteWidth + _spacing;
 
-	if (c >= _numChars)
-		error("invalid character in NutRenderer::getCharWidth : %d (%d)", c, _numChars);
+	if (c >= _numChars) {
+		// Character not in font - return 0 width (skip it)
+		// This can happen with SMUSH fonts that have limited character sets
+		return 0;
+	}
 
 	return _chars[c].width;
 }
@@ -201,18 +353,31 @@ int NutRenderer::getCharHeight(byte c) const {
 	if (c >= 0x80 && _vm->_useCJKMode)
 		return _vm->_2byteHeight;
 
-	if (c >= _numChars)
-		error("invalid character in NutRenderer::getCharHeight : %d (%d)", c, _numChars);
+	if (c >= _numChars) {
+		// Character not in font - return default font height
+		// This can happen with SMUSH fonts that have limited character sets
+		return _fontHeight;
+	}
 
 	return _chars[c].height;
 }
 
-void NutRenderer::drawFrame(byte *dst, int c, int x, int y) {
+const byte *NutRenderer::getCharData(byte c) {
+	if (c >= _numChars)
+		error("invalid character in NutRenderer::getCharData: %d (%d)", c, _numChars);
+
+	return _chars[c].src;
+}
+
+void NutRenderer::drawFrame(byte *dst, int c, int x, int y, int pitch) {
 	const int width = MIN((int)_chars[c].width, _vm->_screenWidth - x);
 	const int height = MIN((int)_chars[c].height, _vm->_screenHeight - y);
 	const byte *src = _chars[c].src;
 	const int srcPitch = _chars[c].width;
 	byte bits = 0;
+
+	if (pitch == -1)
+		pitch = _vm->_screenWidth;
 
 	const int minX = x < 0 ? -x : 0;
 	const int minY = y < 0 ? -y : 0;
@@ -221,10 +386,10 @@ void NutRenderer::drawFrame(byte *dst, int c, int x, int y) {
 		return;
 	}
 
-	dst += _vm->_screenWidth * y + x;
+	dst += pitch * y + x;
 	if (minY) {
 		src += minY * srcPitch;
-		dst += minY * _vm->_screenWidth;
+		dst += minY * pitch;
 	}
 
 	for (int ty = minY; ty < height; ty++) {
@@ -235,11 +400,16 @@ void NutRenderer::drawFrame(byte *dst, int c, int x, int y) {
 			}
 		}
 		src += srcPitch;
-		dst += _vm->_screenWidth;
+		dst += pitch;
 	}
 }
 
 int NutRenderer::drawCharV7(byte *buffer, Common::Rect &clipRect, int x, int y, int pitch, int16 col, TextStyleFlags flags, byte chr, bool hardcodedColors, bool smushColorMode) {
+	// Character not in font - skip drawing
+	// This can happen with SMUSH fonts that have limited character sets
+	if (chr >= _numChars)
+		return 0;
+
 	if (_direction < 0)
 		x -= _chars[chr].width;
 
@@ -289,7 +459,19 @@ int NutRenderer::drawCharV7(byte *buffer, Common::Rect &clipRect, int x, int y, 
 			}
 		}
 	} else {
-		if (smushColorMode) {
+		if (hardcodedColors) {
+			// Direct pixel write for NUT fonts with embedded palette colors
+			for (int j = minY; j < height; j++) {
+				for (int i = minX; i < width; i++) {
+					int8 value = *src++;
+					if (value != _chars[chr].transparency)
+						dst[i] = value;
+				}
+				src += clipWdth;
+				dst += pitch;
+			}
+		} else if (smushColorMode) {
+			// SMUSH subtitle color mode: remap specific values
 			for (int j = minY; j < height; j++) {
 				for (int i = minX; i < width; i++) {
 					int8 value = *src++;

@@ -22,18 +22,14 @@
 #ifndef ACCESS_POLYGON_H
 #define ACCESS_POLYGON_H
 
-#include "common/types.h"
-#include "common/array.h"
 #include "common/rect.h"
 
 namespace Access {
 
-struct Polygon {
-	Common::Array<Common::Point> points;
-	bool pointInside(int16 x, int16 y) const;
-};
-
-typedef Common::Array<Polygon> PolygonArray;
+namespace Polygon {
+	bool pointInside(const Common::Point *points, int16 x, int16 y);
+	constexpr Common::Point LISTEND = { -1, -1 };
+}
 
 } // end namespace Access
 

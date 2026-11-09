@@ -21,7 +21,8 @@
 #include "common/savefile.h"
 
 #include "pelrock/pelrock.h"
-#include "pelrock/types.h"
+#include "pelrock/room.h"
+#include "pelrock/resources.h"
 
 namespace Pelrock {
 
@@ -308,7 +309,6 @@ bool syncGameStateData(Common::Serializer &s, GameStateData *gameState) {
 			for (uint16 i = 0; i < numBranches; ++i) {
 				ResetEntry entry = branches[i];
 				syncResetEntry(s, entry);
-				delete[] entry.data;
 			}
 		}
 	} else {

@@ -22,7 +22,7 @@
 namespace Pelrock {
 
 const PlainGameDescriptor pelrockGames[] = {
-	{ "pelrock", "Alfred Pelrock: En Busca de un Sueño" },
+	{ "pelrock", "Alfred Pelrock: En Busca de un Sue\303\261o" },
 	{ 0, 0 }
 };
 
@@ -37,7 +37,7 @@ const ADGameDescription gameDescriptions[] = {
 		),
 		Common::ES_ESP,
 		Common::kPlatformDOS,
-		ADGF_UNSTABLE,
+		ADGF_TESTING,
 		GUIO4(GAMEOPTION_ORIGINAL_SAVELOAD, GAMEOPTION_ALTERNATE_TIMING, GAMEOPTION_PLAY_INTRO, GAMEOPTION_DISABLE_SCREENSAVER)
 	},
 

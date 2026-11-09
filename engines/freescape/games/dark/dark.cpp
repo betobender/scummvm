@@ -26,7 +26,7 @@
 
 #include "freescape/freescape.h"
 #include "freescape/games/dark/dark.h"
-#include "freescape/language/8bitDetokeniser.h"
+#include "freescape/language/variables.h"
 #include "freescape/objects/global.h"
 #include "freescape/wb.h"
 #include "freescape/objects/connections.h"
@@ -105,7 +105,8 @@ DarkEngine::DarkEngine(OSystem *syst, const ADGameDescription *gd) : FreescapeEn
 }
 
 DarkEngine::~DarkEngine() {
-	delete _playerC64Sfx;
+	if (_sound != _playerC64Sfx)
+		delete _playerC64Sfx;
 	delete _playerMusic;
 
 	for (auto &indicator : _cpcIndicators) {
@@ -123,6 +124,10 @@ DarkEngine::~DarkEngine() {
 	for (auto &frame : _c64ModeFrames) {
 		frame->free();
 		delete frame;
+	}
+	for (auto &indicator : _indicatorsIndexed) {
+		indicator->free();
+		delete indicator;
 	}
 }
 
@@ -348,7 +353,7 @@ void DarkEngine::initGameState() {
 		}
 	}
 
-	if (isC64() && _playerMusic)
+	if ((isC64() || isAtariST() || isDOS()) && _playerMusic)
 		_playerMusic->startMusic();
 }
 
@@ -568,8 +573,8 @@ bool DarkEngine::checkIfGameEnded() {
 		} else {
 			restoreECD(*_currentArea, index);
 			insertTemporaryMessage(_messagesList[1], _countdown - 2);
-			stopAllSounds(_movementSoundHandle);
-			playSound(_soundIndexRestoreECD, false, _soundFxHandle);
+			stopAllSounds(Sound::kTypeMovement);
+			playSound(_soundIndexRestoreECD, false);
 		}
 		_gameStateVars[kVariableDarkECD] = 0;
 
@@ -714,11 +719,11 @@ void DarkEngine::gotoArea(uint16 areaID, int entranceID) {
 	_gameStateVars[0x1f] = 0;
 
 	if (areaID == _startArea && entranceID == _startEntrance) {
-		playSound(_soundIndexStart, true, _soundFxHandle);
+		playSound(_soundIndexStart, true);
 	} else if (areaID == _endArea && entranceID == _endEntrance) {
 		_pitch = 10;
 	} else {
-		playSound(_soundIndexAreaChange, false, _soundFxHandle);
+		playSound(_soundIndexAreaChange, false);
 	}
 
 	debugC(1, kFreescapeDebugMove, "starting player position: %f, %f, %f", _position.x(), _position.y(), _position.z());
@@ -732,6 +737,8 @@ void DarkEngine::gotoArea(uint16 areaID, int entranceID) {
 	_gfx->setColorRemaps(&_currentArea->_colorRemaps);
 
 	swapPalette(areaID);
+	if (isDOS() && _renderMode == Common::kRenderCGA)
+		updateIndicatorsDOS(_gfx->_palette);
 	if (isCPC()) {
 		// The CPC loader still uses the generic area header parser, but the
 		// original Driller code does not use the first header byte as split
@@ -772,12 +779,14 @@ void DarkEngine::pressedKey(const int keycode) {
 			_flyMode = false;
 			insertTemporaryMessage(_messagesList[13], _countdown - 2);
 		} else if (_flyMode) {
+			// TODO: Reimplement inside Sound class using existing chip instances
+			SizedPCSpeaker *speaker = new SizedPCSpeaker();
 			float hzFreq = 1193180.0f / 0xd537;
-			_speaker->play(Audio::PCSpeaker::kWaveFormSquare, hzFreq, -1);
-			_mixer->playStream(Audio::Mixer::kSFXSoundType, &_soundFxHandleJetpack, _speaker, -1, Audio::Mixer::kMaxChannelVolume, 0, DisposeAfterUse::NO);
+			speaker->play(Audio::PCSpeaker::kWaveFormSquare, hzFreq, -1);
+			_mixer->playStream(Audio::Mixer::kSFXSoundType, &_soundFxHandleJetpack, speaker, -1, Audio::Mixer::kMaxChannelVolume, 0, DisposeAfterUse::YES);
 			insertTemporaryMessage(_messagesList[11], _countdown - 2);
 		} else {
-			_speaker->stop();
+			_mixer->stopHandle(_soundFxHandleJetpack);
 			resolveCollisions(_position);
 			if (!_hasFallen)
 				insertTemporaryMessage(_messagesList[12], _countdown - 2);
@@ -882,14 +891,15 @@ void DarkEngine::drawBinaryClock(Graphics::Surface *surface, int xPosition, int 
 
 	int maxBits = 14;
 	int bits = 0;
+	bool isHercules = _renderMode == Common::kRenderHercG;
 	while (bits <= maxBits) {
 		int y = 0;
 		if (isAmiga() || isAtariST()) {
 			y = yPosition - (3 * bits);
 			surface->fillRect(Common::Rect(xPosition, y - 2, xPosition + 4, y), number & 1 ? front : back);
 		} else {
-			y = yPosition - (7 * bits);
-			surface->drawLine(xPosition, y, xPosition + 3, y, number & 1 ? front : back);
+			y = yPosition - ((isHercules ? 10 : 7) * bits);
+			surface->drawLine(xPosition, y, xPosition + (isHercules ? 7 : 3), y, number & 1 ? front : back);
 		}
 		number = number >> 1;
 		bits++;
@@ -897,13 +907,15 @@ void DarkEngine::drawBinaryClock(Graphics::Surface *surface, int xPosition, int 
 }
 
 void DarkEngine::drawVerticalCompass(Graphics::Surface *surface, int x, int y, float angle, uint32 color) {
-	int pitch = int(angle / 1.65);
+	bool isHercules = _renderMode == Common::kRenderHercG;
+	int pitch = int(angle / (isHercules ? 1.25 : 1.65));
+	int width = isHercules ? 7 : 3;
 	Common::Array<int> xpoints;
 	Common::Array<int> ypoints;
 
 	xpoints.push_back(x);
-	xpoints.push_back(x + 3);
-	xpoints.push_back(x + 3);
+	xpoints.push_back(x + width);
+	xpoints.push_back(x + width);
 	xpoints.push_back(x);
 
 	ypoints.push_back(y - pitch);
@@ -918,29 +930,41 @@ void DarkEngine::drawHorizontalCompass(int x, int y, float angle, uint32 front, 
 	// TODO implement different compass styles for C64, Amiga and Atari ST
 	uint32 transparent = _gfx->_texturePixelFormat.ARGBToColor(0x00, 0x00, 0x00, 0x00);
 
+	bool isHercules = _renderMode == Common::kRenderHercG;
+	int scale = isHercules ? 2 : 1;
 	uint32 green = _gfx->_texturePixelFormat.ARGBToColor(0xff, 0x00, 0xaa, 0x00);
 	if (isCPC()) {
 		uint8 r, g, b;
 		_gfx->selectColorFromFourColorPalette(3, r, g, b);
 		green = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
+	} else if (isSpectrum()) {
+		// The ZX HUD uses a single ink color for all the text, including the compass.
+		green = front;
+	} else if (isDOS() && _renderMode == Common::kRenderCGA) {
+		// Use color 1 for labels; front (color 3) highlights the heading.
+		uint8 r, g, b;
+		_gfx->readFromPalette(1, r, g, b);
+		green = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
+	} else if (isHercules) {
+		green = front;
 	}
 
-	int delta = (angle - 180) / 5.5;
+	int delta = int((angle - 180) / 5.5) * scale;
 	Common::String compass = "-N-E-S-W-N-E-S";
 
 	for (uint i = 0; i < compass.size(); i++) {
-	  int charX = delta + x + (i * 8);
+	  int charX = delta + x + (i * 8 * scale);
 	  uint32 color = green;
 
-		if (charX >= x + 52 && charX < x + 60) {
+		if (charX >= x + 52 * scale && charX < x + 60 * scale) {
 			color = front;
 		}
 
 		drawStringInSurface(Common::String(compass[i]), charX, y, color, back, surface);
 	}
 
-	surface->fillRect(Common::Rect(x - 20, y - 5, x + 40, y + 10), transparent);
-	surface->fillRect(Common::Rect(x + 80, y - 5, 320, y + 10), transparent);
+	surface->fillRect(Common::Rect(x - 20 * scale, y - 5, x + 40 * scale, y + 10), transparent);
+	surface->fillRect(Common::Rect(x + 80 * scale, y - 5, surface->w, y + 10), transparent);
 }
 
 void DarkEngine::drawCPCSprite(Graphics::Surface *surface, const Graphics::ManagedSurface *indicator, int xPosition, int yPosition) {
@@ -1018,7 +1042,7 @@ void DarkEngine::drawIndicator(Graphics::Surface *surface, int xPosition, int yP
 void DarkEngine::drawSensorShoot(Sensor *sensor) {
 	if (_gameStateControl == kFreescapeGameStatePlaying) {
 		// Avoid playing new sounds, so the endgame can progress
-		playSound(_soundIndexHit, true, _soundFxHandle);
+		playSound(_soundIndexHit, true);
 	}
 
 	Math::Vector3d target;
@@ -1047,6 +1071,7 @@ void DarkEngine::drawInfoMenu() {
 	uint32 color = 0;
 	switch (_renderMode) {
 		case Common::kRenderCGA:
+		case Common::kRenderHercG:
 			color = 1;
 			break;
 		case Common::kRenderZX:
@@ -1072,20 +1097,23 @@ void DarkEngine::drawInfoMenu() {
 		_gfx->readFromPalette(color, r, g, b);
 		uint32 front = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
 		uint32 black = _gfx->_texturePixelFormat.ARGBToColor(0xFF, 0x00, 0x00, 0x00);
+		bool isHercules = _renderMode == Common::kRenderHercG;
+		auto menuX = [isHercules](int x) { return isHercules ? 2 * x + 32 : x; };
+		int menuOffsetY = isHercules ? 76 : 0;
 
-		surface->fillRect(Common::Rect(88, 48, 231, 103), black);
-		surface->frameRect(Common::Rect(88, 48, 231, 103), front);
+		surface->fillRect(Common::Rect(menuX(88), 48 + menuOffsetY, menuX(231), 103 + menuOffsetY), black);
+		surface->frameRect(Common::Rect(menuX(88), 48 + menuOffsetY, menuX(231), 103 + menuOffsetY), front);
 
-		surface->frameRect(Common::Rect(90, 50, 229, 101), front);
+		surface->frameRect(Common::Rect(menuX(90), 50 + menuOffsetY, menuX(229), 101 + menuOffsetY), front);
 
-		drawStringInSurface("L-LOAD S-SAVE", 105, 56, front, black, surface);
+		drawStringInSurface("L-LOAD S-SAVE", menuX(105), 56 + menuOffsetY, front, black, surface);
 		if (isSpectrum())
-			drawStringInSurface("1-TERMINATE", 105, 64, front, black, surface);
+			drawStringInSurface("1-TERMINATE", menuX(105), 64 + menuOffsetY, front, black, surface);
 		else
-			drawStringInSurface("ESC-TERMINATE", 105, 64, front, black, surface);
+			drawStringInSurface("ESC-TERMINATE", menuX(105), 64 + menuOffsetY, front, black, surface);
 
-		drawStringInSurface("T-TOGGLE", 128, 81, front, black, surface);
-		drawStringInSurface("SOUND ON/OFF", 113, 88, front, black, surface);
+		drawStringInSurface("T-TOGGLE", menuX(128), 81 + menuOffsetY, front, black, surface);
+		drawStringInSurface("SOUND ON/OFF", menuX(113), 88 + menuOffsetY, front, black, surface);
 	}
 	menuTexture = _gfx->createTexture(surface);
 
@@ -1111,7 +1139,7 @@ void DarkEngine::drawInfoMenu() {
 					toggleC64Sound();
 					_eventManager->purgeKeyboardEvents();
 				} else if (isDOS() && event.customType == kActionToggleSound) {
-					playSound(6, true, _soundFxHandle);
+					playSound(6, true);
 					_eventManager->purgeKeyboardEvents();
 				} else if (event.customType == kActionEscape) {
 					_forceEndGame = true;
@@ -1124,6 +1152,12 @@ void DarkEngine::drawInfoMenu() {
 				break;
 			case Common::EVENT_SCREEN_CHANGED:
 				_gfx->computeScreenViewport();
+				break;
+			case Common::EVENT_RBUTTONDOWN:
+			// fallthrough
+			case Common::EVENT_LBUTTONDOWN:
+				if (isTouchscreenActive())
+					cont = false;
 				break;
 
 			default:

@@ -24,6 +24,7 @@ MODULE_OBJS := \
 	fonts/ttf.o \
 	fonts/winfont.o \
 	framelimiter.o \
+	hotspot_renderer.o \
 	image-archive.o \
 	korfont.o \
 	larryScale.o \
@@ -59,7 +60,6 @@ MODULE_OBJS := \
 	scaler/thumbnail_intern.o \
 	screen.o \
 	scaler/normal.o \
-	sjis.o \
 	surface.o \
 	svg.o \
 	transform_struct.o \
@@ -73,6 +73,25 @@ MODULE_OBJS := \
 ifdef USE_ARM_SCALER_ASM
 MODULE_OBJS += \
 	scaler/downscalerARM.o
+endif
+
+ifdef USE_MACTOOLBOX
+MODULE_OBJS += \
+	mactoolbox/siphash/halfsip.o \
+	mactoolbox/toolbox_fileman.o \
+	mactoolbox/toolbox_menu.o \
+	mactoolbox/toolbox_pict.o \
+	mactoolbox/toolbox_quickdraw.o \
+	mactoolbox/toolbox_resman.o \
+	mactoolbox/toolbox_sound.o \
+	mactoolbox/toolbox_text.o \
+	mactoolbox/toolbox.o \
+	mactoolbox/utils.o
+endif
+
+ifdef USE_SJIS
+MODULE_OBJS += \
+	sjis.o
 endif
 
 ifdef USE_MFC
@@ -190,6 +209,14 @@ endif
 ifdef USE_EDGE_SCALERS
 MODULE_OBJS += \
 	scaler/edge.o
+endif
+
+ifdef USE_VIEWS
+MODULE_OBJS += \
+	views/events.o \
+	views/gfx_surface.o \
+	views/messages.o \
+	views/view.o
 endif
 
 endif

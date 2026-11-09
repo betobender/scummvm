@@ -46,7 +46,7 @@ _stilFlag2(_flags[234])
 NoctropolisEngine::~NoctropolisEngine() {
 	delete _invScript;
 	// _midi will be deleted in parent.
-}
+} //-V773
 
 void NoctropolisEngine::initObjects() {
 	_room = new NoctropolisRoom(this);
@@ -71,6 +71,11 @@ void NoctropolisEngine::initObjects() {
 #endif // USE_VORBIS
 	}
 }
+
+Common::Path NoctropolisEngine::getIconPath() const {
+	return ((NoctropolisResources *)_res)->translatePath("DARK/ICONS.AP");
+}
+
 
 void NoctropolisEngine::setupGame() {
 	_timers.clear();
@@ -115,6 +120,8 @@ void NoctropolisEngine::initVariables() {
 	for (auto &entry : _inventory->_inv) {
 		entry._value = ITEM_NOT_FOUND;
 	}
+
+	_startAboutBox = _startAboutItem = 0;
 
 	// This is Noct_InitTravel in the original
 	_travScrollRow = 15;
@@ -221,7 +228,8 @@ void NoctropolisEngine::doPublisherLogo() {
 		pngFile.open(nightDive);
 
 		Image::PNGDecoder decoder;
-		decoder.loadStream(pngFile);
+		if (!decoder.loadStream(pngFile))
+			error("Failed to load nightdive logo nds.png");
 
 		// Find the best 8-bit palette for this logo as the png is 24-bit and we're
 		// not changing the output surface format for this one logo at the start!
@@ -251,16 +259,17 @@ void NoctropolisEngine::doPublisherLogo() {
 			}
 		}
 		delete bestPal;
+		delete scaledPng;
 		_screen->fadeIn();
 
 		_events->_vbCount = 0x7e;
 		while (!shouldQuit() && (_events->_vbCount > 0) && !_events->isKeyActionMousePressed()) {
 			_events->pollEventsAndWait();
 		}
+
 		if (shouldQuit())
 			return;
 		_screen->fadeOut();
-
 	} else {
 		// The original EA release, show their logo.
 		//
@@ -318,15 +327,13 @@ void NoctropolisEngine::doIntro() {
 
 	_midi->loadMusic(98, 1);
 	_midi->midiPlay();
-	_room->loadPlayField(1, 0);
+	_room->loadPlayField(FileIdent(1, 0));
 
 	// This ignores window values, but we know that's ok here.
 	_buffer2.copyFrom(*_screen);
 	_buffer1.copyFrom(*_screen);
 
-	Resource *spriteRes = _files->loadFile(1, 1);
-	SpriteResource *sprites = new SpriteResource(this, spriteRes);
-	delete spriteRes;
+	SpriteResource *sprites = new SpriteResource(this, 1, 1);
 
 	// TODO: Check these fades
 	_screen->setPalette();
@@ -429,7 +436,7 @@ void NoctropolisEngine::doTravel() {
 	_buffer1.clear();
 	_buffer2.clear();
 	_screen->clearScreen();
-	_room->loadPlayField(0, 0); // MAP.AP
+	_room->loadPlayField(FileIdent(0, 0)); // MAP.AP
 	_screen->setPalette();
 	_screen->setIconPalette();
 	_scrollRow = _travScrollRow;
@@ -437,9 +444,7 @@ void NoctropolisEngine::doTravel() {
 	_scrollX = _travScrollX;
 	_scrollY = _travScrollY;
 	// Load MAP.AP
-	Resource *spriteData = _files->loadFile(0, 1);
-	_objectsTable[0] = new SpriteResource(this, spriteData);
-	delete spriteData;
+	_objectsTable[0] = new SpriteResource(this, 0, 1);
 
 	// This section is "state 1" in NoctTravelEngine::ticker
 	((NoctropolisRoom *)_room)->buildScreenXScroll();
@@ -464,7 +469,7 @@ void NoctropolisEngine::doTravel() {
 
 		_player->calcPlayer();
 
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 14; i++) {
 			if (_travel[i]) {
 				int x = TRAV_ICONS[i * 3 + 0];
 				int y = TRAV_ICONS[i * 3 + 1];

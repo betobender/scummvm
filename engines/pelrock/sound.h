@@ -23,9 +23,6 @@
 #define PELROCK_SOUND_H
 
 #include "audio/mixer.h"
-#include "common/file.h"
-#include "common/scummsys.h"
-#include "common/str.h"
 
 namespace Pelrock {
 
@@ -33,7 +30,6 @@ struct SonidoFile {
 	Common::String filename;
 	uint32 offset;
 	uint32 size;
-	byte *data;
 };
 
 extern const char *SOUND_FILENAMES[];

@@ -31,6 +31,7 @@
 #include "director/cast.h"
 #include "director/debugger.h"
 #include "director/lingo/lingo.h"
+#include "director/lingo/lingo-profiler.h"
 #include "director/movie.h"
 #include "director/window.h"
 #include "director/score.h"
@@ -71,6 +72,7 @@ Window::Window(int id, bool scrollable, bool resizable, bool editable, Graphics:
 	_isModal = false;
 	_skipFrameAdvance = false;
 	_resetScreen = false;
+	_playbackPaused = false;
 
 	// Owned by the window manager
 	_window = new Graphics::MacWindow(id, scrollable, resizable, editable, wm);
@@ -91,6 +93,10 @@ Window::~Window() {
 		delete _frozenLingoStates[i];
 	if (_puppetTransition)
 		delete _puppetTransition;
+	if (_isModal) {
+		_wm->setLockedWidget(nullptr);
+		_isModal = false;
+	}
 	g_director->_wm->removeWindow(_window);
 	g_director->_wm->removeMarked();
 	_window = nullptr;
@@ -117,6 +123,15 @@ void Window::invertChannel(Channel *channel, const Common::Rect &destRect) {
 	if (_wm->_pixelformat.bytesPerPixel == 1) {
 		for (int i = 0; i < srcRect.height(); i++) {
 			byte *src = (byte *)composeSurface->getBasePtr(srcRect.left, srcRect.top + i);
+			const byte *msk = mask ? (const byte *)mask->getBasePtr(xoff, yoff + i) : nullptr;
+
+			for (int j = 0; j < srcRect.width(); j++, src++)
+				if (!mask || (msk && (*msk++)))
+					*src = _wm->inverter(*src);
+		}
+	} else if (_wm->_pixelformat.bytesPerPixel == 2) {
+		for (int i = 0; i < srcRect.height(); i++) {
+			uint16 *src = (uint16 *)composeSurface->getBasePtr(srcRect.left, srcRect.top + i);
 			const byte *msk = mask ? (const byte *)mask->getBasePtr(xoff, yoff + i) : nullptr;
 
 			for (int j = 0; j < srcRect.width(); j++, src++)
@@ -154,8 +169,8 @@ void Window::drawChannelBox(Director::Movie *currentMovie, Graphics::ManagedSurf
 		Common::Rect bbox = channel->getBbox();
 		blitTo->frameRect(bbox, g_director->_wm->_colorWhite);
 
-		font->drawString(blitTo, Common::String::format("m: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, selectedChannel, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 3, bbox.top + 3, 128, g_director->_wm->_colorBlack);
-		font->drawString(blitTo, Common::String::format("m: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, selectedChannel, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 2, bbox.top + 2, 128, g_director->_wm->_colorWhite);
+		font->drawString(blitTo, Common::String::format("m: %d, l: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, channel->_sprite->_castId.castLib, selectedChannel, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 3, bbox.top + 3, 128, g_director->_wm->_colorBlack);
+		font->drawString(blitTo, Common::String::format("m: %d, l: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, channel->_sprite->_castId.castLib, selectedChannel, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 2, bbox.top + 2, 128, g_director->_wm->_colorWhite);
 	}
 }
 
@@ -217,6 +232,12 @@ void Window::renderChannel(Channel *channel, const Common::Rect &rect, Graphics:
 
 bool Window::render(bool forceRedraw, Graphics::ManagedSurface *blitTo) {
 	if (!_currentMovie)
+		return false;
+
+	// An embedded movie is composited via getSubChannels(); it must never
+	// render the shared window itself (e.g. from its own updateStage), which
+	// would draw its channels at the embedded movie's native origin.
+	if (_currentMovie->_isEmbedded)
 		return false;
 
 	if (!blitTo)
@@ -299,8 +320,8 @@ bool Window::render(bool forceRedraw, Graphics::ManagedSurface *blitTo) {
 				Common::Rect bbox = channel->getBbox();
 				blitTo->frameRect(bbox, g_director->_wm->_colorWhite);
 
-				font->drawString(blitTo, Common::String::format("m: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, i, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 3, bbox.top + 3, 128, g_director->_wm->_colorBlack);
-				font->drawString(blitTo, Common::String::format("m: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, i, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 2, bbox.top + 2, 128, g_director->_wm->_colorWhite);
+				font->drawString(blitTo, Common::String::format("m: %d, l: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, channel->_sprite->_castId.castLib, i, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 3, bbox.top + 3, 128, g_director->_wm->_colorBlack);
+				font->drawString(blitTo, Common::String::format("m: %d, l: %d, ch: %d, fr: %d", channel->_sprite->_castId.member, channel->_sprite->_castId.castLib, i, channel->_filmLoopFrame ? channel->_filmLoopFrame : channel->_movieTime), bbox.left + 2, bbox.top + 2, 128, g_director->_wm->_colorWhite);
 			}
 		}
 	}
@@ -401,7 +422,8 @@ void Window::setModal(bool modal) {
 		_wm->setLockedWidget(nullptr);
 		_isModal = false;
 	} else if (!_isModal && modal) {
-		_wm->setLockedWidget(this->_window);
+		if (_window->isVisible())
+			_wm->setLockedWidget(this->_window);
 		_isModal = true;
 	}
 }
@@ -468,6 +490,10 @@ void Window::setVisible(bool visible, bool silent) {
 	// setting visible triggers movie load
 	if (!_currentMovie && !silent)
 		ensureMovieIsLoaded();
+
+	// If a modal window is not visible, release the locks it holds.
+	if (!visible && _isModal)
+		setModal(false);
 
 	_window->setVisible(visible);
 
@@ -550,6 +576,7 @@ void Window::loadNewSharedCast(Cast *previousSharedCast) {
 		// Clear those previous widget pointers
 		previousSharedCast->releaseCastMemberWidget();
 		_currentMovie->_sharedCast = previousSharedCast;
+		previousSharedCast->setMovie(_currentMovie);
 
 		debugC(1, kDebugLoading, "Skipping loading already loaded shared cast, path: %s", previousSharedCastPath.toString(Common::Path::kNativeSeparator).c_str());
 		return;
@@ -561,7 +588,6 @@ void Window::loadNewSharedCast(Cast *previousSharedCast) {
 
 		g_director->_allSeenResFiles.erase(previousSharedCastPath);
 		g_director->_allOpenResFiles.remove(previousSharedCastPath);
-		delete previousSharedCast->_castArchive;
 		delete previousSharedCast;
 	} else {
 		debug(0, "@@   No previous shared cast");
@@ -584,6 +610,19 @@ bool Window::loadNextMovie() {
 
 	if (_currentMovie && archivePath == _currentMovie->getArchive()->getPathName()) {
 		debug(0, "Window::loadNextMovie: next movie '%s' is the same as current movie, skipping load", archivePath.toString(Common::Path::kNativeSeparator).c_str());
+
+		// Jump to the correct frame
+		_currentMovie->getScore()->_playState = kPlayStarted;
+		_nextMovie.movie.clear();
+		if (!_nextMovie.frameS.empty()) {
+			_currentMovie->getScore()->setStartToLabel(_nextMovie.frameS);
+			_nextMovie.frameS.clear();
+		}
+
+		if (_nextMovie.frameI != -1) {
+			_currentMovie->getScore()->setCurrentFrame(_nextMovie.frameI);
+			_nextMovie.frameI = -1;
+		}
 		return true;
 	}
 
@@ -591,6 +630,9 @@ bool Window::loadNextMovie() {
 	if (_currentMovie) {
 		previousSharedCast = _currentMovie->getSharedCast();
 		_currentMovie->_sharedCast = nullptr;
+		if (previousSharedCast) {
+			previousSharedCast->setMovie(nullptr);
+		}
 	}
 
 	if (_currentMovie) {
@@ -600,14 +642,14 @@ bool Window::loadNextMovie() {
 		_currentMovie = nullptr;
 	}
 
-	Archive *mov = g_director->openArchive(archivePath);
+	Common::SharedPtr<Archive> mov = g_director->openArchive(archivePath);
 
 	_nextMovie.movie.clear(); // Clearing it, so we will not attempt to load again
 
 	if (!mov)
 		return false;
 
-	probeResources(mov);
+	probeResources(mov.get());
 
 	// Artificial delay for games that expect slow media, e.g. Spaceship Warlock
 	if (g_director->_loadSlowdownFactor && !debugChannelSet(-1, kDebugFast)) {
@@ -618,7 +660,7 @@ bool Window::loadNextMovie() {
 			while (delay != 0) {
 				uint32 dec = MIN((uint32)10, delay);
 				// Skip delay if mouse is clicked
-				if (g_director->processEvents(true, true)) {
+				if (g_director->processSysEvents(true, true)) {
 					g_director->loadSlowdownCooloff();
 					break;
 				}
@@ -792,6 +834,8 @@ Common::Path Window::getSharedCastPath() {
 }
 
 void Window::freezeLingoState() {
+	if (g_director->_lingoProfiler)
+		g_director->_lingoProfiler->onFreeze();
 	_frozenLingoStates.push_back(_lingoState);
 	_lingoState = new LingoState;
 	debugC(3, kDebugLingoExec, "Freezing Lingo state, depth %d", _frozenLingoStates.size());
@@ -806,6 +850,8 @@ void Window::thawLingoState() {
 		warning("Can't thaw a Lingo state in mid-execution, ignoring");
 		return;
 	}
+	if (g_director->_lingoProfiler)
+		g_director->_lingoProfiler->onThaw();
 	delete _lingoState;
 	debugC(3, kDebugLingoExec, "Thawing Lingo state, depth %d", _frozenLingoStates.size());
 	_lingoState = _frozenLingoStates.back();

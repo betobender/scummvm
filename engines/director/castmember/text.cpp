@@ -51,6 +51,7 @@ TextCastMember::TextCastMember(Cast *cast, uint16 castId, Common::SeekableReadSt
 
 	_bgcolor = 0;
 	_fgcolor = 0xff;
+	_bgColorSet = false;
 
 	_textFlags = 0;
 	_scroll = 0;
@@ -153,14 +154,14 @@ TextCastMember::TextCastMember(Cast *cast, uint16 castId, Common::SeekableReadSt
 		_buttonType = static_cast<ButtonType>(stream.readUint16BE() - 1);
 	}
 
-	_bgcolor = g_director->_wm->findBestColor(_bgpalinfo1 & 0xff, _bgpalinfo2 & 0xff, _bgpalinfo3 & 0xff);
+	// _bgcolor is derived lazily in getBackColor(); keep only _bgpalinfo here.
 
 	_modified = true;
 }
 
 TextCastMember::TextCastMember(Cast *cast, uint16 castId, TextCastMember &source)
 	: CastMember(cast, castId) {
-	_type = kCastText;
+	_type = source._type;	// kCastText or kCastButton
 	// force a load so we can copy the cast resource information
 	source.load();
 	_loaded = true;
@@ -199,6 +200,7 @@ TextCastMember::TextCastMember(Cast *cast, uint16 castId, TextCastMember &source
 	_rtext = source._rtext;
 
 	_bgcolor = source._bgcolor;
+	_bgColorSet = source._bgColorSet;
 	_fgcolor = source._fgcolor;
 }
 
@@ -206,8 +208,10 @@ void TextCastMember::setColors(uint32 *fgcolor, uint32 *bgcolor) {
 	if (fgcolor)
 		_fgcolor = *fgcolor;
 
-	if (bgcolor)
+	if (bgcolor) {
 		_bgcolor = *bgcolor;
+		_bgColorSet = true;
+	}
 
 	// if we want to keep the format unchanged, then we need to modify _ftext as well
 	Graphics::MacText *target = getWidget();
@@ -232,7 +236,14 @@ Graphics::TextAlign TextCastMember::getAlignment() {
 
 void TextCastMember::setBackColor(uint32 bgCol) {
 	_bgcolor = bgCol;
+	_bgColorSet = true;
 	_modified = true;
+}
+
+uint32 TextCastMember::getBackColor() {
+	if (!_bgColorSet)
+		_bgcolor = g_director->_wm->findBestColor(_bgpalinfo1 & 0xff, _bgpalinfo2 & 0xff, _bgpalinfo3 & 0xff);
+	return _bgcolor;
 }
 
 uint32 TextCastMember::getForeColor(int start, int end) {
@@ -293,13 +304,14 @@ void TextCastMember::importStxt(const Stxt *stxt) {
 }
 
 bool textWindowCallback(Graphics::WindowClick click, Common::Event &event, void *ptr) {
-	return g_director->getCurrentMovie()->processEvent(event);
+	return g_director->getCurrentMovie()->processSysEvent(event);
 }
 
 Graphics::MacWidget *TextCastMember::createWindowOrWidget(Common::Rect &bbox, Common::Rect dims, Graphics::MacFont *macFont) {
 	Graphics::MacText *widget = nullptr;
 
-	widget = new Graphics::MacText(g_director->getCurrentWindow()->getMacWindow(), bbox.left, bbox.top, dims.width(), dims.height(), g_director->_wm, _ftext, macFont, getForeColor(), getBackColor(), _initialRect.width(), getAlignment(), _lineSpacing, _borderSize, _gutterSize, _boxShadow, _textShadow, _textType == kTextTypeFixed || _textType == kTextTypeScrolling, _textType == kTextTypeScrolling);
+	int maxWidth = _initialRect.width() + _borderSize * 2 + _gutterSize * 2 + _boxShadow;
+	widget = new Graphics::MacText(g_director->getCurrentWindow()->getMacWindow(), bbox.left, bbox.top, dims.width(), dims.height(), g_director->_wm, _ftext, macFont, getForeColor(), getBackColor(), maxWidth, getAlignment(), _lineSpacing, _borderSize, _gutterSize, _boxShadow, _textShadow, _textType == kTextTypeFixed || _textType == kTextTypeScrolling, _textType == kTextTypeScrolling);
 	widget->setSelRange(g_director->getCurrentMovie()->_selStart, g_director->getCurrentMovie()->_selEnd);
 	widget->draw();
 
@@ -981,6 +993,11 @@ void TextCastMember::writeCastData(Common::SeekableWriteStream *writeStream) {
 	}
 }
 
+bool TextCastMember::canWriteCastData() {
+	// writeCastData() is version-agnostic beyond the D4 header difference
+	return _cast->_version >= kFileVer400;
+}
+
 uint32 TextCastMember::getCastDataSize() {
 	// In total 30 bytes for text and 28 for button
 	uint32 size = (_type == kCastButton) ? 30 : 28;
@@ -1046,7 +1063,8 @@ uint32 TextCastMember::writeSTXTResource(Common::SeekableWriteStream *writeStrea
 				// Ignoring height and ascent for now from FontStyle
 				uint16 temp;
 				style.formatStartOffset = pIndex;
-				const Common::u32char_type_t *s = _ftext.substr(it, 22).c_str();
+				Common::U32String data = _ftext.substr(it, 22);
+				const Common::u32char_type_t *s = data.c_str();
 
 				s = Graphics::readHex(&style.fontId, s, 4);
 				s = Graphics::readHex(&temp, s, 2);
@@ -1084,7 +1102,8 @@ uint32 TextCastMember::writeSTXTResource(Common::SeekableWriteStream *writeStrea
 	writeStream->writeString(rawText);
 	writeStream->seek(currentPos);
 
-	if (debugChannelSet(7, kDebugSaving)) {
+	// FIXME: can't dereference SeekableWriteStream
+	/*if (debugChannelSet(7, kDebugSaving)) {
 		byte *dumpData = nullptr;
 		dumpData = (byte *)calloc(stxtSize, sizeof(byte));
 		Common::MemoryWriteStream *dumpStream = new Common::SeekableMemoryWriteStream(dumpData, stxtSize);
@@ -1097,7 +1116,7 @@ uint32 TextCastMember::writeSTXTResource(Common::SeekableWriteStream *writeStrea
 		dumpFile("TextData", _castId, MKTAG('S', 'T', 'X', 'T'), dumpData, getSTXTResourceSize() + 8);
 		free(dumpData);
 		delete dumpStream;
-	}
+	}*/
 
 	return stxtSize + 8;
 }
